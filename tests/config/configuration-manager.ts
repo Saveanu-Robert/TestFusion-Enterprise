@@ -43,27 +43,25 @@ export class ConfigurationManager {
   private loadConfiguration(): TestConfig {
     const environment = process.env.TEST_ENV || 'development';
     
-    return {
-      api: {
+    return {      api: {
         baseUrl: process.env.API_BASE_URL || 'https://jsonplaceholder.typicode.com',
-        timeout: parseInt(process.env.API_TIMEOUT || '30000'),
-        retryAttempts: parseInt(process.env.API_RETRY_ATTEMPTS || '3'),
+        timeout: Number(process.env.API_TIMEOUT) || 30_000,
+        retryAttempts: Number(process.env.API_RETRY_ATTEMPTS) || 3,
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': 'TestFusion-Enterprise/1.0.0',
           ...(process.env.API_KEY && { 'Authorization': `Bearer ${process.env.API_KEY}` }),
         },
         environment,
-      },
-      logging: {
+      },      logging: {
         level: process.env.LOG_LEVEL || 'INFO',
-        enableRequestLogging: process.env.ENABLE_REQUEST_LOGGING !== 'false',
-        enableResponseLogging: process.env.ENABLE_RESPONSE_LOGGING !== 'false',
+        enableRequestLogging: (process.env.ENABLE_REQUEST_LOGGING ?? '').toLowerCase() !== 'false',
+        enableResponseLogging: (process.env.ENABLE_RESPONSE_LOGGING ?? '').toLowerCase() !== 'false',
       },
       reporting: {
-        enableScreenshots: process.env.ENABLE_SCREENSHOTS !== 'false',
-        enableVideos: process.env.ENABLE_VIDEOS !== 'false',
-        enableTracing: process.env.ENABLE_TRACING !== 'false',
+        enableScreenshots: (process.env.ENABLE_SCREENSHOTS ?? '').toLowerCase() !== 'false',
+        enableVideos: (process.env.ENABLE_VIDEOS ?? '').toLowerCase() !== 'false',
+        enableTracing: (process.env.ENABLE_TRACING ?? '').toLowerCase() !== 'false',
       },
     };
   }

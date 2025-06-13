@@ -62,12 +62,10 @@ export class ApiClient {
       this.logger.info(`GET ${endpoint} completed`, {
         status: response.status(),
         duration,
-      });
-
-      return apiResponse;
+      });      return apiResponse;
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`GET ${endpoint} failed`, error);
+      this.logger.error(`GET ${endpoint} failed`, { error, duration });
       throw error;
     }
   }
@@ -80,10 +78,12 @@ export class ApiClient {
     this.logger.info(`POST ${endpoint}`, data);
 
     try {
-      const url = this.buildUrl(endpoint, options?.params);
-      const response = await this.requestContext.post(url, {
+      const url = this.buildUrl(endpoint, options?.params);      const response = await this.requestContext.post(url, {
         data,
-        headers: options?.headers,
+        headers: {
+          'Content-Type': 'application/json',
+          ...options?.headers,
+        },
         timeout: options?.timeout,
       });
 
@@ -106,12 +106,10 @@ export class ApiClient {
       this.logger.info(`POST ${endpoint} completed`, {
         status: response.status(),
         duration,
-      });
-
-      return apiResponse;
+      });      return apiResponse;
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`POST ${endpoint} failed`, error);
+      this.logger.error(`POST ${endpoint} failed`, { error, duration });
       throw error;
     }
   }
@@ -124,10 +122,12 @@ export class ApiClient {
     this.logger.info(`PUT ${endpoint}`, data);
 
     try {
-      const url = this.buildUrl(endpoint, options?.params);
-      const response = await this.requestContext.put(url, {
+      const url = this.buildUrl(endpoint, options?.params);      const response = await this.requestContext.put(url, {
         data,
-        headers: options?.headers,
+        headers: {
+          'Content-Type': 'application/json',
+          ...options?.headers,
+        },
         timeout: options?.timeout,
       });
 
@@ -150,12 +150,10 @@ export class ApiClient {
       this.logger.info(`PUT ${endpoint} completed`, {
         status: response.status(),
         duration,
-      });
-
-      return apiResponse;
+      });      return apiResponse;
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`PUT ${endpoint} failed`, error);
+      this.logger.error(`PUT ${endpoint} failed`, { error, duration });
       throw error;
     }
   }
@@ -201,12 +199,56 @@ export class ApiClient {
       this.logger.info(`DELETE ${endpoint} completed`, {
         status: response.status(),
         duration,
+      });      return apiResponse;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      this.logger.error(`DELETE ${endpoint} failed`, { error, duration });
+      throw error;
+    }
+  }
+
+  /**
+   * Performs a PATCH request
+   */
+  async patch<T>(endpoint: string, data: any, options?: RequestOptions): Promise<ApiResponse<T>> {
+    const startTime = Date.now();
+    this.logger.info(`PATCH ${endpoint}`, data);
+
+    try {
+      const url = this.buildUrl(endpoint, options?.params);
+      const response = await this.requestContext.patch(url, {
+        data,
+        headers: {
+          'Content-Type': 'application/json',
+          ...options?.headers,
+        },
+        timeout: options?.timeout,
       });
 
+      const duration = Date.now() - startTime;
+      const responseData = await response.json();
+      const headers = await response.headersArray();
+      const headersObject = headers.reduce((acc, header) => {
+        acc[header.name] = header.value;
+        return acc;
+      }, {} as Record<string, string>);
+
+      const apiResponse: ApiResponse<T> = {
+        data: responseData,
+        status: response.status(),
+        statusText: response.statusText(),
+        headers: headersObject,
+        duration,
+      };
+
+      this.logger.info(`PATCH ${endpoint} completed`, {
+        status: response.status(),
+        duration,
+      });
       return apiResponse;
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`DELETE ${endpoint} failed`, error);
+      this.logger.error(`PATCH ${endpoint} failed`, { error, duration });
       throw error;
     }
   }

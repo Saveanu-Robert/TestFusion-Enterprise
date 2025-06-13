@@ -55,110 +55,108 @@ export interface Todo {
   completed: boolean;
 }
 
-export class TestDataFactory {
-  /**
-   * Creates a new post payload for testing
-   */
-  static createPostPayload(overrides: Partial<Omit<Post, 'id'>> = {}): Omit<Post, 'id'> {
-    const timestamp = Date.now();
-    return {
-      title: `Test Post ${timestamp}`,
-      body: `This is a test post body created at ${new Date().toISOString()}`,
-      userId: 1,
-      ...overrides,
-    };
-  }
+/**
+ * Creates a new post payload for testing
+ */
+export function createPostPayload(overrides: Partial<Omit<Post, 'id'>> = {}): Omit<Post, 'id'> {
+  const timestamp = Date.now();
+  return {
+    title: `Test Post ${timestamp}`,
+    body: `This is a test post body created at ${new Date().toISOString()}`,
+    userId: 1,
+    ...overrides,
+  };
+}
 
-  /**
-   * Creates a new user payload for testing
-   */
-  static createUserPayload(overrides: Partial<Omit<User, 'id'>> = {}): Omit<User, 'id'> {
-    const timestamp = Date.now();
-    return {
-      name: `Test User ${timestamp}`,
-      username: `testuser${timestamp}`,
-      email: `testuser${timestamp}@example.com`,
-      address: {
-        street: '123 Test Street',
-        suite: 'Apt. 1',
-        city: 'Test City',
-        zipcode: '12345-6789',
-        geo: {
-          lat: '40.7128',
-          lng: '-74.0060',
-        },
+/**
+ * Creates a new user payload for testing
+ */
+export function createUserPayload(overrides: Partial<Omit<User, 'id'>> = {}): Omit<User, 'id'> {
+  const timestamp = Date.now();
+  return {
+    name: `Test User ${timestamp}`,
+    username: `testuser${timestamp}`,
+    email: `testuser${timestamp}@example.com`,
+    address: {
+      street: '123 Test Street',
+      suite: 'Apt. 1',
+      city: 'Test City',
+      zipcode: '12345-6789',
+      geo: {
+        lat: '40.7128',
+        lng: '-74.0060',
       },
-      phone: '1-555-123-4567',
-      website: `testuser${timestamp}.example.com`,
-      company: {
-        name: 'Test Company',
-        catchPhrase: 'Testing is our business',
-        bs: 'quality test automation',
-      },
-      ...overrides,
-    };
-  }
+    },
+    phone: '1-555-123-4567',
+    website: `testuser${timestamp}.example.com`,
+    company: {
+      name: 'Test Company',
+      catchPhrase: 'Testing is our business',
+      bs: 'quality test automation',
+    },
+    ...overrides,
+  };
+}
 
-  /**
-   * Creates a new comment payload for testing
-   */
-  static createCommentPayload(postId: number, overrides: Partial<Omit<Comment, 'id'>> = {}): Omit<Comment, 'id'> {
-    const timestamp = Date.now();
-    return {
-      postId,
-      name: `Test Comment ${timestamp}`,
-      email: `commenter${timestamp}@example.com`,
-      body: `This is a test comment created at ${new Date().toISOString()}`,
-      ...overrides,
-    };
-  }
+/**
+ * Creates a new comment payload for testing
+ */
+export function createCommentPayload(postId: number, overrides: Partial<Omit<Comment, 'id'>> = {}): Omit<Comment, 'id'> {
+  const timestamp = Date.now();
+  return {
+    postId,
+    name: `Test Comment ${timestamp}`,
+    email: `commenter${timestamp}@example.com`,
+    body: `This is a test comment created at ${new Date().toISOString()}`,
+    ...overrides,
+  };
+}
 
-  /**
-   * Creates a new todo payload for testing
-   */
-  static createTodoPayload(userId: number, overrides: Partial<Omit<Todo, 'id'>> = {}): Omit<Todo, 'id'> {
-    const timestamp = Date.now();
-    return {
+/**
+ * Creates a new todo payload for testing
+ */
+export function createTodoPayload(userId: number, overrides: Partial<Omit<Todo, 'id'>> = {}): Omit<Todo, 'id'> {
+  const timestamp = Date.now();
+  return {
+    userId,
+    title: `Test Todo ${timestamp}`,
+    completed: false,
+    ...overrides,
+  };
+}
+
+/**
+ * Creates multiple post payloads
+ */
+export function createMultiplePostPayloads(count: number, userId: number = 1): Omit<Post, 'id'>[] {
+  return Array.from({ length: count }, (_, index) =>
+    createPostPayload({
+      title: `Test Post ${index + 1}`,
       userId,
-      title: `Test Todo ${timestamp}`,
-      completed: false,
-      ...overrides,
-    };
-  }
+    })
+  );
+}
 
-  /**
-   * Creates multiple post payloads
-   */
-  static createMultiplePostPayloads(count: number, userId: number = 1): Omit<Post, 'id'>[] {
-    return Array.from({ length: count }, (_, index) =>
-      this.createPostPayload({
-        title: `Test Post ${index + 1}`,
-        userId,
-      })
-    );
-  }
+/**
+ * Creates invalid payload for negative testing
+ */
+export function createInvalidPostPayload(): any {
+  return {
+    title: null,
+    body: '',
+    userId: 'invalid',
+    invalidField: 'should not be here',
+  };
+}
 
-  /**
-   * Creates invalid payload for negative testing
-   */
-  static createInvalidPostPayload(): any {
-    return {
-      title: null,
-      body: '',
-      userId: 'invalid',
-      invalidField: 'should not be here',
-    };
-  }
-
-  /**
-   * Creates payload with missing required fields
-   */
-  static createIncompletePostPayload(): Partial<Post> {
-    return {
-      title: 'Incomplete Post',
-      // Missing body and userId
-    };
-  }
+/**
+ * Creates payload with missing required fields
+ */
+export function createIncompletePostPayload(): Partial<Post> {
+  return {
+    title: 'Incomplete Post',
+    // Missing body and userId
+  };
 }
 
 export class TestFixtures {
@@ -234,14 +232,13 @@ export class TestFixtures {
     title: 'string',
     completed: 'boolean',
   };
-
   /**
    * Test data sets for parameterized testing
    */
-  static readonly VALID_USER_IDS = [1, 2, 3, 4, 5];
-  static readonly INVALID_USER_IDS = [0, -1, 999, 'invalid', null];
-  static readonly VALID_POST_IDS = [1, 2, 3, 4, 5];
-  static readonly INVALID_POST_IDS = [0, -1, 999, 'invalid', null];
+  static readonly VALID_USER_IDS: readonly number[] = [1, 2, 3, 4, 5] as const;
+  static readonly INVALID_USER_IDS: readonly (number | string | null)[] = [0, -1, 999, 'invalid', null] as const;
+  static readonly VALID_POST_IDS: readonly number[] = [1, 2, 3, 4, 5] as const;
+  static readonly INVALID_POST_IDS: readonly (number | string | null)[] = [0, -1, 999, 'invalid', null] as const;
 
   /**
    * Email validation patterns

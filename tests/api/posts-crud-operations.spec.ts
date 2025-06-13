@@ -5,11 +5,11 @@ import { TEST_TAGS, HTTP_STATUS_CODES } from '../constants/api-constants';
 test.describe('Posts API - CRUD Operations', () => {
   let postsService: PostsApiService;
 
-  test.beforeAll(async ({ apiClient }) => {
+  test.beforeEach(async ({ apiClient }) => {
     postsService = new PostsApiService(apiClient);
   });
 
-  test(`${TEST_TAGS.API}${TEST_TAGS.POSTS}${TEST_TAGS.SMOKE} Should retrieve all posts successfully`, async ({ logger }) => {
+  test(`${TEST_TAGS.API} ${TEST_TAGS.POSTS} ${TEST_TAGS.SMOKE} Should retrieve all posts successfully`, async ({ logger }) => {
     logger.logTestStep('Step 1: Send GET request to retrieve all posts');
     const response = await postsService.getAllPosts();
 
@@ -31,7 +31,7 @@ test.describe('Posts API - CRUD Operations', () => {
     logger.info('Successfully retrieved all posts', { count: response.data.length });
   });
 
-  test(`${TEST_TAGS.API}${TEST_TAGS.POSTS} Should retrieve a specific post by ID`, async ({ logger }) => {
+  test(`${TEST_TAGS.API} ${TEST_TAGS.POSTS} Should retrieve a specific post by ID`, async ({ logger }) => {
     const postId = 1;
     
     logger.logTestStep(`Step 1: Send GET request to retrieve post with ID ${postId}`);
@@ -50,7 +50,7 @@ test.describe('Posts API - CRUD Operations', () => {
     logger.info('Successfully retrieved specific post', { postId });
   });
 
-  test(`${TEST_TAGS.API}${TEST_TAGS.POSTS}${TEST_TAGS.CRUD} Should create a new post successfully`, async ({ logger }) => {
+  test(`${TEST_TAGS.API} ${TEST_TAGS.POSTS} ${TEST_TAGS.CRUD} Should create a new post successfully`, async ({ logger }) => {
     const newPostData = {
       title: 'Test Post Title',
       body: 'This is a test post body content',
@@ -73,7 +73,7 @@ test.describe('Posts API - CRUD Operations', () => {
     logger.info('Successfully created new post', { postId: response.data.id });
   });
 
-  test(`${TEST_TAGS.API}${TEST_TAGS.POSTS} Should return 404 for non-existent post`, async ({ logger }) => {
+  test(`${TEST_TAGS.API} ${TEST_TAGS.POSTS} Should return 404 for non-existent post`, async ({ logger }) => {
     const nonExistentId = 9999;
     
     logger.logTestStep(`Step 1: Send GET request to retrieve non-existent post ID ${nonExistentId}`);

@@ -3,6 +3,8 @@
  * Provides structured logging with different levels and formatting
  */
 
+import { randomUUID } from 'crypto';
+
 export enum LogLevel {
   DEBUG = 0,
   INFO = 1,
@@ -23,6 +25,7 @@ export class Logger {
   private static instance: Logger;
   private logLevel: LogLevel = LogLevel.INFO;
   private logs: LogEntry[] = [];
+  private readonly MAX_LOGS = 1000; // Cap to prevent memory leaks
 
   private constructor() {}
 
@@ -99,10 +102,15 @@ export class Logger {
       message,
       data,
       testCase,
-      requestId: this.generateRequestId(),
-    };
+      requestId: this.generateRequestId(),    };
 
     this.logs.push(logEntry);
+    
+    // Cap logs to prevent memory leaks
+    if (this.logs.length > this.MAX_LOGS) {
+      this.logs.shift();
+    }
+    
     this.outputLog(logEntry);
   }
 
@@ -126,9 +134,9 @@ export class Logger {
         break;
     }
   }
-
   private generateRequestId(): string {
-    return Math.random().toString(36).substr(2, 9);
+    // RFC 4122 v4 UUID
+    return randomUUID();
   }
 
   public getLogs(): LogEntry[] {

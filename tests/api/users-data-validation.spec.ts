@@ -5,11 +5,11 @@ import { TEST_TAGS, HTTP_STATUS_CODES } from '../constants/api-constants';
 test.describe('Users API - Data Validation', () => {
   let usersService: UsersApiService;
 
-  test.beforeAll(async ({ apiClient }) => {
+  test.beforeEach(async ({ apiClient }) => {
     usersService = new UsersApiService(apiClient);
   });
 
-  test(`${TEST_TAGS.API}${TEST_TAGS.USERS}${TEST_TAGS.SMOKE} Should retrieve all users successfully`, async ({ logger }) => {
+  test(`${TEST_TAGS.API} ${TEST_TAGS.USERS} ${TEST_TAGS.SMOKE} Should retrieve all users successfully`, async ({ logger }) => {
     logger.logTestStep('Step 1: Send GET request to retrieve all users');
     const response = await usersService.getAllUsers();
 
@@ -35,7 +35,7 @@ test.describe('Users API - Data Validation', () => {
     logger.info('Successfully retrieved all users', { count: response.data.length });
   });
 
-  test(`${TEST_TAGS.API}${TEST_TAGS.USERS} Should retrieve a specific user by ID`, async ({ logger }) => {
+  test(`${TEST_TAGS.API} ${TEST_TAGS.USERS} Should retrieve a specific user by ID`, async ({ logger }) => {
     const userId = 1;
     
     logger.logTestStep(`Step 1: Send GET request to retrieve user with ID ${userId}`);
@@ -57,7 +57,7 @@ test.describe('Users API - Data Validation', () => {
     logger.info('Successfully retrieved specific user', { userId });
   });
 
-  test(`${TEST_TAGS.API}${TEST_TAGS.USERS}${TEST_TAGS.CRUD} Should create a new user successfully`, async ({ logger }) => {
+  test(`${TEST_TAGS.API} ${TEST_TAGS.USERS} ${TEST_TAGS.CRUD} Should create a new user successfully`, async ({ logger }) => {
     const newUserData = {
       name: 'Test User',
       username: 'testuser',
@@ -97,7 +97,7 @@ test.describe('Users API - Data Validation', () => {
     logger.info('Successfully created new user', { userId: response.data.id });
   });
 
-  test(`${TEST_TAGS.API}${TEST_TAGS.USERS} Should return 404 for non-existent user`, async ({ logger }) => {
+  test(`${TEST_TAGS.API} ${TEST_TAGS.USERS} Should return 404 for non-existent user`, async ({ logger }) => {
     const nonExistentId = 9999;
     
     logger.logTestStep(`Step 1: Send GET request to retrieve non-existent user ID ${nonExistentId}`);

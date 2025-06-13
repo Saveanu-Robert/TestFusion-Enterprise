@@ -99,7 +99,7 @@ npx playwright test tests/api --reporter=line
 
 ### Test Data Management
 
-- **TestDataFactory** - Dynamic test data generation
+- **Test Data Factory Functions** - Dynamic test data generation
 - **TestFixtures** - Static test data and schemas
 - **Custom Fixtures** - Playwright test fixtures
 
@@ -191,7 +191,7 @@ validator.validateAll([schemaValidation, fieldValidation, emailValidation]);
 
 ```typescript
 // Use factory for dynamic data
-const postData = TestDataFactory.createPostPayload({
+const postData = createPostPayload({
   title: 'Custom Title',
   userId: 2
 });
@@ -299,6 +299,6 @@ This provides:
 
 - Use TypeScript for type safety
 - Follow SOLID principles
-- Implement proper error handling
+- Implement proper error handling to improve reliability
 - Add meaningful comments
 - Use consistent naming conventions

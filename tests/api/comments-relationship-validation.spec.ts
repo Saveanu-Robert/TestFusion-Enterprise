@@ -5,11 +5,11 @@ import { TEST_TAGS, HTTP_STATUS_CODES } from '../constants/api-constants';
 test.describe('Comments API - Relationship Validation', () => {
   let commentsService: CommentsApiService;
 
-  test.beforeAll(async ({ apiClient }) => {
+  test.beforeEach(async ({ apiClient }) => {
     commentsService = new CommentsApiService(apiClient);
   });
 
-  test(`${TEST_TAGS.API}${TEST_TAGS.COMMENTS}${TEST_TAGS.SMOKE} Should retrieve all comments successfully`, async ({ logger }) => {
+  test(`${TEST_TAGS.API} ${TEST_TAGS.COMMENTS} ${TEST_TAGS.SMOKE} Should retrieve all comments successfully`, async ({ logger }) => {
     logger.logTestStep('Step 1: Send GET request to retrieve all comments');
     const response = await commentsService.getAllComments();
 
@@ -32,7 +32,7 @@ test.describe('Comments API - Relationship Validation', () => {
     logger.info('Successfully retrieved all comments', { count: response.data.length });
   });
 
-  test(`${TEST_TAGS.API}${TEST_TAGS.COMMENTS} Should retrieve a specific comment by ID`, async ({ logger }) => {
+  test(`${TEST_TAGS.API} ${TEST_TAGS.COMMENTS} Should retrieve a specific comment by ID`, async ({ logger }) => {
     const commentId = 1;
     
     logger.logTestStep(`Step 1: Send GET request to retrieve comment with ID ${commentId}`);
@@ -55,7 +55,7 @@ test.describe('Comments API - Relationship Validation', () => {
     logger.info('Successfully retrieved specific comment', { commentId });
   });
 
-  test(`${TEST_TAGS.API}${TEST_TAGS.COMMENTS} Should retrieve comments by post ID`, async ({ logger }) => {
+  test(`${TEST_TAGS.API} ${TEST_TAGS.COMMENTS} Should retrieve comments by post ID`, async ({ logger }) => {
     const postId = 1;
     
     logger.logTestStep(`Step 1: Send GET request to retrieve comments for post ID ${postId}`);
@@ -77,7 +77,7 @@ test.describe('Comments API - Relationship Validation', () => {
     logger.info('Successfully retrieved comments for post', { postId, count: response.data.length });
   });
 
-  test(`${TEST_TAGS.API}${TEST_TAGS.COMMENTS}${TEST_TAGS.CRUD} Should create a new comment successfully`, async ({ logger }) => {
+  test(`${TEST_TAGS.API} ${TEST_TAGS.COMMENTS} ${TEST_TAGS.CRUD} Should create a new comment successfully`, async ({ logger }) => {
     const newCommentData = {
       name: 'Test Comment',
       email: 'testcommenter@example.com',
