@@ -1,0 +1,274 @@
+name: Dependency Bot
+
+on:
+  schedule:
+    # Run every morning at 7:00 AM UTC (Monday to Friday)
+    - cron: '0 7 * * 1-5'
+  workflow_dispatch: # Allow manual trigger
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  check-dependencies:
+    name: Check & Update Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'dependency-bot[bot]'
+          git config --global user.email 'dependency-bot[bot]@users.noreply.github.com'
+
+      - name: Install npm-check-updates
+        run: npm install -g npm-check-updates
+
+      - name: Check for dependency updates
+        id: check-updates
+        run: |
+          echo "🔍 Checking for dependency updates..."
+          
+          # Check what can be updated
+          ncu --jsonAll > updates.json
+          
+          # Check if there are any updates available
+          if [ "$(cat updates.json)" = "{}" ]; then
+            echo "✅ All dependencies are up to date!"
+            echo "has-updates=false" >> $GITHUB_OUTPUT
+            exit 0
+          else
+            echo "📦 Dependencies that can be updated:"
+            ncu --format group
+            echo "has-updates=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create dependency update branch
+        if: steps.check-updates.outputs.has-updates == 'true'
+        id: create-branch
+        run: |
+          # Create a unique branch name with current date
+          BRANCH_NAME="dependency-updates/$(date +%Y-%m-%d)"
+          echo "branch-name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          
+          # Check if branch already exists
+          if git ls-remote --exit-code --heads origin $BRANCH_NAME; then
+            echo "Branch $BRANCH_NAME already exists, using timestamp suffix"
+            BRANCH_NAME="dependency-updates/$(date +%Y-%m-%d-%H%M)"
+            echo "branch-name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "🌿 Creating branch: $BRANCH_NAME"
+          git checkout -b $BRANCH_NAME
+
+      - name: Update dependencies
+        if: steps.check-updates.outputs.has-updates == 'true'
+        run: |
+          echo "📦 Updating dependencies..."
+          
+          # Update dependencies
+          ncu -u
+          
+          # Install updated dependencies
+          npm install
+          
+          echo "✅ Dependencies updated successfully"
+
+      - name: Run linting
+        if: steps.check-updates.outputs.has-updates == 'true'
+        run: |
+          echo "🔍 Running linting checks..."
+          npm run lint:check
+
+      - name: Install Playwright browsers
+        if: steps.check-updates.outputs.has-updates == 'true'
+        run: |
+          echo "🎭 Installing Playwright browsers..."
+          npx playwright install --with-deps
+
+      - name: Run all tests
+        if: steps.check-updates.outputs.has-updates == 'true'
+        id: run-tests
+        run: |
+          echo "🧪 Running all tests to verify dependency updates..."
+          
+          # Run tests with detailed reporting
+          npx playwright test --reporter=html,json --output-dir=test-results-dependency-check
+          
+          echo "test-status=success" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Check test results
+        if: steps.check-updates.outputs.has-updates == 'true'
+        id: check-tests
+        run: |
+          if [ "${{ steps.run-tests.outcome }}" = "failure" ]; then
+            echo "❌ Tests failed with updated dependencies"
+            echo "test-status=failed" >> $GITHUB_OUTPUT
+            
+            # Still create PR but mark it as failing tests
+            echo "TESTS_FAILED=true" >> $GITHUB_ENV
+          else
+            echo "✅ All tests passed with updated dependencies"
+            echo "test-status=success" >> $GITHUB_OUTPUT
+            echo "TESTS_FAILED=false" >> $GITHUB_ENV
+          fi
+
+      - name: Generate change summary
+        if: steps.check-updates.outputs.has-updates == 'true'
+        run: |
+          echo "📋 Generating dependency change summary..."
+          
+          # Create a detailed summary
+          cat > DEPENDENCY_CHANGES.md << EOF
+          # 🤖 Automatic Dependency Updates
+          
+          This PR was automatically created by the dependency bot to update outdated packages.
+          
+          ## 📦 Updated Dependencies
+          
+          \`\`\`
+          $(ncu --format group)
+          \`\`\`
+          
+          ## 🧪 Test Results
+          
+          EOF
+          
+          if [ "$TESTS_FAILED" = "true" ]; then
+            cat >> DEPENDENCY_CHANGES.md << EOF
+          ❌ **Tests failed with these updates**
+          
+          Please review the test failures before merging this PR. The dependency updates may have introduced breaking changes.
+          
+          ### Next Steps:
+          1. Review the failing tests in the test artifacts
+          2. Check for breaking changes in the updated packages
+          3. Update test code if necessary
+          4. Re-run tests manually once fixes are applied
+          
+          EOF
+          else
+            cat >> DEPENDENCY_CHANGES.md << EOF
+          ✅ **All tests passed**
+          
+          All automated tests have passed with the updated dependencies. This PR is ready for review and merge.
+          
+          EOF
+          fi
+          
+          cat >> DEPENDENCY_CHANGES.md << EOF
+          ## 🔧 What was updated?
+          
+          - Dependencies were updated to their latest versions using \`npm-check-updates\`
+          - Package-lock.json was regenerated
+          - All tests were executed to ensure compatibility
+          
+          ## 🚀 How to merge?
+          
+          If tests are passing:
+          1. Review the changes
+          2. Merge this PR
+          
+          If tests are failing:
+          1. Review the test failures
+          2. Check breaking changes in updated packages
+          3. Make necessary code adjustments
+          4. Push additional commits to this branch
+          
+          ---
+          
+          *This PR was automatically created by the dependency bot on $(date)*
+          EOF
+
+      - name: Commit changes
+        if: steps.check-updates.outputs.has-updates == 'true'
+        run: |
+          echo "💾 Committing dependency updates..."
+          
+          git add .
+          
+          if [ "$TESTS_FAILED" = "true" ]; then
+            git commit -m "🤖 chore: update dependencies (⚠️ tests failing)
+
+          - Updated dependencies to latest versions
+          - ⚠️ Some tests are failing with these updates
+          - Please review test failures before merging
+          - Generated by dependency-bot
+          
+          $(date)"
+          else
+            git commit -m "🤖 chore: update dependencies (✅ tests passing)
+
+          - Updated dependencies to latest versions
+          - ✅ All tests passing with updates
+          - Safe to merge after review
+          - Generated by dependency-bot
+          
+          $(date)"
+          fi
+
+      - name: Push changes and create PR
+        if: steps.check-updates.outputs.has-updates == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🚀 Pushing changes and creating PR..."
+          
+          # Push the branch
+          git push origin ${{ steps.create-branch.outputs.branch-name }}
+          
+          # Create PR with appropriate labels and details
+          if [ "$TESTS_FAILED" = "true" ]; then
+            gh pr create \
+              --title "🤖 Dependency Updates $(date +%Y-%m-%d) ⚠️ Tests Failing" \
+              --body-file DEPENDENCY_CHANGES.md \
+              --label "dependencies,automated,test:all,needs-review" \
+              --base main \
+              --head ${{ steps.create-branch.outputs.branch-name }}
+          else
+            gh pr create \
+              --title "🤖 Dependency Updates $(date +%Y-%m-%d) ✅ Tests Passing" \
+              --body-file DEPENDENCY_CHANGES.md \
+              --label "dependencies,automated,test:all,ready-to-merge" \
+              --base main \
+              --head ${{ steps.create-branch.outputs.branch-name }}
+          fi
+          
+          echo "✅ PR created successfully!"
+
+      - name: Upload test artifacts
+        if: steps.check-updates.outputs.has-updates == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-test-results
+          path: |
+            test-results-dependency-check/
+            playwright-report/
+          retention-days: 14
+
+      - name: Notify completion
+        if: always()
+        run: |
+          if [ "${{ steps.check-updates.outputs.has-updates }}" = "true" ]; then
+            if [ "$TESTS_FAILED" = "true" ]; then
+              echo "🤖 Dependency bot completed with test failures"
+              echo "📧 PR created with failing tests - manual review required"
+            else
+              echo "🤖 Dependency bot completed successfully"
+              echo "📧 PR created with passing tests - ready for review"
+            fi
+          else
+            echo "🤖 Dependency bot completed - no updates needed"
+            echo "✅ All dependencies are already up to date"
+          fi
