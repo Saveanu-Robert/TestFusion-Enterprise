@@ -34,24 +34,39 @@ jobs:
           TEST_ALL="false"
           RUN_LINT="true"
           
-          # Check for PR labels (if this is a PR)
+          # Check for PR title keywords (if this is a PR)
           if [ "${{ github.event_name }}" = "pull_request" ]; then
+            PR_TITLE="${{ github.event.pull_request.title }}"
             LABELS="${{ join(github.event.pull_request.labels.*.name, ' ') }}"
+            echo "PR Title: $PR_TITLE"
             echo "PR Labels: $LABELS"
             
-            if [[ "$LABELS" == *"test:all"* ]]; then
+            # Priority 1: Check PR title for keywords
+            if [[ "$PR_TITLE" == *"[ALL]"* ]] || [[ "$PR_TITLE" == *"[all]"* ]]; then
+              TEST_ALL="true"
+              echo "🚀 Running ALL tests due to '[ALL]' in PR title"
+            elif [[ "$PR_TITLE" == *"[API]"* ]] || [[ "$PR_TITLE" == *"[api]"* ]]; then
+              TEST_API="true"
+              echo "📡 Running API tests due to '[API]' in PR title"
+            elif [[ "$PR_TITLE" == *"[WEB]"* ]] || [[ "$PR_TITLE" == *"[web]"* ]]; then
+              TEST_WEB="true"
+              echo "🌐 Running WEB tests due to '[WEB]' in PR title"
+            elif [[ "$PR_TITLE" == *"[SKIP]"* ]] || [[ "$PR_TITLE" == *"[skip]"* ]]; then
+              echo "⏭️ Skipping tests due to '[SKIP]' in PR title"
+            # Priority 2: Check PR labels
+            elif [[ "$LABELS" == *"test:all"* ]]; then
               TEST_ALL="true"
               echo "🚀 Running ALL tests due to 'test:all' label"
             elif [[ "$LABELS" == *"test:api"* ]]; then
               TEST_API="true"
-              echo "🔧 Running API tests due to 'test:api' label"
+              echo "� Running API tests due to 'test:api' label"
             elif [[ "$LABELS" == *"test:web"* ]]; then
               TEST_WEB="true"
               echo "🌐 Running WEB tests due to 'test:web' label"
             elif [[ "$LABELS" == *"skip-tests"* ]]; then
               echo "⏭️ Skipping tests due to 'skip-tests' label"
             else
-              # Auto-detect based on changed files
+              # Priority 3: Auto-detect based on changed files
               echo "🔍 Auto-detecting test scope from changed files..."
               
               # Get changed files
@@ -79,7 +94,7 @@ jobs:
               # If no specific changes detected, run API tests (default)
               if [[ "$TEST_API" == "false" && "$TEST_WEB" == "false" && "$TEST_ALL" == "false" ]]; then
                 TEST_API="true"
-                echo "🔧 No specific changes detected - defaulting to API tests"
+                echo "� No specific changes detected - defaulting to API tests"
               fi
             fi
           else
@@ -97,8 +112,7 @@ jobs:
             if [[ "$BRANCH_NAME" == *"api"* ]]; then
               TEST_API="true"
               echo "📡 API tests from branch name"
-            elif [[ "$BRANCH_NAME" == *"web"* ]] || [[ "$BRANCH_NAME" == *"ui"* ]]; then
-              TEST_WEB="true"
+            elif [[ "$BRANCH_NAME" == *"web"* ]] || [[ "$BRANCH_NAME" == *"ui"* ]]; then              TEST_WEB="true"
               echo "🌐 Web tests from branch name"
             else
               # File-based detection for push events
@@ -121,7 +135,7 @@ jobs:
               # Default for push
               if [[ "$TEST_API" == "false" && "$TEST_WEB" == "false" && "$TEST_ALL" == "false" ]]; then
                 TEST_API="true"
-                echo "🔧 Default to API tests for push"
+                echo "� Default to API tests for push"
               fi
             fi
           fi
@@ -159,13 +173,10 @@ jobs:
         run: npm run lint:check
 
   api-tests:
-    name: API Tests
+    name: API Tests (No Browser)
     runs-on: ubuntu-latest
     needs: detect-test-type
-    if: needs.detect-test-type.outputs.test-api == 'true' || needs.detect-test-type.outputs.test-all == 'true'
-    strategy:
-      matrix:
-        browser: [chromium, firefox, webkit]
+    if: needs.detect-test-type.outputs.test-api == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -179,34 +190,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps ${{ matrix.browser }}
-
       - name: Run API tests
         run: |
-          if [ "${{ needs.detect-test-type.outputs.test-all }}" = "true" ]; then
-            echo "🚀 Running ALL tests"
-            npx playwright test --project=${{ matrix.browser }} --reporter=html
-          else
-            echo "📡 Running API tests only"
-            npx playwright test tests/api/ --project=${{ matrix.browser }} --reporter=html
-          fi
+          echo "📡 Running API tests (using Playwright's request context - no browser needed)"
+          npm run test:api
 
-      - name: Upload test results
+      - name: Upload API test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: api-test-results-${{ matrix.browser }}
+          name: api-test-results
           path: |
             playwright-report/
             test-results/
           retention-days: 7
 
   web-tests:
-    name: Web/UI Tests
+    name: Web/UI Tests (Browser Required)
     runs-on: ubuntu-latest
     needs: detect-test-type
-    if: needs.detect-test-type.outputs.test-web == 'true' || needs.detect-test-type.outputs.test-all == 'true'
+    if: needs.detect-test-type.outputs.test-web == 'true'
     strategy:
       matrix:
         browser: [chromium, firefox, webkit]
@@ -223,25 +226,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browsers
+      - name: Install Playwright browser - ${{ matrix.browser }}
         run: npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Run Web/UI tests
         run: |
-          if [ "${{ needs.detect-test-type.outputs.test-all }}" = "true" ]; then
-            echo "🚀 Running ALL tests"
-            npx playwright test --project=${{ matrix.browser }} --reporter=html
+          echo "🌐 Running Web/UI tests on ${{ matrix.browser }} browser"
+          # Check if web test directories exist
+          if [ -d "tests/web" ] || [ -d "tests/ui" ] || find tests/ -name "*.page.spec.ts" | grep -q .; then
+            npm run test:web -- --project=${{ matrix.browser }}
           else
-            echo "🌐 Running Web/UI tests only"
-            # Check if web test directory exists, otherwise skip
-            if [ -d "tests/web" ] || [ -d "tests/ui" ] || find tests/ -name "*.page.spec.ts" | grep -q .; then
-              npx playwright test tests/web/ tests/ui/ tests/pages/ --project=${{ matrix.browser }} --reporter=html || echo "No web tests found, skipping"
-            else
-              echo "⚠️ No web tests directory found, skipping web tests"
-            fi
+            echo "⚠️ No web tests found, skipping web tests"
+            mkdir -p test-results
+            echo "No web tests available in this project" > test-results/web-tests-info.txt
           fi
 
-      - name: Upload test results
+      - name: Upload Web test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -251,10 +251,49 @@ jobs:
             test-results/
           retention-days: 7
 
+  all-tests:
+    name: All Tests (API + Web)
+    runs-on: ubuntu-latest
+    needs: detect-test-type
+    if: needs.detect-test-type.outputs.test-all == 'true'
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser - ${{ matrix.browser }}
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Run all tests
+        run: |
+          echo "🚀 Running ALL tests (API + Web) on ${{ matrix.browser }}"
+          npm run test -- --project=${{ matrix.browser }}
+
+      - name: Upload all test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: all-test-results-${{ matrix.browser }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
   test-summary:
     name: Test Summary
     runs-on: ubuntu-latest
-    needs: [detect-test-type, lint, api-tests, web-tests]
+    needs: [detect-test-type, lint, api-tests, web-tests, all-tests]
     if: always()
     steps:
       - name: Generate test summary
@@ -262,15 +301,16 @@ jobs:
           echo "## 🧪 Test Execution Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Test Configuration" >> $GITHUB_STEP_SUMMARY
-          echo "- **API Tests**: ${{ needs.detect-test-type.outputs.test-api }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Web Tests**: ${{ needs.detect-test-type.outputs.test-web }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **All Tests**: ${{ needs.detect-test-type.outputs.test-all }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **API Tests**: ${{ needs.detect-test-type.outputs.test-api }} (No browser needed)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Web Tests**: ${{ needs.detect-test-type.outputs.test-web }} (Browser required)" >> $GITHUB_STEP_SUMMARY
+          echo "- **All Tests**: ${{ needs.detect-test-type.outputs.test-all }} (API + Web)" >> $GITHUB_STEP_SUMMARY
           echo "- **Linting**: ${{ needs.detect-test-type.outputs.run-lint }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Results" >> $GITHUB_STEP_SUMMARY
           echo "- **Lint**: ${{ needs.lint.result || 'Skipped' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **API Tests**: ${{ needs.api-tests.result || 'Skipped' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Web Tests**: ${{ needs.web-tests.result || 'Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **All Tests**: ${{ needs.all-tests.result || 'Skipped' }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           # Determine overall status
@@ -285,10 +325,19 @@ jobs:
           
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### 💡 PR Testing Tips" >> $GITHUB_STEP_SUMMARY
-            echo "- Use \`test:api\` label to run only API tests" >> $GITHUB_STEP_SUMMARY
-            echo "- Use \`test:web\` label to run only Web/UI tests" >> $GITHUB_STEP_SUMMARY
-            echo "- Use \`test:all\` label to run all tests" >> $GITHUB_STEP_SUMMARY
-            echo "- Use \`skip-tests\` label to skip all tests" >> $GITHUB_STEP_SUMMARY
-            echo "- Tests are auto-detected based on changed files if no labels are used" >> $GITHUB_STEP_SUMMARY
+            echo "### 💡 PR Testing Control" >> $GITHUB_STEP_SUMMARY
+            echo "**📋 PR Title Keywords (Highest Priority):**" >> $GITHUB_STEP_SUMMARY
+            echo "- Add \`[API]\` to PR title to run only API tests (no browser)" >> $GITHUB_STEP_SUMMARY
+            echo "- Add \`[WEB]\` to PR title to run only Web/UI tests (with browsers)" >> $GITHUB_STEP_SUMMARY
+            echo "- Add \`[ALL]\` to PR title to run all tests" >> $GITHUB_STEP_SUMMARY
+            echo "- Add \`[SKIP]\` to PR title to skip all tests" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**🏷️ Labels (Medium Priority):**" >> $GITHUB_STEP_SUMMARY
+            echo "- Use \`test:api\` label for API tests only" >> $GITHUB_STEP_SUMMARY
+            echo "- Use \`test:web\` label for Web tests only" >> $GITHUB_STEP_SUMMARY
+            echo "- Use \`test:all\` label for all tests" >> $GITHUB_STEP_SUMMARY
+            echo "- Use \`skip-tests\` label to skip tests" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**🔍 Auto-detection (Lowest Priority):**" >> $GITHUB_STEP_SUMMARY
+            echo "- Tests are auto-detected based on changed files if no title keywords or labels are used" >> $GITHUB_STEP_SUMMARY
           fi

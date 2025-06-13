@@ -12,24 +12,35 @@ This document describes the automated CI/CD pipelines set up for TestFusion-Ente
 
 **Features:**
 - ✅ **Intelligent Test Detection**: Automatically determines what tests to run based on:
-  - PR labels (`test:api`, `test:web`, `test:all`, `skip-tests`)
-  - Changed files analysis
-  - Branch naming patterns
-- ✅ **Multi-browser Testing**: Runs tests on Chromium, Firefox, and WebKit
-- ✅ **Code Quality**: Runs ESLint checks
-- ✅ **Parallel Execution**: Tests run in parallel for faster feedback
+  - **PR Title Keywords** (Highest Priority): `[API]`, `[WEB]`, `[ALL]`, `[SKIP]`
+  - **PR Labels** (Medium Priority): `test:api`, `test:web`, `test:all`, `skip-tests`
+  - **Changed Files Analysis** (Lowest Priority): Auto-detects based on modified files
+  - **Branch Naming Patterns**: Detects patterns like `api`, `web`, `ui` in branch names
+- ✅ **Proper Browser Separation**: 
+  - **API Tests**: Run without browsers (faster execution)
+  - **Web Tests**: Run with multi-browser support (Chromium, Firefox, WebKit)
+- ✅ **Code Quality**: ESLint integration
+- ✅ **Parallel Execution**: Tests run efficiently based on type
 
-**PR Labels for Test Control:**
-- `test:api` - Run only API tests
-- `test:web` - Run only Web/UI tests
-- `test:all` - Run all tests
-- `skip-tests` - Skip all tests
+**PR Control Methods (in priority order):**
 
-**Auto-detection Logic:**
-- Changes in `tests/api/`, `tests/operations/`, `tests/validators/` → API tests
-- Changes in `tests/pages/`, `tests/web/`, `tests/ui/` → Web tests
-- Changes in `tests/config/`, `tests/fixtures/`, `package.json` → All tests
-- No specific changes detected → API tests (default)
+1. **📋 PR Title Keywords (Highest Priority):**
+   - `[API]` - Run only API tests (no browser needed)
+   - `[WEB]` - Run only Web/UI tests (with browsers)
+   - `[ALL]` - Run all tests (API + Web)
+   - `[SKIP]` - Skip all tests
+
+2. **🏷️ PR Labels (Medium Priority):**
+   - `test:api` - Run only API tests
+   - `test:web` - Run only Web/UI tests  
+   - `test:all` - Run all tests
+   - `skip-tests` - Skip all tests
+
+3. **🔍 Auto-detection (Lowest Priority):**
+   - Changes in `tests/api/`, `tests/operations/`, `tests/validators/` → API tests (no browser)
+   - Changes in `tests/pages/`, `tests/web/`, `tests/ui/` → Web tests (with browsers)
+   - Changes in `tests/config/`, `tests/fixtures/`, `package.json` → All tests
+   - No specific changes detected → API tests (default)
 
 ### 2. Dependency Bot Workflow (`dependency-bot.yml`)
 
@@ -59,13 +70,15 @@ This document describes the automated CI/CD pipelines set up for TestFusion-Ente
 
 **Features:**
 - ✅ **Flexible Test Selection**: Choose test type (API, Web, All)
-- ✅ **Browser Selection**: Choose specific browser or all browsers
+- ✅ **Smart Browser Management**: 
+  - **API Tests**: No browser installation (faster execution)
+  - **Web/All Tests**: Browser selection (specific browser or all browsers)
 - ✅ **Environment Configuration**: Select test environment
 - ✅ **Parallel Control**: Enable/disable parallel execution
 
 **Options:**
-- **Test Type**: `api`, `web`, `all`
-- **Browser**: `chromium`, `firefox`, `webkit`, `all`
+- **Test Type**: `api` (no browser), `web` (with browser), `all` (with browser)
+- **Browser**: `chromium`, `firefox`, `webkit`, `all` (ignored for API tests)
 - **Environment**: `default`, `staging`, `production`
 - **Parallel**: `true`, `false`
 
@@ -73,8 +86,12 @@ This document describes the automated CI/CD pipelines set up for TestFusion-Ente
 
 ### For Pull Requests
 
-1. **Automatic Detection** (Recommended):
-   - Just create your PR - the system will auto-detect what tests to run
+1. **PR Title Keywords** (Fastest Method):
+   - Add `[API]` to your PR title to run only API tests (no browser)
+   - Add `[WEB]` to your PR title to run only Web tests (with browsers)  
+   - Add `[ALL]` to your PR title to run all tests
+   - Add `[SKIP]` to your PR title to skip all tests
+   - Example: "Fix user validation [API]" or "Update login form [WEB]"
 
 2. **Label-based Control**:
    - Add `test:api` label to run only API tests
@@ -82,9 +99,12 @@ This document describes the automated CI/CD pipelines set up for TestFusion-Ente
    - Add `test:all` label to run all tests
    - Add `skip-tests` label to skip all tests
 
-3. **Branch-based Detection**:
-   - Name your branch with `api` for API-focused changes
-   - Name your branch with `web` or `ui` for Web-focused changes
+3. **Automatic Detection** (Default):
+   - Just create your PR - the system will auto-detect what tests to run based on changed files
+
+4. **Branch-based Detection**:
+   - Name your branch with `api` for API-focused changes (no browser)
+   - Name your branch with `web` or `ui` for Web-focused changes (with browsers)
 
 ### For Dependency Updates
 
