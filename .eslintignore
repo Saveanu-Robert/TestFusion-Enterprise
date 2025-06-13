@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+out/
+
+# Test outputs
+test-results/
+playwright-report/
+coverage/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# JavaScript files (we're focusing on TypeScript)
+*.js
+!*.config.js
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

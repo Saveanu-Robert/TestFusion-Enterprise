@@ -27,7 +27,9 @@ export class Logger {
   private logs: LogEntry[] = [];
   private readonly MAX_LOGS = 1000; // Cap to prevent memory leaks
 
-  private constructor() {}
+  private constructor() {
+    // Private constructor for singleton pattern
+  }
 
   public static getInstance(): Logger {
     if (!Logger.instance) {
@@ -97,7 +99,7 @@ export class Logger {
       message,
       data,
       testCase,
-      requestId: this.generateRequestId(),    };
+      requestId: this.generateRequestId()    };
 
     this.logs.push(logEntry);
     
@@ -115,18 +117,18 @@ export class Logger {
     const logMessage = `${prefix}${testInfo} ${entry.message}`;
 
     switch (entry.level) {
-      case 'DEBUG':
-        console.debug(logMessage, entry.data || '');
-        break;
-      case 'INFO':
-        console.log(logMessage, entry.data || '');
-        break;
-      case 'WARN':
-        console.warn(logMessage, entry.data || '');
-        break;
-      case 'ERROR':
-        console.error(logMessage, entry.data || '');
-        break;
+    case 'DEBUG':
+      console.debug(logMessage, entry.data || '');
+      break;
+    case 'INFO':
+      console.log(logMessage, entry.data || '');
+      break;
+    case 'WARN':
+      console.warn(logMessage, entry.data || '');
+      break;
+    case 'ERROR':
+      console.error(logMessage, entry.data || '');
+      break;
     }
   }
   private generateRequestId(): string {

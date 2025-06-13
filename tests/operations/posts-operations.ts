@@ -72,7 +72,7 @@ export class PostsOperations {
     return {
       title: 'Test Post Title',
       body: 'This is a test post body content that contains meaningful information for testing purposes.',
-      userId: userId
+      userId: userId,
     };
   }
 
@@ -83,7 +83,7 @@ export class PostsOperations {
     return {
       title: 'Updated Test Post Title',
       body: 'This is an updated test post body content with modified information for testing purposes.',
-      userId: userId
+      userId: userId,
     };
   }
 }

@@ -21,7 +21,7 @@ export const test = base.extend<ApiTestFixtures, ApiWorkerFixtures>({
       const apiConfig = config.getApiConfig();
       await use(apiConfig);
     },
-    { scope: 'worker' }
+    { scope: 'worker' },
   ],
   
   apiRequestContext: [
@@ -30,7 +30,7 @@ export const test = base.extend<ApiTestFixtures, ApiWorkerFixtures>({
         baseURL: apiConfig.baseUrl,
         extraHTTPHeaders: {
           ...apiConfig.headers,
-          'Accept': 'application/json'
+          'Accept': 'application/json',
         },
         timeout: apiConfig.timeout,
       });
@@ -41,7 +41,7 @@ export const test = base.extend<ApiTestFixtures, ApiWorkerFixtures>({
         await requestContext.dispose();
       }
     },
-    { scope: 'worker' }
+    { scope: 'worker' },
   ],
   
   apiClient: async ({ apiRequestContext, apiConfig }, use) => {

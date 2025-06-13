@@ -24,7 +24,7 @@ export class ApiClient {
 
   constructor(
     private requestContext: APIRequestContext,
-    private baseUrl: string
+    private baseUrl: string,
   ) {
     this.logger = Logger.getInstance();
   }
@@ -50,7 +50,7 @@ export class ApiClient {
       }
       const headers = await response.headersArray();
       const headersObject = Object.fromEntries(
-        headers.map(({ name, value }) => [name, value])
+        headers.map(({ name, value }) => [name, value]),
       );
 
       const apiResponse: ApiResponse<T> = {
@@ -91,7 +91,7 @@ export class ApiClient {
       const responseData = await response.json();
       const headers = await response.headersArray();
       const headersObject = Object.fromEntries(
-        headers.map(({ name, value }) => [name, value])
+        headers.map(({ name, value }) => [name, value]),
       );
 
       const apiResponse: ApiResponse<T> = {
@@ -133,7 +133,7 @@ export class ApiClient {
       const duration = Date.now() - startTime;
       const responseData = await response.json();      const headers = await response.headersArray();
       const headersObject = Object.fromEntries(
-        headers.map(({ name, value }) => [name, value])
+        headers.map(({ name, value }) => [name, value]),
       );
 
       const apiResponse: ApiResponse<T> = {
@@ -180,7 +180,7 @@ export class ApiClient {
 
       const headers = await response.headersArray();
       const headersObject = Object.fromEntries(
-        headers.map(({ name, value }) => [name, value])
+        headers.map(({ name, value }) => [name, value]),
       );
 
       const apiResponse: ApiResponse<T> = {
@@ -221,7 +221,7 @@ export class ApiClient {
       const responseData = await response.json();
       const headers = await response.headersArray();
       const headersObject = Object.fromEntries(
-        headers.map(({ name, value }) => [name, value])
+        headers.map(({ name, value }) => [name, value]),
       );
 
       const apiResponse: ApiResponse<T> = {

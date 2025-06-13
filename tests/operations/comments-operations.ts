@@ -64,7 +64,7 @@ export class CommentsOperations {
       name: 'Test Comment',
       email: 'testcommenter@example.com',
       body: 'This is a test comment body content',
-      postId: postId
+      postId: postId,
     };
   }
 }
