@@ -13,6 +13,13 @@ export const API_ENDPOINTS = {
   TODOS: '/todos',
 } as const;
 
+/**
+ * Configuration constants
+ */
+export const API_CONFIG = {
+  BATCH_SIZE: 5,
+} as const;
+
 export const HTTP_STATUS_CODES = {
   OK: 200,
   CREATED: 201,

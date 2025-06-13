@@ -5,7 +5,7 @@
 
 import { ApiClient, ApiResponse } from '../clients/api-client';
 import { Post, createPostPayload, createMultiplePostPayloads } from '../fixtures/test-data';
-import { API_ENDPOINTS } from '../constants/api-constants';
+import { API_ENDPOINTS, API_CONFIG } from '../constants/api-constants';
 
 export class PostsApiService {
   constructor(private apiClient: ApiClient) {}
@@ -58,22 +58,28 @@ export class PostsApiService {
    */
   async deletePost(id: number): Promise<ApiResponse<void>> {
     return this.apiClient.delete<void>(`${API_ENDPOINTS.POSTS}/${id}`);
-  }
-  /**
+  }  /**
    * Creates multiple posts for bulk testing
    */
   async createMultiplePosts(count: number, userId: number = 1): Promise<ApiResponse<Post>[]> {
     const payloads = createMultiplePostPayloads(count, userId);
     
     // Batch requests to avoid overwhelming the API
-    const BATCH_SIZE = 5;
     const results: ApiResponse<Post>[] = [];
     
-    for (let i = 0; i < payloads.length; i += BATCH_SIZE) {
-      const batch = payloads.slice(i, i + BATCH_SIZE);
+    for (let i = 0; i < payloads.length; i += API_CONFIG.BATCH_SIZE) {
+      const batch = payloads.slice(i, i + API_CONFIG.BATCH_SIZE);
       const batchPromises = batch.map(payload => this.createPost(payload));
-      const batchResults = await Promise.all(batchPromises);
-      results.push(...batchResults);
+      const batchResults = await Promise.allSettled(batchPromises);
+      
+      batchResults.forEach(result => {
+        if (result.status === 'fulfilled') {
+          results.push(result.value);
+        } else {
+          // Log partial failures but continue processing
+          console.warn('Batch request failed:', result.reason);
+        }
+      });
     }
     
     return results;

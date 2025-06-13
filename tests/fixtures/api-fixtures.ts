@@ -37,8 +37,8 @@ export const test = base.extend<ApiTestFixtures, ApiWorkerFixtures>({
     const config = ConfigurationManager.getInstance();
     const apiConfig = config.getApiConfig();
     const client = new ApiClient(apiRequestContext, apiConfig.baseUrl);
-    await use(client);
-  },  logger: async ({ }, use) => {
+    await use(client);  },
+  logger: async ({} /* no worker fixtures needed */, use) => {
     const logger = Logger.getInstance();
     logger.setLogLevel(LogLevel.INFO);
     await use(logger);

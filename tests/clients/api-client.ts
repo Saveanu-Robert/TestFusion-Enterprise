@@ -41,18 +41,20 @@ export class ApiClient {
       const response = await this.requestContext.get(url, {
         headers: options?.headers,
         timeout: options?.timeout,
-      });
-
-      const duration = Date.now() - startTime;
-      const data = await response.json();
+      });      const duration = Date.now() - startTime;
+      let data: T | null = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
       const headers = await response.headersArray();
-      const headersObject = headers.reduce((acc, header) => {
-        acc[header.name] = header.value;
-        return acc;
-      }, {} as Record<string, string>);
+      const headersObject = Object.fromEntries(
+        headers.map(({ name, value }) => [name, value])
+      );
 
       const apiResponse: ApiResponse<T> = {
-        data,
+        data: data as T,
         status: response.status(),
         statusText: response.statusText(),
         headers: headersObject,
@@ -79,21 +81,18 @@ export class ApiClient {
 
     try {
       const url = this.buildUrl(endpoint, options?.params);      const response = await this.requestContext.post(url, {
-        data,
+        data: typeof data === 'string' ? data : JSON.stringify(data),
         headers: {
           'Content-Type': 'application/json',
           ...options?.headers,
         },
         timeout: options?.timeout,
-      });
-
-      const duration = Date.now() - startTime;
+      });      const duration = Date.now() - startTime;
       const responseData = await response.json();
       const headers = await response.headersArray();
-      const headersObject = headers.reduce((acc, header) => {
-        acc[header.name] = header.value;
-        return acc;
-      }, {} as Record<string, string>);
+      const headersObject = Object.fromEntries(
+        headers.map(({ name, value }) => [name, value])
+      );
 
       const apiResponse: ApiResponse<T> = {
         data: responseData,
@@ -123,7 +122,7 @@ export class ApiClient {
 
     try {
       const url = this.buildUrl(endpoint, options?.params);      const response = await this.requestContext.put(url, {
-        data,
+        data: typeof data === 'string' ? data : JSON.stringify(data),
         headers: {
           'Content-Type': 'application/json',
           ...options?.headers,
@@ -132,12 +131,10 @@ export class ApiClient {
       });
 
       const duration = Date.now() - startTime;
-      const responseData = await response.json();
-      const headers = await response.headersArray();
-      const headersObject = headers.reduce((acc, header) => {
-        acc[header.name] = header.value;
-        return acc;
-      }, {} as Record<string, string>);
+      const responseData = await response.json();      const headers = await response.headersArray();
+      const headersObject = Object.fromEntries(
+        headers.map(({ name, value }) => [name, value])
+      );
 
       const apiResponse: ApiResponse<T> = {
         data: responseData,
@@ -179,14 +176,12 @@ export class ApiClient {
         responseData = await response.json();
       } catch {
         // DELETE requests might not return JSON
-        responseData = null;
-      }
+        responseData = null;      }
 
       const headers = await response.headersArray();
-      const headersObject = headers.reduce((acc, header) => {
-        acc[header.name] = header.value;
-        return acc;
-      }, {} as Record<string, string>);
+      const headersObject = Object.fromEntries(
+        headers.map(({ name, value }) => [name, value])
+      );
 
       const apiResponse: ApiResponse<T> = {
         data: responseData,
@@ -215,23 +210,19 @@ export class ApiClient {
     this.logger.info(`PATCH ${endpoint}`, data);
 
     try {
-      const url = this.buildUrl(endpoint, options?.params);
-      const response = await this.requestContext.patch(url, {
-        data,
+      const url = this.buildUrl(endpoint, options?.params);      const response = await this.requestContext.patch(url, {
+        data: typeof data === 'string' ? data : JSON.stringify(data),
         headers: {
           'Content-Type': 'application/json',
           ...options?.headers,
         },
         timeout: options?.timeout,
-      });
-
-      const duration = Date.now() - startTime;
+      });      const duration = Date.now() - startTime;
       const responseData = await response.json();
       const headers = await response.headersArray();
-      const headersObject = headers.reduce((acc, header) => {
-        acc[header.name] = header.value;
-        return acc;
-      }, {} as Record<string, string>);
+      const headersObject = Object.fromEntries(
+        headers.map(({ name, value }) => [name, value])
+      );
 
       const apiResponse: ApiResponse<T> = {
         data: responseData,

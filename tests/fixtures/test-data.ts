@@ -3,6 +3,8 @@
  * Provides reusable test data and model definitions
  */
 
+import { EMAIL_PATTERN, PHONE_PATTERN, WEBSITE_PATTERN } from '../constants/validation-constants';
+
 export interface Post {
   id: number;
   title: string;
@@ -128,19 +130,26 @@ export function createTodoPayload(userId: number, overrides: Partial<Omit<Todo, 
 /**
  * Creates multiple post payloads
  */
-export function createMultiplePostPayloads(count: number, userId: number = 1): Omit<Post, 'id'>[] {
-  return Array.from({ length: count }, (_, index) =>
+export function createMultiplePostPayloads(
+  count: number,
+  userId: number = 1,
+): Omit<Post, 'id'>[] {
+  const seed = Date.now();
+  return Array.from({ length: count }, (_, i) =>
     createPostPayload({
-      title: `Test Post ${index + 1}`,
+      title: `Test Post ${i + 1} (${seed + i})`,
       userId,
-    })
+    }),
   );
 }
 
 /**
  * Creates invalid payload for negative testing
  */
-export function createInvalidPostPayload(): any {
+export function createInvalidPostPayload(): Partial<Record<keyof Post, unknown>> & {
+  /** Deliberately extra field for negative testing */
+  invalidField: string;
+} {
   return {
     title: null,
     body: '',
@@ -159,91 +168,92 @@ export function createIncompletePostPayload(): Partial<Post> {
   };
 }
 
-export class TestFixtures {
-  /**
-   * Sample valid post data
-   */
-  static readonly VALID_POST: Post = {
-    id: 1,
-    title: 'sunt aut facere repellat provident occaecati excepturi optio reprehenderit',
-    body: 'quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto',
-    userId: 1,
-  };
+/* ──────────────────────────────
+   Test fixtures (no wrapper)
+ ────────────────────────────────*/
 
-  /**
-   * Sample valid user data
-   */
-  static readonly VALID_USER: User = {
-    id: 1,
-    name: 'Leanne Graham',
-    username: 'Bret',
-    email: 'Sincere@april.biz',
-    address: {
-      street: 'Kulas Light',
-      suite: 'Apt. 556',
-      city: 'Gwenborough',
-      zipcode: '92998-3874',
-      geo: {
-        lat: '-37.3159',
-        lng: '81.1496',
-      },
+/**
+ * Sample valid post data
+ */
+export const VALID_POST: Post = {
+  id: 1,
+  title: 'sunt aut facere repellat provident occaecati excepturi optio reprehenderit',
+  body: 'quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto',
+  userId: 1,
+} as const;
+
+/**
+ * Sample valid user data
+ */
+export const VALID_USER: User = {
+  id: 1,
+  name: 'Leanne Graham',
+  username: 'Bret',
+  email: 'Sincere@april.biz',
+  address: {
+    street: 'Kulas Light',
+    suite: 'Apt. 556',
+    city: 'Gwenborough',
+    zipcode: '92998-3874',
+    geo: {
+      lat: '-37.3159',
+      lng: '81.1496',
     },
-    phone: '1-770-736-8031 x56442',
-    website: 'hildegard.org',
-    company: {
-      name: 'Romaguera-Crona',
-      catchPhrase: 'Multi-layered client-server neural-net',
-      bs: 'harness real-time e-markets',
-    },
-  };
+  },
+  phone: '1-770-736-8031 x56442',
+  website: 'hildegard.org',
+  company: {
+    name: 'Romaguera-Crona',
+    catchPhrase: 'Multi-layered client-server neural-net',
+    bs: 'harness real-time e-markets',
+  },
+} as const;
 
-  /**
-   * Schema definitions for validation
-   */
-  static readonly POST_SCHEMA = {
-    id: 'number',
-    title: 'string',
-    body: 'string',
-    userId: 'number',
-  };
+/**
+ * Schema definitions for validation
+ */
+export const POST_SCHEMA = {
+  id: 'number',
+  title: 'string',
+  body: 'string',
+  userId: 'number',
+} as const;
 
-  static readonly USER_SCHEMA = {
-    id: 'number',
-    name: 'string',
-    username: 'string',
-    email: 'string',
-    address: 'object',
-    phone: 'string',
-    website: 'string',
-    company: 'object',
-  };
+export const USER_SCHEMA = {
+  id: 'number',
+  name: 'string',
+  username: 'string',
+  email: 'string',
+  address: 'object',
+  phone: 'string',
+  website: 'string',
+  company: 'object',
+} as const;
 
-  static readonly COMMENT_SCHEMA = {
-    id: 'number',
-    postId: 'number',
-    name: 'string',
-    email: 'string',
-    body: 'string',
-  };
+export const COMMENT_SCHEMA = {
+  id: 'number',
+  postId: 'number',
+  name: 'string',
+  email: 'string',
+  body: 'string',
+} as const;
 
-  static readonly TODO_SCHEMA = {
-    id: 'number',
-    userId: 'number',
-    title: 'string',
-    completed: 'boolean',
-  };
-  /**
-   * Test data sets for parameterized testing
-   */
-  static readonly VALID_USER_IDS: readonly number[] = [1, 2, 3, 4, 5] as const;
-  static readonly INVALID_USER_IDS: readonly (number | string | null)[] = [0, -1, 999, 'invalid', null] as const;
-  static readonly VALID_POST_IDS: readonly number[] = [1, 2, 3, 4, 5] as const;
-  static readonly INVALID_POST_IDS: readonly (number | string | null)[] = [0, -1, 999, 'invalid', null] as const;
+export const TODO_SCHEMA = {
+  id: 'number',
+  userId: 'number',
+  title: 'string',
+  completed: 'boolean',
+} as const;
 
-  /**
-   * Email validation patterns
-   */
-  static readonly EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  static readonly PHONE_PATTERN = /^[\d\-\s\(\)\+x]+$/;
-  static readonly WEBSITE_PATTERN = /^[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}$/;
-}
+/**
+ * Test data sets for parameterized testing
+ */
+export const VALID_USER_IDS: readonly number[] = [1, 2, 3, 4, 5] as const;
+export const INVALID_USER_IDS: readonly (number | string | null)[] = [0, -1, 999, 'invalid', null] as const;
+export const VALID_POST_IDS: readonly number[] = [1, 2, 3, 4, 5] as const;
+export const INVALID_POST_IDS: readonly (number | string | null)[] = [0, -1, 999, 'invalid', null] as const;
+
+/**
+ * Email validation patterns
+ */
+export { EMAIL_PATTERN, PHONE_PATTERN, WEBSITE_PATTERN } from '../constants/validation-constants';

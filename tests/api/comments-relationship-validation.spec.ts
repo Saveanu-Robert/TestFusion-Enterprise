@@ -1,6 +1,7 @@
 import { test, expect } from '../fixtures/api-fixtures';
 import { CommentsApiService } from '../services/comments-api.service';
 import { TEST_TAGS, HTTP_STATUS_CODES } from '../constants/api-constants';
+import { EMAIL_REGEX } from '../constants/validation-constants';
 
 test.describe('Comments API - Relationship Validation', () => {
   let commentsService: CommentsApiService;
@@ -47,10 +48,8 @@ test.describe('Comments API - Relationship Validation', () => {
     expect(response.data.name).toBeDefined();
     expect(response.data.email).toBeDefined();
     expect(response.data.body).toBeDefined();
-    expect(response.data.postId).toBeDefined();
-
-    logger.logTestStep('Step 4: Validate email format');
-    expect(response.data.email).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    expect(response.data.postId).toBeDefined();    logger.logTestStep('Step 4: Validate email format');
+    expect(response.data.email).toMatch(EMAIL_REGEX);
 
     logger.info('Successfully retrieved specific comment', { commentId });
   });
