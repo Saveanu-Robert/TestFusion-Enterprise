@@ -251,10 +251,9 @@ jobs:
         if: steps.check-updates.outputs.has-updates == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: dependency-test-results
-          path: |
+          name: dependency-test-results          path: |
             test-results-dependency-check/
-            playwright-report/
+            enterprise-reports/
           retention-days: 14
 
       - name: Notify completion

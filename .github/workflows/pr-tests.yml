@@ -215,8 +215,8 @@ jobs:
         with:
           name: api-test-results
           path: |
-            playwright-report/
             test-results/
+            enterprise-reports/
           retention-days: 7
 
   web-tests:
@@ -261,8 +261,8 @@ jobs:
         with:
           name: web-test-results-${{ matrix.browser }}
           path: |
-            playwright-report/
             test-results/
+            enterprise-reports/
           retention-days: 7
   all-tests:
     name: All Tests (API + Web)
@@ -314,8 +314,8 @@ jobs:
         with:
           name: all-test-results-${{ matrix.browser }}
           path: |
-            playwright-report/
             test-results/
+            enterprise-reports/
           retention-days: 7
 
   test-summary:

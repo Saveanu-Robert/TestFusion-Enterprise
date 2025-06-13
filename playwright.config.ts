@@ -12,11 +12,9 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+  workers: process.env.CI ? 1 : undefined,  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
-    ['html'],
-    ['junit', { outputFile: 'test-results/junit.xml' }],
+    ['./tests/reporters/enterprise-reporter.ts', { outputDir: 'enterprise-reports' }],
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -28,21 +26,31 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
-
-  /* Configure projects for major browsers */
+  /* Configure projects for different test types */
   projects: [
+    // API Tests - No browser needed
+    {
+      name: 'api',
+      testDir: './tests/api',
+      use: {
+        // API tests don't need browser context
+      },
+    },    // Web/UI Tests - Browser required
     {
       name: 'chromium',
+      testDir: './tests/web',
       use: { ...devices['Desktop Chrome'] },
     },
 
     {
       name: 'firefox',
+      testDir: './tests/web',
       use: { ...devices['Desktop Firefox'] },
     },
 
     {
       name: 'webkit',
+      testDir: './tests/web',
       use: { ...devices['Desktop Safari'] },
     },
 

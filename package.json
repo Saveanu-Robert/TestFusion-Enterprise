@@ -1,28 +1,52 @@
-{
-  "name": "testfusion-enterprise",
+{  "name": "testfusion-enterprise",
   "version": "1.0.0",
   "description": "Enterprise test automation framework using Playwright",
-  "main": "index.js",  "scripts": {
+  "main": "index.js",  "config": {
+    "reporting": {
+      "outputDir": "enterprise-reports",
+      "defaultBranch": "local-dev",
+      "defaultRunId": "local-execution",
+      "environment": "development",
+      "projectNameFallback": "unknown-project",
+      "suiteNameFallback": "Unknown Suite",
+      "ciEnvironmentVariables": [
+        "CI",
+        "GITHUB_ACTIONS",
+        "GITLAB_CI",
+        "JENKINS_URL",
+        "CIRCLECI"
+      ],
+      "branchEnvironmentVariables": [
+        "GITHUB_REF_NAME",
+        "CI_COMMIT_BRANCH",
+        "GIT_BRANCH"
+      ],
+      "runIdEnvironmentVariables": [
+        "GITHUB_RUN_ID",
+        "CI_PIPELINE_ID",
+        "BUILD_NUMBER"
+      ]
+    }
+  },"scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
     "test:ui": "playwright test --ui",
-    "test:report": "playwright show-report",
-    "test:api": "playwright test tests/api/",
-    "test:web": "playwright test tests/web/ tests/ui/ tests/pages/",
-    "test:posts": "playwright test tests/api/posts-crud-operations.spec.ts",
-    "test:users": "playwright test tests/api/users-data-validation.spec.ts",
-    "test:comments": "playwright test tests/api/comments-relationship-validation.spec.ts",
-    "test:all-files": "playwright test tests/api/",
-    "test:parallel": "playwright test --workers=4",
-    "test:ci": "playwright test --reporter=html,json",
-    "test:ci:api": "playwright test tests/api/ --reporter=html,json",
-    "test:ci:web": "playwright test tests/web/ tests/ui/ tests/pages/ --reporter=html,json",
+    "test:report": "start enterprise-reports/enterprise-report.html",
+    "test:enterprise-report": "start enterprise-reports/enterprise-report.html",    "test:api": "playwright test --project=api",
+    "test:web": "playwright test --project=chromium --project=firefox --project=webkit",
+    "test:posts": "playwright test --project=api tests/api/posts-crud-operations.spec.ts",
+    "test:users": "playwright test --project=api tests/api/users-data-validation.spec.ts",
+    "test:comments": "playwright test --project=api tests/api/comments-relationship-validation.spec.ts",
+    "test:all-files": "playwright test --project=api",
+    "test:parallel": "playwright test --workers=4",    "test:ci": "playwright test",
+    "test:ci:api": "playwright test --project=api",
+    "test:ci:web": "playwright test --project=chromium --project=firefox --project=webkit",
     "install:browsers": "playwright install",
     "install:browsers:chromium": "playwright install chromium",
     "install:browsers:firefox": "playwright install firefox",
     "install:browsers:webkit": "playwright install webkit",
-    "clean": "rimraf test-results playwright-report coverage",
+    "clean": "rimraf test-results coverage enterprise-reports",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "lint:check": "eslint . --ext .ts --max-warnings 0"
@@ -38,11 +62,13 @@
   "devDependencies": {
     "@eslint/js": "^9.28.0",
     "@playwright/test": "^1.40.0",
+    "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^8.34.0",
     "@typescript-eslint/parser": "^8.34.0",
     "eslint": "^9.28.0",
-    "eslint-plugin-playwright": "^2.2.0"
+    "eslint-plugin-playwright": "^2.2.0",
+    "fs-extra": "^11.3.0"
   },
   "dependencies": {
     "dotenv": "^16.5.0"

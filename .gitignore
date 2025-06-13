@@ -89,7 +89,8 @@ pids
 
 # Playwright test results and reports
 test-results/
-playwright-report/
+# Enterprise reporting
+enterprise-reports/
 playwright/.cache/
 blob-report/
 
