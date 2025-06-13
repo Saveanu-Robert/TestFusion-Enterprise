@@ -1,0 +1,252 @@
+/**
+ * Test Fixtures and Data Models for API Testing
+ * Provides reusable test data and model definitions
+ */
+
+export interface Post {
+  id: number;
+  title: string;
+  body: string;
+  userId: number;
+}
+
+export interface User {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+  address: Address;
+  phone: string;
+  website: string;
+  company: Company;
+}
+
+export interface Address {
+  street: string;
+  suite: string;
+  city: string;
+  zipcode: string;
+  geo: Geo;
+}
+
+export interface Geo {
+  lat: string;
+  lng: string;
+}
+
+export interface Company {
+  name: string;
+  catchPhrase: string;
+  bs: string;
+}
+
+export interface Comment {
+  id: number;
+  postId: number;
+  name: string;
+  email: string;
+  body: string;
+}
+
+export interface Todo {
+  id: number;
+  userId: number;
+  title: string;
+  completed: boolean;
+}
+
+export class TestDataFactory {
+  /**
+   * Creates a new post payload for testing
+   */
+  static createPostPayload(overrides: Partial<Omit<Post, 'id'>> = {}): Omit<Post, 'id'> {
+    const timestamp = Date.now();
+    return {
+      title: `Test Post ${timestamp}`,
+      body: `This is a test post body created at ${new Date().toISOString()}`,
+      userId: 1,
+      ...overrides,
+    };
+  }
+
+  /**
+   * Creates a new user payload for testing
+   */
+  static createUserPayload(overrides: Partial<Omit<User, 'id'>> = {}): Omit<User, 'id'> {
+    const timestamp = Date.now();
+    return {
+      name: `Test User ${timestamp}`,
+      username: `testuser${timestamp}`,
+      email: `testuser${timestamp}@example.com`,
+      address: {
+        street: '123 Test Street',
+        suite: 'Apt. 1',
+        city: 'Test City',
+        zipcode: '12345-6789',
+        geo: {
+          lat: '40.7128',
+          lng: '-74.0060',
+        },
+      },
+      phone: '1-555-123-4567',
+      website: `testuser${timestamp}.example.com`,
+      company: {
+        name: 'Test Company',
+        catchPhrase: 'Testing is our business',
+        bs: 'quality test automation',
+      },
+      ...overrides,
+    };
+  }
+
+  /**
+   * Creates a new comment payload for testing
+   */
+  static createCommentPayload(postId: number, overrides: Partial<Omit<Comment, 'id'>> = {}): Omit<Comment, 'id'> {
+    const timestamp = Date.now();
+    return {
+      postId,
+      name: `Test Comment ${timestamp}`,
+      email: `commenter${timestamp}@example.com`,
+      body: `This is a test comment created at ${new Date().toISOString()}`,
+      ...overrides,
+    };
+  }
+
+  /**
+   * Creates a new todo payload for testing
+   */
+  static createTodoPayload(userId: number, overrides: Partial<Omit<Todo, 'id'>> = {}): Omit<Todo, 'id'> {
+    const timestamp = Date.now();
+    return {
+      userId,
+      title: `Test Todo ${timestamp}`,
+      completed: false,
+      ...overrides,
+    };
+  }
+
+  /**
+   * Creates multiple post payloads
+   */
+  static createMultiplePostPayloads(count: number, userId: number = 1): Omit<Post, 'id'>[] {
+    return Array.from({ length: count }, (_, index) =>
+      this.createPostPayload({
+        title: `Test Post ${index + 1}`,
+        userId,
+      })
+    );
+  }
+
+  /**
+   * Creates invalid payload for negative testing
+   */
+  static createInvalidPostPayload(): any {
+    return {
+      title: null,
+      body: '',
+      userId: 'invalid',
+      invalidField: 'should not be here',
+    };
+  }
+
+  /**
+   * Creates payload with missing required fields
+   */
+  static createIncompletePostPayload(): Partial<Post> {
+    return {
+      title: 'Incomplete Post',
+      // Missing body and userId
+    };
+  }
+}
+
+export class TestFixtures {
+  /**
+   * Sample valid post data
+   */
+  static readonly VALID_POST: Post = {
+    id: 1,
+    title: 'sunt aut facere repellat provident occaecati excepturi optio reprehenderit',
+    body: 'quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto',
+    userId: 1,
+  };
+
+  /**
+   * Sample valid user data
+   */
+  static readonly VALID_USER: User = {
+    id: 1,
+    name: 'Leanne Graham',
+    username: 'Bret',
+    email: 'Sincere@april.biz',
+    address: {
+      street: 'Kulas Light',
+      suite: 'Apt. 556',
+      city: 'Gwenborough',
+      zipcode: '92998-3874',
+      geo: {
+        lat: '-37.3159',
+        lng: '81.1496',
+      },
+    },
+    phone: '1-770-736-8031 x56442',
+    website: 'hildegard.org',
+    company: {
+      name: 'Romaguera-Crona',
+      catchPhrase: 'Multi-layered client-server neural-net',
+      bs: 'harness real-time e-markets',
+    },
+  };
+
+  /**
+   * Schema definitions for validation
+   */
+  static readonly POST_SCHEMA = {
+    id: 'number',
+    title: 'string',
+    body: 'string',
+    userId: 'number',
+  };
+
+  static readonly USER_SCHEMA = {
+    id: 'number',
+    name: 'string',
+    username: 'string',
+    email: 'string',
+    address: 'object',
+    phone: 'string',
+    website: 'string',
+    company: 'object',
+  };
+
+  static readonly COMMENT_SCHEMA = {
+    id: 'number',
+    postId: 'number',
+    name: 'string',
+    email: 'string',
+    body: 'string',
+  };
+
+  static readonly TODO_SCHEMA = {
+    id: 'number',
+    userId: 'number',
+    title: 'string',
+    completed: 'boolean',
+  };
+
+  /**
+   * Test data sets for parameterized testing
+   */
+  static readonly VALID_USER_IDS = [1, 2, 3, 4, 5];
+  static readonly INVALID_USER_IDS = [0, -1, 999, 'invalid', null];
+  static readonly VALID_POST_IDS = [1, 2, 3, 4, 5];
+  static readonly INVALID_POST_IDS = [0, -1, 999, 'invalid', null];
+
+  /**
+   * Email validation patterns
+   */
+  static readonly EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  static readonly PHONE_PATTERN = /^[\d\-\s\(\)\+x]+$/;
+  static readonly WEBSITE_PATTERN = /^[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}$/;
+}
