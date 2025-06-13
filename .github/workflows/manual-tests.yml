@@ -44,9 +44,6 @@ jobs:
   manual-tests:
     name: Manual Test Execution
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        browser: ${{ github.event.inputs.browser == 'all' && fromJSON('["chromium", "firefox", "webkit"]') || fromJSON(format('["{0}"]', github.event.inputs.browser)) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -61,7 +58,15 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps ${{ matrix.browser }}
+        if: github.event.inputs.test-type != 'api'
+        run: |
+          if [ "${{ github.event.inputs.browser }}" = "all" ]; then
+            echo "🎭 Installing all Playwright browsers..."
+            npx playwright install --with-deps
+          else
+            echo "🎭 Installing Playwright browser: ${{ github.event.inputs.browser }}"
+            npx playwright install --with-deps ${{ github.event.inputs.browser }}
+          fi
 
       - name: Set test environment
         run: |
@@ -85,8 +90,6 @@ jobs:
 
       - name: Run tests
         run: |
-          echo "🧪 Running ${{ github.event.inputs.test-type }} tests on ${{ matrix.browser }}"
-          
           # Configure parallel execution
           WORKERS=""
           if [ "${{ github.event.inputs.parallel }}" = "true" ]; then
@@ -98,19 +101,29 @@ jobs:
           # Run specific test type
           case "${{ github.event.inputs.test-type }}" in
             "api")
-              npx playwright test tests/api/ --project=${{ matrix.browser }} $WORKERS --reporter=html,json
+              echo "📡 Running API tests (no browser needed)"
+              npm run test:api $WORKERS --reporter=html,json
               ;;
             "web")
+              echo "🌐 Running Web/UI tests with browser: ${{ github.event.inputs.browser }}"
               if [ -d "tests/web" ] || [ -d "tests/ui" ] || find tests/ -name "*.page.spec.ts" | grep -q .; then
-                npx playwright test tests/web/ tests/ui/ tests/pages/ --project=${{ matrix.browser }} $WORKERS --reporter=html,json
+                if [ "${{ github.event.inputs.browser }}" = "all" ]; then
+                  npm run test:web $WORKERS --reporter=html,json
+                else
+                  npm run test:web -- --project=${{ github.event.inputs.browser }} $WORKERS --reporter=html,json
+                fi
               else
                 echo "⚠️ No web tests found, creating placeholder test result"
                 mkdir -p test-results
                 echo "No web tests available in this project" > test-results/web-tests-info.txt
-              fi
-              ;;
+              fi              ;;
             "all")
-              npx playwright test --project=${{ matrix.browser }} $WORKERS --reporter=html,json
+              echo "🚀 Running ALL tests with browser: ${{ github.event.inputs.browser }}"
+              if [ "${{ github.event.inputs.browser }}" = "all" ]; then
+                npm run test $WORKERS --reporter=html,json
+              else
+                npm run test -- --project=${{ github.event.inputs.browser }} $WORKERS --reporter=html,json
+              fi
               ;;
           esac
 
@@ -118,7 +131,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: manual-test-results-${{ github.event.inputs.test-type }}-${{ matrix.browser }}-${{ github.event.inputs.environment }}
+          name: manual-test-results-${{ github.event.inputs.test-type }}-${{ github.event.inputs.browser }}-${{ github.event.inputs.environment }}
           path: |
             playwright-report/
             test-results/
