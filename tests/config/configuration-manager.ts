@@ -3,6 +3,11 @@
  * Handles environment-specific configurations and properties
  */
 
+import { config } from 'dotenv';
+
+// Load environment variables from .env file
+config();
+
 export interface ApiConfig {
   baseUrl: string;
   timeout: number;
@@ -39,29 +44,31 @@ export class ConfigurationManager {
     }
     return ConfigurationManager.instance;
   }
-
   private loadConfiguration(): TestConfig {
-    const environment = process.env.TEST_ENV || 'development';
+    // Validate required environment variables
+    this.validateRequiredConfig();
     
-    return {      api: {
-        baseUrl: process.env.API_BASE_URL || 'https://jsonplaceholder.typicode.com',
-        timeout: Number(process.env.API_TIMEOUT) || 30_000,
-        retryAttempts: Number(process.env.API_RETRY_ATTEMPTS) || 3,
+    return {
+      api: {
+        baseUrl: this.getRequiredEnvVar('API_BASE_URL'),
+        timeout: this.getNumberEnvVar('API_TIMEOUT'),
+        retryAttempts: this.getNumberEnvVar('API_RETRY_ATTEMPTS'),
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': 'TestFusion-Enterprise/1.0.0',
           ...(process.env.API_KEY && { 'Authorization': `Bearer ${process.env.API_KEY}` }),
         },
-        environment,
-      },      logging: {
-        level: process.env.LOG_LEVEL || 'INFO',
-        enableRequestLogging: (process.env.ENABLE_REQUEST_LOGGING ?? '').toLowerCase() !== 'false',
-        enableResponseLogging: (process.env.ENABLE_RESPONSE_LOGGING ?? '').toLowerCase() !== 'false',
+        environment: this.getRequiredEnvVar('TEST_ENV'),
+      },
+      logging: {
+        level: this.getRequiredEnvVar('LOG_LEVEL'),
+        enableRequestLogging: this.getBooleanEnvVar('ENABLE_REQUEST_LOGGING'),
+        enableResponseLogging: this.getBooleanEnvVar('ENABLE_RESPONSE_LOGGING'),
       },
       reporting: {
-        enableScreenshots: (process.env.ENABLE_SCREENSHOTS ?? '').toLowerCase() !== 'false',
-        enableVideos: (process.env.ENABLE_VIDEOS ?? '').toLowerCase() !== 'false',
-        enableTracing: (process.env.ENABLE_TRACING ?? '').toLowerCase() !== 'false',
+        enableScreenshots: this.getBooleanEnvVar('ENABLE_SCREENSHOTS'),
+        enableVideos: this.getBooleanEnvVar('ENABLE_VIDEOS'),
+        enableTracing: this.getBooleanEnvVar('ENABLE_TRACING'),
       },
     };
   }
@@ -101,5 +108,49 @@ export class ConfigurationManager {
     }
     
     target[lastKey] = value;
+  }
+
+  private validateRequiredConfig(): void {
+    const requiredVars = [
+      'API_BASE_URL',
+      'API_TIMEOUT', 
+      'API_RETRY_ATTEMPTS',
+      'TEST_ENV',
+      'LOG_LEVEL',
+      'ENABLE_REQUEST_LOGGING',
+      'ENABLE_RESPONSE_LOGGING',
+      'ENABLE_SCREENSHOTS'
+    ];
+
+    const missingVars = requiredVars.filter(varName => !process.env[varName]);
+    
+    if (missingVars.length > 0) {
+      throw new Error(
+        `Missing required environment variables: ${missingVars.join(', ')}. ` +
+        'Please ensure all required variables are set in your .env file.'
+      );
+    }
+  }
+
+  private getRequiredEnvVar(name: string): string {
+    const value = process.env[name];
+    if (!value) {
+      throw new Error(`Required environment variable ${name} is not set`);
+    }
+    return value;
+  }
+
+  private getNumberEnvVar(name: string): number {
+    const value = this.getRequiredEnvVar(name);
+    const numValue = Number(value);
+    if (isNaN(numValue)) {
+      throw new Error(`Environment variable ${name} must be a valid number, got: ${value}`);
+    }
+    return numValue;
+  }
+
+  private getBooleanEnvVar(name: string): boolean {
+    const value = this.getRequiredEnvVar(name);
+    return value.toLowerCase() === 'true';
   }
 }

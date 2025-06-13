@@ -8,9 +8,14 @@
 export const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
 /**
- * Phone validation pattern - stricter format
+ * Username validation pattern - alphanumeric with optional dots, dashes, underscores
  */
-export const PHONE_REGEX = /^\+?[\d\s\-\(\)]{10,}$/;
+export const USERNAME_REGEX = /^[a-zA-Z0-9._-]{3,20}$/;
+
+/**
+ * Phone validation pattern - stricter format (includes extensions)
+ */
+export const PHONE_REGEX = /^\+?[\d\s\-\(\)x]{10,}$/;
 
 /**
  * Website validation pattern - stricter format

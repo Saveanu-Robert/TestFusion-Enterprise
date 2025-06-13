@@ -44,17 +44,6 @@ export const HEADERS = {
   AUTHORIZATION: 'Authorization',
 } as const;
 
-export const TEST_TAGS = {
-  API: '@api',
-  SMOKE: '@smoke',
-  REGRESSION: '@regression',
-  POSTS: '@posts',
-  USERS: '@users',
-  COMMENTS: '@comments',
-  CRUD: '@crud',
-  VALIDATION: '@validation',
-} as const;
-
 export const ERROR_MESSAGES = {
   INVALID_RESPONSE: 'Response validation failed',
   TIMEOUT_ERROR: 'Request timed out',
