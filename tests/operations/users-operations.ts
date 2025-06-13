@@ -69,14 +69,14 @@ export class UsersOperations {
         zipcode: '12345-678',
         geo: {
           lat: '40.7128',
-          lng: '-74.0060'
-        }
+          lng: '-74.0060',
+        },
       },
       company: {
         name: 'Test Company',
         catchPhrase: 'Testing Excellence',
-        bs: 'quality test solutions'
-      }
+        bs: 'quality test solutions',
+      },
     };
   }
 }

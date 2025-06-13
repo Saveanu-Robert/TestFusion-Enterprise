@@ -149,7 +149,7 @@ export function createMultiplePostPayloads(
 export function createInvalidPostPayload(): Partial<Record<keyof Post, unknown>> & {
   /** Deliberately extra field for negative testing */
   invalidField: string;
-} {
+  } {
   return {
     title: null,
     body: '',

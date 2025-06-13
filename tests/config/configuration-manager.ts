@@ -119,7 +119,7 @@ export class ConfigurationManager {
       'LOG_LEVEL',
       'ENABLE_REQUEST_LOGGING',
       'ENABLE_RESPONSE_LOGGING',
-      'ENABLE_SCREENSHOTS'
+      'ENABLE_SCREENSHOTS',
     ];
 
     const missingVars = requiredVars.filter(varName => !process.env[varName]);
@@ -127,7 +127,7 @@ export class ConfigurationManager {
     if (missingVars.length > 0) {
       throw new Error(
         `Missing required environment variables: ${missingVars.join(', ')}. ` +
-        'Please ensure all required variables are set in your .env file.'
+        'Please ensure all required variables are set in your .env file.',
       );
     }
   }
