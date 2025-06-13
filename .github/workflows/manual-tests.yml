@@ -13,8 +13,8 @@ on:
           - web
           - all
       browser:
-        description: 'Browser to test with'
-        required: true
+        description: 'Browser to test with (only for web/all tests)'
+        required: false
         default: 'chromium'
         type: choice
         options:
@@ -44,6 +44,20 @@ jobs:
   manual-tests:
     name: Manual Test Execution
     runs-on: ubuntu-latest
+    env:
+      # API Configuration - Set defaults
+      API_BASE_URL: https://jsonplaceholder.typicode.com
+      API_TIMEOUT: 30000
+      API_RETRY_ATTEMPTS: 3
+      # Test Environment - will be overridden based on selection
+      TEST_ENV: development
+      # Logging Configuration
+      LOG_LEVEL: INFO
+      ENABLE_REQUEST_LOGGING: true
+      ENABLE_RESPONSE_LOGGING: true      # Reporting Configuration
+      ENABLE_SCREENSHOTS: true
+      ENABLE_VIDEOS: false
+      ENABLE_TRACING: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -58,7 +72,7 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browsers
-        if: github.event.inputs.test-type != 'api'
+        if: ${{ github.event.inputs.test-type == 'web' || github.event.inputs.test-type == 'all' }}
         run: |
           if [ "${{ github.event.inputs.browser }}" = "all" ]; then
             echo "🎭 Installing all Playwright browsers..."
@@ -123,20 +137,18 @@ jobs:
                 npm run test $WORKERS --reporter=html,json
               else
                 npm run test -- --project=${{ github.event.inputs.browser }} $WORKERS --reporter=html,json
-              fi
-              ;;
+              fi              ;;
           esac
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: manual-test-results-${{ github.event.inputs.test-type }}-${{ github.event.inputs.browser }}-${{ github.event.inputs.environment }}
+          name: manual-test-results-${{ github.event.inputs.test-type }}-${{ github.event.inputs.test-type == 'api' && 'no-browser' || github.event.inputs.browser }}-${{ github.event.inputs.environment }}
           path: |
             playwright-report/
             test-results/
           retention-days: 30
-
   test-summary:
     name: Manual Test Summary
     runs-on: ubuntu-latest
@@ -149,7 +161,14 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Test Configuration" >> $GITHUB_STEP_SUMMARY
           echo "- **Test Type**: ${{ github.event.inputs.test-type }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Browser**: ${{ github.event.inputs.browser }}" >> $GITHUB_STEP_SUMMARY
+          
+          # Only show browser info for web and all tests
+          if [ "${{ github.event.inputs.test-type }}" != "api" ]; then
+            echo "- **Browser**: ${{ github.event.inputs.browser }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Browser**: Not applicable (API tests only)" >> $GITHUB_STEP_SUMMARY
+          fi
+          
           echo "- **Environment**: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Parallel Execution**: ${{ github.event.inputs.parallel }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
