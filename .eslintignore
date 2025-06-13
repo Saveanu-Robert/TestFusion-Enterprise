@@ -8,7 +8,7 @@ out/
 
 # Test outputs
 test-results/
-playwright-report/
+enterprise-reports/
 coverage/
 
 # Logs

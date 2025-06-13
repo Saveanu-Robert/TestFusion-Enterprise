@@ -99,7 +99,7 @@ After running tests, you can view detailed reports:
 
 - HTML Report: `npm run test:report`
 - Test artifacts are stored in `test-results/`
-- Playwright report is stored in `playwright-report/`
+- Enterprise reports are stored in `enterprise-reports/`
 
 ## 🧪 Writing Tests
 

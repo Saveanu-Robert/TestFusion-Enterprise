@@ -90,7 +90,7 @@ module.exports = [
       'dist/',
       'build/',
       'test-results/',
-      'playwright-report/',
+      'enterprise-reports/',
       'coverage/',
       '*.js',
       '!*.config.js',
