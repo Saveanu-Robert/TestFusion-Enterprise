@@ -10,14 +10,22 @@ export interface ApiTestFixtures {
 
 export interface ApiWorkerFixtures {
   apiRequestContext: APIRequestContext;
+  apiConfig: ReturnType<ConfigurationManager['getApiConfig']>;
 }
 
 export const test = base.extend<ApiTestFixtures, ApiWorkerFixtures>({
-  apiRequestContext: [
-    async ({ playwright }, use) => {
+  // Worker-scoped fixture to cache configuration
+  apiConfig: [
+    async ({}, use) => {
       const config = ConfigurationManager.getInstance();
       const apiConfig = config.getApiConfig();
-      
+      await use(apiConfig);
+    },
+    { scope: 'worker' }
+  ],
+  
+  apiRequestContext: [
+    async ({ playwright, apiConfig }, use) => {
       const requestContext = await playwright.request.newContext({
         baseURL: apiConfig.baseUrl,
         extraHTTPHeaders: {
@@ -27,18 +35,21 @@ export const test = base.extend<ApiTestFixtures, ApiWorkerFixtures>({
         timeout: apiConfig.timeout,
       });
 
-      await use(requestContext);
-      await requestContext.dispose();
+      try {
+        await use(requestContext);
+      } finally {
+        await requestContext.dispose();
+      }
     },
     { scope: 'worker' }
   ],
-
-  apiClient: async ({ apiRequestContext }, use) => {
-    const config = ConfigurationManager.getInstance();
-    const apiConfig = config.getApiConfig();
+  
+  apiClient: async ({ apiRequestContext, apiConfig }, use) => {
     const client = new ApiClient(apiRequestContext, apiConfig.baseUrl);
-    await use(client);  },
-  logger: async ({} /* no worker fixtures needed */, use) => {
+    await use(client);
+  },
+  
+  logger: async ({}, use) => {
     const logger = Logger.getInstance();
     logger.setLogLevel(LogLevel.INFO);
     await use(logger);
