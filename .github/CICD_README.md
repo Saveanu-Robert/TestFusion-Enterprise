@@ -19,6 +19,9 @@ This document describes the automated CI/CD pipelines set up for TestFusion-Ente
 - ✅ **Proper Browser Separation**: 
   - **API Tests**: Run without browsers (faster execution)
   - **Web Tests**: Run with multi-browser support (Chromium, Firefox, WebKit)
+- ✅ **Environment Variable Management**: 
+  - **API Tests**: All required environment variables are automatically set with CI-appropriate defaults
+  - **No .env Dependencies**: Tests run without requiring .env files to be present
 - ✅ **Code Quality**: ESLint integration
 - ✅ **Parallel Execution**: Tests run efficiently based on type
 
@@ -73,12 +76,13 @@ This document describes the automated CI/CD pipelines set up for TestFusion-Ente
 - ✅ **Smart Browser Management**: 
   - **API Tests**: No browser installation (faster execution)
   - **Web/All Tests**: Browser selection (specific browser or all browsers)
+- ✅ **Environment Variable Management**: All required API test variables are automatically set
 - ✅ **Environment Configuration**: Select test environment
 - ✅ **Parallel Control**: Enable/disable parallel execution
 
 **Options:**
 - **Test Type**: `api` (no browser), `web` (with browser), `all` (with browser)
-- **Browser**: `chromium`, `firefox`, `webkit`, `all` (ignored for API tests)
+- **Browser**: `chromium`, `firefox`, `webkit`, `all` (only available for web/all tests)
 - **Environment**: `default`, `staging`, `production`
 - **Parallel**: `true`, `false`
 
@@ -141,8 +145,23 @@ All workflows generate detailed test reports:
 
 ### Environment Variables
 
-The workflows support these environment configurations:
+The workflows now automatically handle all required environment variables:
 
+**API Test Variables (automatically set in CI):**
+```bash
+API_BASE_URL=https://jsonplaceholder.typicode.com
+API_TIMEOUT=30000
+API_RETRY_ATTEMPTS=3
+TEST_ENV=development
+LOG_LEVEL=INFO
+ENABLE_REQUEST_LOGGING=true
+ENABLE_RESPONSE_LOGGING=true
+ENABLE_SCREENSHOTS=false  # Disabled in CI for performance
+ENABLE_VIDEOS=false       # Disabled in CI for performance
+ENABLE_TRACING=false      # Disabled in CI for performance
+```
+
+**Environment-specific Overrides:**
 ```bash
 # Default (JSONPlaceholder API)
 BASE_URL=https://jsonplaceholder.typicode.com
@@ -153,6 +172,11 @@ BASE_URL=https://staging-api.example.com
 # Production
 BASE_URL=https://api.example.com
 ```
+
+**✅ Recent Fixes:**
+- All required environment variables are now automatically set in CI pipelines
+- API tests no longer require .env files or manual environment setup
+- Browser installation is properly restricted to web/all tests only
 
 ### Playwright Configuration
 
@@ -179,6 +203,14 @@ Tests use the existing `playwright.config.ts` with these browsers:
    - Check if `skip-tests` label is applied
    - Verify branch naming conventions
    - Ensure file changes are in expected directories
+
+4. **Environment variable issues** (Fixed ✅):
+   - ~~API tests failing with missing environment variables~~ - Now automatically set
+   - ~~Browser installation for API-only tests~~ - Now properly restricted
+
+5. **Manual workflow browser selection** (Fixed ✅):
+   - ~~Browser options showing for API tests~~ - Now only shown for web/all tests
+   - ~~Browsers being installed unnecessarily~~ - Now skipped for API tests
 
 ### Getting Help
 
