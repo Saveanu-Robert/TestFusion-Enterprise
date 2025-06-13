@@ -64,17 +64,12 @@ export class Logger {
       requestId,
     });
   }
-
   public logResponse(statusCode: number, responseData?: any, requestId?: string): void {
     this.info(`API Response: ${statusCode}`, {
       statusCode,
       responseData,
       requestId,
     });
-  }
-
-  public logTestStep(step: string, testCase?: string): void {
-    this.info(`Test Step: ${step}`, undefined, testCase);
   }
 
   public logValidation(field: string, expectedValue: any, actualValue: any, isValid: boolean): void {

@@ -1,7 +1,8 @@
 {
   "name": "testfusion-enterprise",
   "version": "1.0.0",
-  "description": "Enterprise test automation framework using Playwright",  "main": "index.js",
+  "description": "Enterprise test automation framework using Playwright",
+  "main": "index.js",
   "scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",
@@ -30,5 +31,8 @@
   "devDependencies": {
     "@playwright/test": "^1.40.0",
     "@types/node": "^20.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0"
   }
 }
