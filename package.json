@@ -1,52 +1,29 @@
-{  "name": "testfusion-enterprise",
+{
+  "name": "testfusion-enterprise",
   "version": "1.0.0",
   "description": "Enterprise test automation framework using Playwright",
-  "main": "index.js",  "config": {
-    "reporting": {
-      "outputDir": "enterprise-reports",
-      "defaultBranch": "local-dev",
-      "defaultRunId": "local-execution",
-      "environment": "development",
-      "projectNameFallback": "unknown-project",
-      "suiteNameFallback": "Unknown Suite",
-      "ciEnvironmentVariables": [
-        "CI",
-        "GITHUB_ACTIONS",
-        "GITLAB_CI",
-        "JENKINS_URL",
-        "CIRCLECI"
-      ],
-      "branchEnvironmentVariables": [
-        "GITHUB_REF_NAME",
-        "CI_COMMIT_BRANCH",
-        "GIT_BRANCH"
-      ],
-      "runIdEnvironmentVariables": [
-        "GITHUB_RUN_ID",
-        "CI_PIPELINE_ID",
-        "BUILD_NUMBER"
-      ]
-    }
-  },"scripts": {
+  "main": "index.js",
+  "scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
     "test:ui": "playwright test --ui",
-    "test:report": "start enterprise-reports/enterprise-report.html",
-    "test:enterprise-report": "start enterprise-reports/enterprise-report.html",    "test:api": "playwright test --project=api",
+    "test:report": "playwright show-report",
+    "test:api": "playwright test --project=api",
     "test:web": "playwright test --project=chromium --project=firefox --project=webkit",
     "test:posts": "playwright test --project=api tests/api/posts-crud-operations.spec.ts",
     "test:users": "playwright test --project=api tests/api/users-data-validation.spec.ts",
     "test:comments": "playwright test --project=api tests/api/comments-relationship-validation.spec.ts",
     "test:all-files": "playwright test --project=api",
-    "test:parallel": "playwright test --workers=4",    "test:ci": "playwright test",
+    "test:parallel": "playwright test --workers=4",
+    "test:ci": "playwright test",
     "test:ci:api": "playwright test --project=api",
     "test:ci:web": "playwright test --project=chromium --project=firefox --project=webkit",
     "install:browsers": "playwright install",
     "install:browsers:chromium": "playwright install chromium",
     "install:browsers:firefox": "playwright install firefox",
     "install:browsers:webkit": "playwright install webkit",
-    "clean": "rimraf test-results coverage enterprise-reports",
+    "clean": "rimraf test-results coverage playwright-report",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "lint:check": "eslint . --ext .ts --max-warnings 0"
