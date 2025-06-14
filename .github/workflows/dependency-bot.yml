@@ -44,9 +44,8 @@ jobs:
         id: check-updates
         run: |
           echo "🔍 Checking for dependency updates..."
-          
-          # Check what can be updated
-          ncu --jsonAll > updates.json
+            # Check what can be updated (only actual updates, not current versions)
+          ncu --jsonUpgraded > updates.json
           
           # Check if there are any updates available
           if [ "$(cat updates.json)" = "{}" ]; then
