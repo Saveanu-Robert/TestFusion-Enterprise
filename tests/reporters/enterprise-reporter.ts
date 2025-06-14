@@ -6,6 +6,7 @@
 import { Reporter, TestCase, TestResult, FullResult, Suite } from '@playwright/test/reporter';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import { execSync } from 'child_process';
 
 interface TestMetrics {
   total: number;
@@ -92,9 +93,9 @@ export class EnterpriseReporter implements Reporter {
     
     const projectName = this.getProjectName(test);
     const statusIcon = result.status === 'passed' ? '✅' : 
-                      result.status === 'failed' ? '❌' : 
-                      result.status === 'skipped' ? '⏭️' : 
-                      result.status === 'timedOut' ? '⏰' : '⚠️';
+      result.status === 'failed' ? '❌' : 
+        result.status === 'skipped' ? '⏭️' : 
+          result.status === 'timedOut' ? '⏰' : '⚠️';
     const duration = (result.duration / 1000).toFixed(2);
     
     console.log(`${statusIcon} [${projectName}] ${test.title} (${duration}s)`);
@@ -112,10 +113,10 @@ export class EnterpriseReporter implements Reporter {
     this.printConsoleSummary();
     
     console.log(`\n📊 Enterprise report generated in: ${path.resolve(this.outputDir)}`);
-    console.log(`📄 Files generated:`);
-    console.log(`   📊 enterprise-report.html - Interactive HTML report`);
-    console.log(`   📋 executive-summary.md - Executive summary`);
-    console.log(`   📊 test-data.json - Raw test data`);
+    console.log('📄 Files generated:');
+    console.log('   📊 enterprise-report.html - Interactive HTML report');
+    console.log('   📋 executive-summary.md - Executive summary');
+    console.log('   📊 test-data.json - Raw test data');
   }
 
   private async generateEnterpriseReport(result: FullResult) {
@@ -133,13 +134,13 @@ export class EnterpriseReporter implements Reporter {
       apiMetrics,
       failures,
       environment,
-      summary: result
+      summary: result,
     });
 
     // Generate main report
     await fs.writeFile(
       path.join(this.outputDir, 'enterprise-report.html'),
-      htmlContent
+      htmlContent,
     );
 
     // Generate JSON data for potential integrations
@@ -153,8 +154,8 @@ export class EnterpriseReporter implements Reporter {
         apiMetrics,
         failures,
         environment,
-        summary: result
-      }, null, 2)
+        summary: result,
+      }, null, 2),
     );
 
     // Generate executive summary
@@ -189,7 +190,7 @@ export class EnterpriseReporter implements Reporter {
       skipped,
       flaky,
       duration: totalDuration,
-      passRate: total > 0 ? (passed / total) * 100 : 0
+      passRate: total > 0 ? (passed / total) * 100 : 0,
     };
   }  private calculateBrowserMetrics(): BrowserMetrics {
     const browserMetrics: BrowserMetrics = {};
@@ -226,7 +227,7 @@ export class EnterpriseReporter implements Reporter {
       passed: 0,
       failed: 0,
       duration: 0,
-      passRate: 0
+      passRate: 0,
     };
 
     for (const [test, results] of this.results) {
@@ -264,7 +265,7 @@ export class EnterpriseReporter implements Reporter {
           failed: 0,
           skipped: 0,
           duration: 0,
-          passRate: 0
+          passRate: 0,
         });
       }
 
@@ -294,15 +295,15 @@ export class EnterpriseReporter implements Reporter {
 
     for (const [test, results] of this.results) {
       results.forEach((result, index) => {        if (result.status === 'failed' || result.status === 'timedOut') {
-          failures.push({
-            test: test.title,
-            suite: this.getSuiteName(test),
-            browser: this.getProjectName(test),
-            error: result.error?.message || (result.status === 'timedOut' ? 'Test timed out' : 'Unknown error'),
-            duration: result.duration,
-            retry: index
-          });
-        }
+        failures.push({
+          test: test.title,
+          suite: this.getSuiteName(test),
+          browser: this.getProjectName(test),
+          error: result.error?.message || (result.status === 'timedOut' ? 'Test timed out' : 'Unknown error'),
+          duration: result.duration,
+          retry: index,
+        });
+      }
       });
     }
 
@@ -330,7 +331,7 @@ export class EnterpriseReporter implements Reporter {
 
     // Detect CI/CD environment
     const isCiEnvironment = reportingConfig.ciEnvironmentVariables?.some((envVar: string) => 
-      process.env[envVar] === 'true' || process.env[envVar] === '1' || !!process.env[envVar]
+      process.env[envVar] === 'true' || process.env[envVar] === '1' || !!process.env[envVar],
     );
 
     // Get branch information - FAIL if not configured
@@ -345,12 +346,9 @@ export class EnterpriseReporter implements Reporter {
         branch = process.env[envVar];
         break;
       }
-    }
-
-    // Try to get local git branch if not in CI and not already set from env
+    }    // Try to get local git branch if not in CI and not already set from env
     if (!isCiEnvironment && branch === reportingConfig.defaultBranch) {
       try {
-        const { execSync } = require('child_process');
         const gitBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim();
         if (gitBranch) {
           branch = gitBranch;
@@ -390,7 +388,7 @@ export class EnterpriseReporter implements Reporter {
       apiBaseUrl: this.getRequiredEnvVar('API_BASE_URL'),
       runId,
       frameworkVersion: packageJson.version,
-      branch
+      branch,
     };
   }
 
@@ -1203,9 +1201,13 @@ export class EnterpriseReporter implements Reporter {
         
         .pie-chart.all-passed {
             background: conic-gradient(#27ae60 100%);
-        }
-          .pie-chart.mixed {
-            background: conic-gradient(#27ae60 0deg, #27ae60 var(--passed-angle), #e74c3c var(--passed-angle), #e74c3c 360deg);
+        }          .pie-chart.mixed {
+            background: conic-gradient(
+              #27ae60 0deg, 
+              #27ae60 var(--passed-angle), 
+              #e74c3c var(--passed-angle), 
+              #e74c3c 360deg
+            );
         }
         
         .pie-chart.all-failed {
@@ -1262,7 +1264,8 @@ export class EnterpriseReporter implements Reporter {
         <div class="metrics-grid">
             <div class="metric-card">                <h3>📊 Overall Results</h3>
                 
-                <div class="pie-chart ${this.getPieChartClass(metrics.passRate, metrics.failed)}" ${this.getPieChartStyle(metrics.passRate)}></div>
+                <div class="pie-chart ${this.getPieChartClass(metrics.passRate, metrics.failed)}" 
+                     ${this.getPieChartStyle(metrics.passRate)}></div>
                 
                 <div class="metric-row">
                     <span class="metric-label">Total Tests</span>
@@ -1291,7 +1294,8 @@ export class EnterpriseReporter implements Reporter {
                     <span class="metric-value">${this.formatDuration(metrics.duration)}</span>
                 </div>
                   <div class="pass-rate">
-                    <div class="pass-rate-circle ${this.getPieChartClass(metrics.passRate, metrics.failed)}" style="--pass-angle: ${(metrics.passRate / 100) * 360}deg">
+                    <div class="pass-rate-circle ${this.getPieChartClass(metrics.passRate, metrics.failed)}" 
+                         style="--pass-angle: ${(metrics.passRate / 100) * 360}deg">
                         ${metrics.passRate.toFixed(1)}%
                     </div>
                     <div class="status-badge ${this.getOverallStatus(metrics)}">
@@ -1348,7 +1352,8 @@ export class EnterpriseReporter implements Reporter {
                                     <span class="label">Total</span>
                                 </div>
                             </div>                            <div class="progress-bar">
-                                <div class="progress-fill passed" style="width: ${stats.total > 0 ? (stats.passed / stats.total) * 100 : 0}%"></div>
+                                <div class="progress-fill passed" 
+                                     style="width: ${stats.total > 0 ? (stats.passed / stats.total) * 100 : 0}%"></div>
                                 ${stats.failed > 0 ? `<div class="progress-fill failed" style="width: ${stats.total > 0 ? (stats.failed / stats.total) * 100 : 0}%"></div>` : ''}
                             </div>
                             <div class="duration">${this.formatDuration(stats.duration)}</div>
@@ -1381,11 +1386,11 @@ export class EnterpriseReporter implements Reporter {
             
             <div class="features-container">
                 ${suiteMetrics.map((suite: SuiteMetrics) => {
-                    const suiteTests = this.getTestsForSuite(suite.name);
-                    const suiteFailures = failures.filter((f: FailureDetails) => f.suite === suite.name);
-                    const statusIcon = suite.passRate === 100 ? '✅' : suite.failed > 0 ? '❌' : '⚠️';
+    const suiteTests = this.getTestsForSuite(suite.name);
+    const suiteFailures = failures.filter((f: FailureDetails) => f.suite === suite.name);
+    const statusIcon = suite.passRate === 100 ? '✅' : suite.failed > 0 ? '❌' : '⚠️';
                     
-                    return `
+    return `
                     <div class="feature-card">
                         <div class="feature-header" onclick="toggleFeature('${suite.name.replace(/[^a-zA-Z0-9]/g, '-')}')">
                             <div class="feature-title">
@@ -1396,12 +1401,19 @@ export class EnterpriseReporter implements Reporter {
                             <div class="feature-summary">
                                 <span class="total">${suite.total} tests</span>
                                 <span class="passed">${suite.passed} passed</span>
-                                ${suite.failed > 0 ? `<span class="failed">${suite.failed} failed</span>` : ''}
-                                ${suite.skipped > 0 ? `<span class="skipped">${suite.skipped} skipped</span>` : ''}
-                                <span class="duration">${this.formatDuration(suite.duration)}</span>
-                                <div class="feature-progress">                                    <div class="progress-bar">
-                                        <div class="progress-fill passed" style="width: ${suite.passRate}%"></div>
-                                        ${suite.failed > 0 ? `<div class="progress-fill failed" style="width: ${100 - suite.passRate}%"></div>` : ''}
+                                ${suite.failed > 0 ? 
+    `<span class="failed">${suite.failed} failed</span>` : 
+    ''}
+                                ${suite.skipped > 0 ? 
+    `<span class="skipped">${suite.skipped} skipped</span>` : 
+    ''}                                <span class="duration">${this.formatDuration(suite.duration)}</span>
+                                <div class="feature-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill passed" 
+                                             style="width: ${suite.passRate}%"></div>
+                                        ${suite.failed > 0 ? 
+    `<div class="progress-fill failed" style="width: ${100 - suite.passRate}%"></div>` : 
+    ''}
                                     </div>
                                     <span class="pass-rate">${suite.passRate.toFixed(1)}%</span>
                                 </div>
@@ -1410,26 +1422,30 @@ export class EnterpriseReporter implements Reporter {
                             <div class="tests-list">
                                 <h5>📝 Individual Tests</h5>
                                 ${suiteTests.map((test: any) => {
-                                    const testFailures = suiteFailures.filter((f: FailureDetails) => 
-                                        f.test === test.title && f.browser === test.project
-                                    );
-                                    const hasErrors = testFailures.length > 0;
-                                    const testId = `${test.title.replace(/[^a-zA-Z0-9]/g, '-')}-${test.project}`;
+    const testFailures = suiteFailures.filter((f: FailureDetails) => 
+      f.test === test.title && f.browser === test.project,
+    );
+    const hasErrors = testFailures.length > 0;
+    const testId = `${test.title.replace(/[^a-zA-Z0-9]/g, '-')}-${test.project}`;
                                     
-                                    return `
+    return `
                                     <div class="test-item ${test.status} ${hasErrors ? 'has-errors' : ''}" data-test-id="${testId}">
                                         <div class="test-header" ${hasErrors ? `onclick="toggleTestError('${testId}')"` : ''}>
                                             <span class="test-status-icon">${test.status === 'passed' ? '✅' : test.status === 'failed' || test.status === 'timedOut' ? '❌' : '⏭️'}</span>
                                             <span class="test-name">${test.title}</span>
                                             <span class="test-duration">${this.formatDuration(test.duration)}</span>
                                             ${test.project ? `<span class="test-project">[${test.project}]</span>` : ''}
-                                            ${hasErrors ? '<span class="dropdown-arrow">▶</span>' : ''}
+                                            ${hasErrors ? 
+    '<span class="dropdown-arrow">▶</span>' : 
+    ''}
                                         </div>
                                         ${hasErrors ? `
                                         <div class="test-error-container" id="error-${testId}">
                                             ${testFailures.map((failure: FailureDetails) => `
                                                 <div class="test-error-item">
-                                                    <div class="error-duration">Duration: ${this.formatDuration(failure.duration)}</div>
+                                                    <div class="error-duration">
+                                                      Duration: ${this.formatDuration(failure.duration)}
+                                                    </div>
                                                     <div class="test-error">
                                                         ${failure.error}
                                                     </div>
@@ -1439,11 +1455,11 @@ export class EnterpriseReporter implements Reporter {
                                         ` : ''}
                                     </div>
                                     `;
-                                }).join('')}
+  }).join('')}
                             </div>
                         </div>
                     </div>`;
-                }).join('')}
+  }).join('')}
             </div>        </div>
           <div class="footer">
             <p>Generated by TestFusion Enterprise Reporter v${environment.frameworkVersion}</p>
@@ -1504,13 +1520,15 @@ export class EnterpriseReporter implements Reporter {
         document.addEventListener('DOMContentLoaded', function() {
             const failedFeatures = document.querySelectorAll('.feature-card');
             failedFeatures.forEach(card => {
-                const failedTests = card.querySelectorAll('.test-item.failed, .test-item.timedOut');
+                const failedTests = card.querySelectorAll(
+                    '.test-item.failed, .test-item.timedOut'
+                );
                 if (failedTests.length > 0) {
                     card.classList.add('expanded');
                     card.classList.add('failed');
-                    
-                    // Auto-expand failed tests to show errors immediately
-                    failedTests.forEach(test => {                        const testId = test.getAttribute('data-test-id');
+                      // Auto-expand failed tests to show errors immediately
+                    failedTests.forEach(test => {
+                        const testId = test.getAttribute('data-test-id');
                         if (testId) {
                             const errorContainer = document.querySelector('#error-' + testId);
                             if (errorContainer) {
@@ -1548,8 +1566,8 @@ ${this.getQualityAssessment(metrics)}
 
 ## 🚨 Critical Issues
 ${failures.length > 0 ? 
-  failures.slice(0, 5).map(f => `- **${f.test}** in ${f.suite} (${f.browser})`).join('\n') :
-  'No critical issues detected ✅'
+    failures.slice(0, 5).map(f => `- **${f.test}** in ${f.suite} (${f.browser})`).join('\n') :
+    'No critical issues detected ✅'
 }
 
 ${failures.length > 5 ? `\n... and ${failures.length - 5} more failures. See full report for details.` : ''}
@@ -1563,7 +1581,7 @@ ${this.getRecommendations(metrics, failures)}
 
     await fs.writeFile(
       path.join(this.outputDir, 'executive-summary.md'),
-      summary
+      summary,
     );
   }
 
@@ -1628,7 +1646,7 @@ ${this.getRecommendations(metrics, failures)}
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      timeZoneName: 'short'
+      timeZoneName: 'short',
     });
   }
 
@@ -1656,22 +1674,26 @@ ${this.getRecommendations(metrics, failures)}
     const apiMetrics = this.calculateApiMetrics();
     const failures = this.extractFailureDetails();
     
-    console.log(`\n📊 EXECUTION SUMMARY`);
+    console.log('\n📊 EXECUTION SUMMARY');
     console.log(`${'='.repeat(50)}`);
     
     // Overall results
     const passIcon = metrics.passRate === 100 ? '🟢' : metrics.passRate >= 80 ? '🟡' : '🔴';
-    console.log(`${passIcon} Overall: ${metrics.passed}/${metrics.total} passed (${metrics.passRate.toFixed(1)}%)`);
+    console.log(
+      `${passIcon} Overall: ${metrics.passed}/${metrics.total} passed (${metrics.passRate.toFixed(1)}%)`,
+    );
     
     // API Results
     if (apiMetrics.total > 0) {
       const apiIcon = apiMetrics.passRate === 100 ? '🟢' : apiMetrics.passRate >= 80 ? '🟡' : '🔴';
-      console.log(`${apiIcon} API Tests: ${apiMetrics.passed}/${apiMetrics.total} passed (${apiMetrics.passRate.toFixed(1)}%)`);
+      console.log(
+        `${apiIcon} API Tests: ${apiMetrics.passed}/${apiMetrics.total} passed (${apiMetrics.passRate.toFixed(1)}%)`,
+      );
     }
     
     // Browser Results
     if (Object.keys(browserMetrics).length > 0) {
-      console.log(`🌐 Browser Tests:`);
+      console.log('🌐 Browser Tests:');
       Object.entries(browserMetrics).forEach(([browser, stats]) => {
         const passRate = stats.total > 0 ? (stats.passed / stats.total) * 100 : 0;
         const browserIcon = passRate === 100 ? '🟢' : passRate >= 80 ? '🟡' : '🔴';
@@ -1719,17 +1741,17 @@ ${this.getRecommendations(metrics, failures)}
             status: result.status,
             duration: result.duration,
             project: this.getProjectName(test),
-            uniqueId: `${test.title}-${this.getProjectName(test)}`
+            uniqueId: `${test.title}-${this.getProjectName(test)}`,
           });
         });
       }
     }
     
     return tests;
-  }
-  private loadPackageConfig(): any {
+  }  private loadPackageConfig(): any {
     try {
-      const packageJson = require(path.join(process.cwd(), 'package.json'));
+      const packageJsonPath = path.join(process.cwd(), 'package.json');
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
       if (!packageJson.config || !packageJson.config.reporting) {
         throw new Error('Missing required configuration in package.json. Please ensure config.reporting section exists.');
       }
