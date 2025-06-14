@@ -23,7 +23,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.DEPENDENCY_BOT_TOKEN }}
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -227,7 +227,7 @@ jobs:
       - name: Push changes and create PR
         if: steps.check-updates.outputs.has-updates == 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.DEPENDENCY_BOT_TOKEN }}
         run: |
           echo "🚀 Pushing changes and creating PR..."
           
