@@ -89,10 +89,18 @@ pids
 
 # Playwright test results and reports
 test-results/
+playwright-report/
 # Enterprise reporting
 enterprise-reports/
 playwright/.cache/
 blob-report/
+
+# Playwright debug artifacts
+**/playwright-*.png
+**/playwright-*.jpg
+**/playwright-*.jpeg
+**/playwright-*.webm
+**/playwright-*.mp4
 
 # Coverage reports
 coverage/
@@ -117,6 +125,18 @@ Thumbs.db
 
 # Windows files
 *.lnk
+
+# Mac files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Debug and development files
+*.map
+*.min.js
+*.min.css
 
 # Temporary directories
 tmp/
