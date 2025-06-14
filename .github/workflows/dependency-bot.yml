@@ -243,15 +243,15 @@ jobs:
               --label "dependencies,automated,test:all,ready-to-merge" \
               --base main \
               --head ${{ steps.create-branch.outputs.branch-name }}
-          fi
-          
+          fi          
           echo "✅ PR created successfully!"
 
       - name: Upload test artifacts
         if: steps.check-updates.outputs.has-updates == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: dependency-test-results          path: |
+          name: dependency-test-results
+          path: |
             test-results-dependency-check/
             enterprise-reports/
           retention-days: 14

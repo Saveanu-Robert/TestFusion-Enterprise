@@ -135,16 +135,17 @@ jobs:
               echo "🚀 Running ALL tests with browser: ${{ github.event.inputs.browser }}"
               if [ "${{ github.event.inputs.browser }}" = "all" ]; then
                 npm run test $WORKERS --reporter=html,json
-              else
-                npm run test -- --project=${{ github.event.inputs.browser }} $WORKERS --reporter=html,json
-              fi              ;;
+              else                npm run test -- --project=${{ github.event.inputs.browser }} $WORKERS --reporter=html,json
+              fi
+              ;;
           esac
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: manual-test-results-${{ github.event.inputs.test-type }}-${{ github.event.inputs.test-type == 'api' && 'no-browser' || github.event.inputs.browser }}-${{ github.event.inputs.environment }}          path: |
+          name: manual-test-results-${{ github.event.inputs.test-type }}-${{ github.event.inputs.test-type == 'api' && 'no-browser' || github.event.inputs.browser }}-${{ github.event.inputs.environment }}
+          path: |
             test-results/
             enterprise-reports/
           retention-days: 30
