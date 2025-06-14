@@ -233,23 +233,26 @@ jobs:
           
           # Push the branch
           git push origin ${{ steps.create-branch.outputs.branch-name }}
-          
-          # Create PR with appropriate labels and details
+            # Create PR with appropriate title and details
           if [ "$TESTS_FAILED" = "true" ]; then
             gh pr create \
               --title "🤖 Dependency Updates $(date +%Y-%m-%d) ⚠️ Tests Failing" \
               --body-file DEPENDENCY_CHANGES.md \
-              --label "dependencies,automated,test:all,needs-review" \
               --base main \
               --head ${{ steps.create-branch.outputs.branch-name }}
+            
+            # Try to add labels (ignore errors if labels don't exist)
+            gh pr edit ${{ steps.create-branch.outputs.branch-name }} --add-label "dependencies,automated,test:all,needs-review" || echo "⚠️ Could not add labels (labels may not exist)"
           else
             gh pr create \
               --title "🤖 Dependency Updates $(date +%Y-%m-%d) ✅ Tests Passing" \
               --body-file DEPENDENCY_CHANGES.md \
-              --label "dependencies,automated,test:all,ready-to-merge" \
               --base main \
               --head ${{ steps.create-branch.outputs.branch-name }}
-          fi          
+            
+            # Try to add labels (ignore errors if labels don't exist)
+            gh pr edit ${{ steps.create-branch.outputs.branch-name }} --add-label "dependencies,automated,test:all,ready-to-merge" || echo "⚠️ Could not add labels (labels may not exist)"
+          fi
           echo "✅ PR created successfully!"
 
       - name: Upload test artifacts
