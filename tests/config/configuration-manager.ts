@@ -54,11 +54,78 @@ export interface ApiConfig {
 }
 
 /**
+ * Web execution mode types for different browser execution environments
+ */
+export type WebExecutionMode = 'local' | 'grid' | 'browserstack';
+
+/**
+ * BrowserStack configuration for cloud testing
+ */
+export interface BrowserStackConfig {
+  /** BrowserStack username */
+  username: string;
+  /** BrowserStack access key */
+  accessKey: string;
+  /** BrowserStack Hub URL */
+  hubUrl: string;
+  /** Project name for BrowserStack dashboard */
+  projectName: string;
+  /** Build name for test runs */
+  buildName: string;
+  /** Enable local testing for accessing local URLs */
+  enableLocal: boolean;
+  /** BrowserStack capabilities */
+  capabilities: {
+    /** Operating system */
+    os: string;
+    /** Operating system version */
+    osVersion: string;
+    /** Browser name */
+    browserName: string;
+    /** Browser version */
+    browserVersion: string;
+    /** Enable video recording */
+    enableVideo: boolean;
+    /** Enable network logs */
+    enableNetworkLogs: boolean;
+    /** Console log level */
+    consoleLogLevel: 'disable' | 'errors' | 'warnings' | 'info' | 'verbose';
+  };
+}
+
+/**
+ * Selenium Grid configuration for distributed testing
+ */
+export interface SeleniumGridConfig {
+  /** Grid Hub URL */
+  hubUrl: string;
+  /** Maximum number of browser instances */
+  maxInstances: number;
+  /** Node timeout in seconds */
+  nodeTimeout: number;
+  /** Session timeout in seconds */
+  sessionTimeout: number;
+  /** Desired capabilities for grid nodes */
+  capabilities: {
+    /** Browser name */
+    browserName: string;
+    /** Browser version */
+    browserVersion: string;
+    /** Platform name */
+    platformName: string;
+    /** Additional options */
+    options: Record<string, any>;
+  };
+}
+
+/**
  * Configuration interface for web testing
  */
 export interface WebConfig {
   /** Base URL for web application */
   baseUrl: string;
+  /** Web execution mode - determines where tests run */
+  executionMode: WebExecutionMode;
   /** Timeout configurations for various operations */
   timeout: {
     navigation: number;
@@ -69,7 +136,7 @@ export interface WebConfig {
   retryAttempts: number;
   /** Current test environment */
   environment: string;
-  /** Browser-specific configurations */
+  /** Browser-specific configurations for local execution */
   browsers: {
     headless: boolean;
     slowMo: number;
@@ -77,14 +144,20 @@ export interface WebConfig {
       width: number;
       height: number;
     };
-  };  /** Page paths relative to base URL */
+  };
+  /** BrowserStack configuration (used when executionMode is 'browserstack') */
+  browserStack: BrowserStackConfig;
+  /** Selenium Grid configuration (used when executionMode is 'grid') */
+  seleniumGrid: SeleniumGridConfig;
+  /** Page paths relative to base URL */
   pages: {
     home: string;
     docs: string;
     api: string;
     community: string;
     search: string;
-  };  /** CSS selectors for web elements */
+  };
+  /** CSS selectors for web elements */
   selectors: {
     searchBox: string;
     searchButton: string;
@@ -178,9 +251,9 @@ export class ConfigurationManager {
           comments: this.getEnvVar('API_COMMENTS_ENDPOINT', '/comments'),
           healthCheck: this.getEnvVar('API_HEALTH_ENDPOINT', '/health'),
         },
-      },
-      web: {
+      },      web: {
         baseUrl: this.getRequiredEnvVar('WEB_BASE_URL'),
+        executionMode: this.getEnvVar('WEB_EXECUTION_MODE', 'local') as WebExecutionMode,
         timeout: {
           navigation: this.getNumberEnvVar('WEB_NAVIGATION_TIMEOUT'),
           element: this.getNumberEnvVar('WEB_ELEMENT_TIMEOUT'),
@@ -195,7 +268,35 @@ export class ConfigurationManager {
             width: this.getNumberEnvVar('WEB_VIEWPORT_WIDTH'),
             height: this.getNumberEnvVar('WEB_VIEWPORT_HEIGHT'),
           },
-        },        pages: {
+        },        browserStack: {
+          username: this.getOptionalEnvVar('BROWSERSTACK_USERNAME', ''),
+          accessKey: this.getOptionalEnvVar('BROWSERSTACK_ACCESS_KEY', ''),
+          hubUrl: this.getOptionalEnvVar('BROWSERSTACK_HUB_URL', 'https://hub-cloud.browserstack.com/wd/hub'),
+          projectName: this.getOptionalEnvVar('BROWSERSTACK_PROJECT_NAME', 'TestFusion-Enterprise'),
+          buildName: this.getOptionalEnvVar('BROWSERSTACK_BUILD_NAME', `Build-${new Date().toISOString().split('T')[0]}`),
+          enableLocal: this.getOptionalBooleanEnvVar('BROWSERSTACK_ENABLE_LOCAL', false),
+          capabilities: {
+            os: this.getOptionalEnvVar('BROWSERSTACK_OS', 'Windows'),
+            osVersion: this.getOptionalEnvVar('BROWSERSTACK_OS_VERSION', '10'),
+            browserName: this.getOptionalEnvVar('BROWSERSTACK_BROWSER_NAME', 'Chrome'),
+            browserVersion: this.getOptionalEnvVar('BROWSERSTACK_BROWSER_VERSION', 'latest'),
+            enableVideo: this.getOptionalBooleanEnvVar('BROWSERSTACK_ENABLE_VIDEO', true),
+            enableNetworkLogs: this.getOptionalBooleanEnvVar('BROWSERSTACK_ENABLE_NETWORK_LOGS', true),
+            consoleLogLevel: this.getOptionalEnvVar('BROWSERSTACK_CONSOLE_LOG_LEVEL', 'errors') as BrowserStackConfig['capabilities']['consoleLogLevel'],
+          },
+        },
+        seleniumGrid: {
+          hubUrl: this.getOptionalEnvVar('SELENIUM_GRID_HUB_URL', 'http://localhost:4444/wd/hub'),
+          maxInstances: this.getOptionalNumberEnvVar('SELENIUM_GRID_MAX_INSTANCES', 5),
+          nodeTimeout: this.getOptionalNumberEnvVar('SELENIUM_GRID_NODE_TIMEOUT', 30),
+          sessionTimeout: this.getOptionalNumberEnvVar('SELENIUM_GRID_SESSION_TIMEOUT', 300),
+          capabilities: {
+            browserName: this.getOptionalEnvVar('SELENIUM_GRID_BROWSER_NAME', 'chrome'),
+            browserVersion: this.getOptionalEnvVar('SELENIUM_GRID_BROWSER_VERSION', 'latest'),
+            platformName: this.getOptionalEnvVar('SELENIUM_GRID_PLATFORM_NAME', 'ANY'),
+            options: this.parseJsonEnvVar('SELENIUM_GRID_OPTIONS', {}),
+          },
+        },pages: {
           home: this.getEnvVar('WEB_HOME_PATH', '/'),
           docs: this.getEnvVar('WEB_DOCS_PATH', '/docs/intro'),
           api: this.getEnvVar('WEB_API_PATH', '/docs/api'),
@@ -234,6 +335,201 @@ export class ConfigurationManager {
       },
     };
   }  /**
+   * Validates web execution mode configuration
+   * @param webConfig - Web configuration to validate
+   * @throws Error if configuration is invalid for the selected execution mode
+   */
+  public validateWebExecutionConfig(webConfig: WebConfig): void {
+    const mode = webConfig.executionMode;
+    
+    switch (mode) {
+    case 'local':
+      // Local execution doesn't require additional validation
+      break;
+        
+    case 'browserstack':
+      this.validateBrowserStackConfig(webConfig.browserStack);
+      break;
+        
+    case 'grid':
+      this.validateSeleniumGridConfig(webConfig.seleniumGrid);
+      break;
+        
+    default:
+      throw new Error(`Invalid web execution mode: ${mode}. Supported modes are: local, grid, browserstack`);
+    }
+  }
+
+  /**
+   * Validates BrowserStack configuration
+   * @param config - BrowserStack configuration to validate
+   * @throws Error if BrowserStack configuration is invalid
+   */
+  private validateBrowserStackConfig(config: BrowserStackConfig): void {
+    const requiredFields = [
+      { field: 'username', value: config.username },
+      { field: 'accessKey', value: config.accessKey },
+      { field: 'hubUrl', value: config.hubUrl },
+    ];
+
+    const missingFields = requiredFields
+      .filter(({ value }) => !value || value.trim() === '')
+      .map(({ field }) => field);
+
+    if (missingFields.length > 0) {
+      throw new Error(
+        `BrowserStack configuration missing required fields: ${missingFields.join(', ')}. ` +
+        'Please set the following environment variables: ' +
+        missingFields.map(field => `BROWSERSTACK_${field.toUpperCase()}`).join(', '),
+      );
+    }
+
+    // Validate console log level
+    const validLogLevels: BrowserStackConfig['capabilities']['consoleLogLevel'][] = 
+      ['disable', 'errors', 'warnings', 'info', 'verbose'];
+    
+    if (!validLogLevels.includes(config.capabilities.consoleLogLevel)) {
+      throw new Error(
+        `Invalid BrowserStack console log level: ${config.capabilities.consoleLogLevel}. ` +
+        `Valid options: ${validLogLevels.join(', ')}`,
+      );
+    }
+  }
+
+  /**
+   * Validates Selenium Grid configuration
+   * @param config - Selenium Grid configuration to validate
+   * @throws Error if Selenium Grid configuration is invalid
+   */
+  private validateSeleniumGridConfig(config: SeleniumGridConfig): void {
+    if (!config.hubUrl || config.hubUrl.trim() === '') {
+      throw new Error(
+        'Selenium Grid hub URL is required. Please set SELENIUM_GRID_HUB_URL environment variable.',
+      );
+    }
+
+    // Validate URL format
+    try {
+      new URL(config.hubUrl);
+    } catch (error) {
+      throw new Error(`Invalid Selenium Grid hub URL: ${config.hubUrl}. Must be a valid URL.`);
+    }
+
+    // Validate numeric values
+    if (config.maxInstances <= 0) {
+      throw new Error('Selenium Grid max instances must be greater than 0');
+    }
+
+    if (config.nodeTimeout <= 0) {
+      throw new Error('Selenium Grid node timeout must be greater than 0');
+    }
+
+    if (config.sessionTimeout <= 0) {
+      throw new Error('Selenium Grid session timeout must be greater than 0');
+    }
+  }
+
+  /**
+   * Gets the appropriate browser configuration based on execution mode
+   * @returns Browser configuration object for Playwright
+   */
+  public getBrowserConfig(): any {
+    const webConfig = this.getWebConfig();
+    
+    // Validate configuration before proceeding
+    this.validateWebExecutionConfig(webConfig);
+    
+    switch (webConfig.executionMode) {
+    case 'local':
+      return this.getLocalBrowserConfig(webConfig);
+        
+    case 'browserstack':
+      return this.getBrowserStackConfig(webConfig);
+        
+    case 'grid':
+      return this.getSeleniumGridConfig(webConfig);
+        
+    default:
+      throw new Error(`Unsupported execution mode: ${webConfig.executionMode}`);
+    }
+  }
+
+  /**
+   * Gets local browser configuration for Playwright
+   * @param webConfig - Web configuration
+   * @returns Local browser configuration
+   */
+  private getLocalBrowserConfig(webConfig: WebConfig): any {
+    return {
+      headless: webConfig.browsers.headless,
+      slowMo: webConfig.browsers.slowMo,
+      viewport: webConfig.browsers.viewport,
+      // Add any additional local browser options
+    };
+  }
+
+  /**
+   * Gets BrowserStack configuration for Playwright
+   * @param webConfig - Web configuration
+   * @returns BrowserStack configuration for Playwright
+   */
+  private getBrowserStackConfig(webConfig: WebConfig): any {
+    const { browserStack } = webConfig;
+    
+    return {
+      // BrowserStack WebDriver connection
+      connectOptions: {
+        wsEndpoint: `wss://${browserStack.username}:${browserStack.accessKey}@${browserStack.hubUrl.replace('https://', '').replace('http://', '')}`,
+      },
+      // BrowserStack capabilities
+      capabilities: {
+        'bstack:options': {
+          os: browserStack.capabilities.os,
+          osVersion: browserStack.capabilities.osVersion,
+          browserVersion: browserStack.capabilities.browserVersion,
+          projectName: browserStack.projectName,
+          buildName: browserStack.buildName,
+          sessionName: 'TestFusion-Enterprise Web Test',
+          local: browserStack.enableLocal,
+          video: browserStack.capabilities.enableVideo,
+          networkLogs: browserStack.capabilities.enableNetworkLogs,
+          consoleLogs: browserStack.capabilities.consoleLogLevel,
+          resolution: `${webConfig.browsers.viewport.width}x${webConfig.browsers.viewport.height}`,
+        },
+        browserName: browserStack.capabilities.browserName,
+      },
+    };
+  }
+
+  /**
+   * Gets Selenium Grid configuration for Playwright
+   * @param webConfig - Web configuration
+   * @returns Selenium Grid configuration for Playwright
+   */
+  private getSeleniumGridConfig(webConfig: WebConfig): any {
+    const { seleniumGrid } = webConfig;
+    
+    return {
+      // Selenium Grid WebDriver connection
+      connectOptions: {
+        wsEndpoint: seleniumGrid.hubUrl.replace('http://', 'ws://').replace('https://', 'wss://'),
+      },
+      // Grid capabilities
+      capabilities: {
+        browserName: seleniumGrid.capabilities.browserName,
+        browserVersion: seleniumGrid.capabilities.browserVersion,
+        platformName: seleniumGrid.capabilities.platformName,
+        'se:options': {
+          maxInstances: seleniumGrid.maxInstances,
+          'se:nodeTimeout': seleniumGrid.nodeTimeout,
+          'se:sessionTimeout': seleniumGrid.sessionTimeout,
+        },
+        // Additional options
+        ...seleniumGrid.capabilities.options,
+      },
+    };  }
+
+  /**
    * Gets the API configuration settings
    * @returns API configuration object with endpoints, timeouts, and headers
    */
@@ -348,6 +644,60 @@ export class ConfigurationManager {
         `Missing required environment variables: ${missingVars.join(', ')}. ` +
         'Please ensure all required variables are set in your .env file.',
       );
+    }
+  }
+  /**
+   * Helper method to get environment variable with optional default value
+   * @param name - Environment variable name
+   * @param defaultValue - Default value if environment variable is not set
+   * @returns Environment variable value or default value
+   */
+  private getOptionalEnvVar(name: string, defaultValue: string): string {
+    return process.env[name] || defaultValue;
+  }
+
+  /**
+   * Helper method to get boolean environment variable with optional default value
+   * @param name - Environment variable name
+   * @param defaultValue - Default boolean value if environment variable is not set
+   * @returns Boolean value from environment variable or default value
+   */
+  private getOptionalBooleanEnvVar(name: string, defaultValue: boolean): boolean {
+    const value = process.env[name];
+    if (!value) return defaultValue;
+    return value.toLowerCase() === 'true';
+  }
+
+  /**
+   * Helper method to get number environment variable with optional default value
+   * @param name - Environment variable name
+   * @param defaultValue - Default number value if environment variable is not set
+   * @returns Number value from environment variable or default value
+   */
+  private getOptionalNumberEnvVar(name: string, defaultValue: number): number {
+    const value = process.env[name];
+    if (!value) return defaultValue;
+    const numValue = Number(value);
+    if (isNaN(numValue)) {
+      throw new Error(`Environment variable ${name} must be a valid number, got: ${value}`);
+    }
+    return numValue;
+  }
+
+  /**
+   * Helper method to parse JSON environment variable with optional default value
+   * @param name - Environment variable name
+   * @param defaultValue - Default object value if environment variable is not set
+   * @returns Parsed JSON object or default value
+   */
+  private parseJsonEnvVar(name: string, defaultValue: Record<string, any>): Record<string, any> {
+    const value = process.env[name];
+    if (!value) return defaultValue;
+    
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      throw new Error(`Environment variable ${name} must be valid JSON, got: ${value}`);
     }
   }
 

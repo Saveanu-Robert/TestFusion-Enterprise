@@ -95,7 +95,8 @@ export class ApiReporter {
   public async attachRequest(requestDetails: RequestDetails): Promise<void> {
     const formattedRequest = this.formatRequestDetails(requestDetails);
     
-    await this.testInfo.attach(`API Request - ${requestDetails.method} ${this.getEndpointFromUrl(requestDetails.url)}`, {
+    const endpoint = this.getEndpointFromUrl(requestDetails.url);
+    await this.testInfo.attach(`API Request - ${requestDetails.method} ${endpoint}`, {
       body: JSON.stringify(formattedRequest, null, 2),
       contentType: 'application/json',
     });
@@ -113,9 +114,9 @@ export class ApiReporter {
    */
   public async attachResponse(responseDetails: ResponseDetails): Promise<void> {
     const formattedResponse = this.formatResponseDetails(responseDetails);
-    
     const statusEmoji = this.getStatusEmoji(responseDetails.status);
-    await this.testInfo.attach(`API Response - ${statusEmoji} ${responseDetails.status} (${responseDetails.duration}ms)`, {
+    const title = `API Response - ${statusEmoji} ${responseDetails.status} (${responseDetails.duration}ms)`;
+    await this.testInfo.attach(title, {
       body: JSON.stringify(formattedResponse, null, 2),
       contentType: 'application/json',
     });
@@ -134,18 +135,17 @@ export class ApiReporter {
    */
   public async attachRequestResponse(
     requestDetails: RequestDetails, 
-    responseDetails: ResponseDetails
+    responseDetails: ResponseDetails,
   ): Promise<void> {
     const requestResponsePair = {
       request: this.formatRequestDetails(requestDetails),
       response: this.formatResponseDetails(responseDetails),
       metrics: this.calculateMetrics(requestDetails, responseDetails),
-    };
-
-    const statusEmoji = this.getStatusEmoji(responseDetails.status);
+    };    const statusEmoji = this.getStatusEmoji(responseDetails.status);
     const endpoint = this.getEndpointFromUrl(requestDetails.url);
+    const title = `API Call - ${requestDetails.method} ${endpoint} ${statusEmoji} ${responseDetails.status}`;
     
-    await this.testInfo.attach(`API Call - ${requestDetails.method} ${endpoint} ${statusEmoji} ${responseDetails.status}`, {
+    await this.testInfo.attach(title, {
       body: JSON.stringify(requestResponsePair, null, 2),
       contentType: 'application/json',
     });
@@ -166,7 +166,7 @@ export class ApiReporter {
    */
   public async attachPerformanceMetrics(
     metrics: PerformanceMetrics, 
-    context?: string
+    context?: string,
   ): Promise<void> {
     const performanceReport = {
       context: context || 'API Performance Metrics',
@@ -200,7 +200,7 @@ export class ApiReporter {
   public async attachError(
     error: any, 
     requestDetails?: RequestDetails, 
-    context?: string
+    context?: string,
   ): Promise<void> {
     const errorReport = {
       context: context || 'API Error Details',
@@ -386,7 +386,7 @@ export class ApiReporter {
    */
   private calculateMetrics(
     requestDetails: RequestDetails, 
-    responseDetails: ResponseDetails
+    responseDetails: ResponseDetails,
   ): PerformanceMetrics {
     const requestSize = requestDetails.body 
       ? JSON.stringify(requestDetails.body).length 
