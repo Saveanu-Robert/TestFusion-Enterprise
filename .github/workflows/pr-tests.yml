@@ -101,3 +101,52 @@ jobs:
         name: playwright-report-${{ matrix.test-type }}
         path: playwright-report/
         retention-days: 30
+
+    - name: Create PR test summary
+      if: always()
+      run: |
+        # Determine status with proper emoji
+        if [[ "${{ job.status }}" == "success" ]]; then
+          STATUS="✅ Passed"
+          STATUS_EMOJI="🎉"
+        elif [[ "${{ job.status }}" == "failure" ]]; then
+          STATUS="❌ Failed"
+          STATUS_EMOJI="💥"
+        elif [[ "${{ job.status }}" == "cancelled" ]]; then
+          STATUS="🚫 Cancelled"
+          STATUS_EMOJI="⏹️"
+        else
+          STATUS="⚠️ ${{ job.status }}"
+          STATUS_EMOJI="❓"
+        fi
+        
+        # Create PR test summary
+        echo "## ${STATUS_EMOJI} PR Test Results - ${{ matrix.test-type }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| **Test Type** | \`${{ matrix.test-type }}\` |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Status** | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
+        echo "| **PR Number** | \`#${{ github.event.number }}\` |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Branch** | \`${{ github.head_ref }}\` |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Add test-specific information
+        if [[ "${{ matrix.test-type }}" == "api" ]]; then
+          echo "### 🔌 API Tests Executed" >> $GITHUB_STEP_SUMMARY
+          echo "- JSONPlaceholder API endpoints" >> $GITHUB_STEP_SUMMARY
+          echo "- CRUD operations validation" >> $GITHUB_STEP_SUMMARY
+          echo "- Data integrity checks" >> $GITHUB_STEP_SUMMARY
+        elif [[ "${{ matrix.test-type }}" == "web-local" ]]; then
+          echo "### 🌐 Web Tests Executed (Local)" >> $GITHUB_STEP_SUMMARY
+          echo "- Cross-browser compatibility" >> $GITHUB_STEP_SUMMARY
+          echo "- Page navigation and loading" >> $GITHUB_STEP_SUMMARY
+          echo "- Accessibility validation" >> $GITHUB_STEP_SUMMARY
+        elif [[ "${{ matrix.test-type }}" == "web-grid" ]]; then
+          echo "### 🌐 Web Tests Executed (Grid)" >> $GITHUB_STEP_SUMMARY
+          echo "- Selenium Grid execution" >> $GITHUB_STEP_SUMMARY
+          echo "- Distributed testing" >> $GITHUB_STEP_SUMMARY
+          echo "- Browser compatibility" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "" >> $GITHUB_STEP_SUMMARY
