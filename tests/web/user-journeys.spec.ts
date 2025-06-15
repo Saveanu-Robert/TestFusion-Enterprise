@@ -255,23 +255,28 @@ test.describe('End-to-End User Journeys', () => {
         expect([200, 301, 302, 404]).toContain(response.status());
         logger.info(`Non-existent page returned status: ${response.status()}`);
       }
-    });
-
-    await test.step('Test with slow network conditions', async () => {
-      // Simulate slow network
-      const client = await webPage.context().newCDPSession(webPage);
-      await client.send('Network.emulateNetworkConditions', {
-        offline: false,
-        downloadThroughput: 100 * 1024, // 100kb/s
-        uploadThroughput: 100 * 1024,   // 100kb/s
-        latency: 500                     // 500ms latency
-      });
+    });    await test.step('Test with slow network conditions', async () => {
+      // Simulate slow network (only available in Chromium browsers)
+      const browserName = webPage.context().browser()?.browserType().name();
+      
+      if (browserName === 'chromium') {
+        const client = await webPage.context().newCDPSession(webPage);
+        await client.send('Network.emulateNetworkConditions', {
+          offline: false,
+          downloadThroughput: 100 * 1024, // 100kb/s
+          uploadThroughput: 100 * 1024,   // 100kb/s
+          latency: 500                     // 500ms latency
+        });
+        logger.info('Network throttling applied (Chromium only)');
+      } else {
+        logger.info(`Network throttling skipped - not available in ${browserName} browser`);
+      }
 
       const homePage = new HomePage(webPage);
       await homePage.navigate();
       await homePage.validatePageLoaded();
       
-      logger.info('Page loaded successfully under slow network conditions');
+      logger.info('Page loaded successfully under network conditions test');
     });
 
     logger.info('Completed performance and error handling journey');
