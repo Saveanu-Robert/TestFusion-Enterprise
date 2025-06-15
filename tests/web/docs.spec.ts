@@ -1,6 +1,12 @@
 /**
- * Docs Page Tests for TestFusion-Enterprise
- * Professional web tests for documentation functionality
+ * Docs Page Web Tests for TestFusion-Enterprise
+ * 
+ * Comprehensive test suite for validating the documentation page functionality,
+ * including navigation, content structure, search functionality, and accessibility.
+ * Tests cover multiple viewports and validate user interaction patterns.
+ * 
+ * @author TestFusion-Enterprise Team
+ * @version 1.0.0
  */
 
 import { test, expect } from '../fixtures/web-fixtures';
@@ -17,30 +23,51 @@ test.describe('Docs Page Tests', () => {
     logger = Logger.getInstance();
     await docsPage.navigate();
   });
-
-  test('should load docs page successfully', async () => {
-    await test.step('Validate page loads with documentation elements', async () => {
+  test('Should load docs page successfully and validate core documentation elements', async () => {
+    // Mark as smoke test for core functionality validation
+    test.info().annotations.push({ type: 'tag', description: 'smoke' });
+    test.info().annotations.push({ type: 'feature', description: 'docs-page-loading' });
+    
+    await test.step('Navigate to docs page and validate that documentation elements are loaded', async () => {
       await docsPage.validatePageLoaded();
+      
+      logger.info('✅ Docs page loaded successfully with all core elements', {
+        timestamp: new Date().toISOString(),
+      });
     });
 
-    await test.step('Verify page URL and title', async () => {
+    await test.step('Verify page URL matches docs pattern and title is present', async () => {
       await docsPage.assertPageUrl(/\/docs/);
       const title = await docsPage.getPageTitle();
       expect(title).toBeTruthy();
+      
+      logger.info('✅ Docs page URL and title validation completed', {
+        title: title,
+        urlPattern: 'docs',
+      });
     });
   });
-
-  test('should display sidebar navigation', async () => {
-    await test.step('Validate sidebar elements', async () => {
+  test('Should display sidebar navigation and validate navigation functionality', async () => {
+    test.info().annotations.push({ type: 'feature', description: 'sidebar-navigation' });
+    test.info().annotations.push({ type: 'tag', description: 'navigation' });
+    
+    await test.step('Validate that sidebar navigation elements are properly rendered', async () => {
       await docsPage.validateSidebarNavigation();
+      
+      logger.info('✅ Sidebar navigation elements validation completed', {
+        section: 'sidebar-navigation',
+        timestamp: new Date().toISOString(),
+      });
     });
 
-    await test.step('Verify sidebar is functional', async () => {
+    await test.step('Verify sidebar functionality and count navigation items', async () => {
       await expect(docsPage.sidebar).toBeVisible();
       const sidebarLinks = await docsPage.getAllSidebarLinks();
       expect(sidebarLinks.length).toBeGreaterThan(0);
-      logger.info(`📋 Found ${sidebarLinks.length} sidebar navigation items`, { 
-        sidebarLinksCount: sidebarLinks.length, 
+      
+      logger.info('✅ Sidebar navigation functionality verified successfully', { 
+        sidebarLinksCount: sidebarLinks.length,
+        sidebarVisible: true,
       });
     });
   });
