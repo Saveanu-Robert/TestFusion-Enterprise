@@ -1,5 +1,7 @@
 import { CommentsApiService } from '../services/comments-api.service';
 import { CommentsValidator } from '../validators/comments-validator';
+import { createCommentPayload } from '../fixtures/test-data';
+import { TEST_DATA } from '../constants/test-constants';
 
 export class CommentsOperations {
   
@@ -55,16 +57,14 @@ export class CommentsOperations {
     
     return response;
   }
-
   /**
-   * Generates test comment data
+   * Generates test comment data using centralized test data factory
    */
   static generateTestCommentData(postId: number = 1): any {
-    return {
-      name: 'Test Comment',
-      email: 'testcommenter@example.com',
-      body: 'This is a test comment body content',
-      postId: postId,
-    };
+    return createCommentPayload(postId, {
+      name: TEST_DATA.COMMENTS.VALID_COMMENT.name,
+      email: TEST_DATA.COMMENTS.VALID_COMMENT.email,
+      body: TEST_DATA.COMMENTS.VALID_COMMENT.body,
+    });
   }
 }

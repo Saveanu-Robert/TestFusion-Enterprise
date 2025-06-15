@@ -262,18 +262,18 @@ export class Logger {
     const logMessage = `${prefix}${testInfo} ${entry.message}`;
 
     switch (entry.level) {
-      case 'DEBUG':
-        console.debug(logMessage, entry.data || '');
-        break;
-      case 'INFO':
-        console.log(logMessage, entry.data || '');
-        break;
-      case 'WARN':
-        console.warn(logMessage, entry.data || '');
-        break;
-      case 'ERROR':
-        console.error(logMessage, entry.data || '');
-        break;
+    case 'DEBUG':
+      console.debug(logMessage, entry.data || '');
+      break;
+    case 'INFO':
+      console.log(logMessage, entry.data || '');
+      break;
+    case 'WARN':
+      console.warn(logMessage, entry.data || '');
+      break;
+    case 'ERROR':
+      console.error(logMessage, entry.data || '');
+      break;
     }
   }
 

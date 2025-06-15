@@ -20,7 +20,7 @@ export const WEB_URLS = {
     BOOKS: '/books',
     PROFILE: '/profile',
     BOOK_STORE: '/books',
-  }
+  },
 } as const;
 
 /**
@@ -65,7 +65,7 @@ export const TEST_USERS = {
     lastName: 'Doe',
     email: 'testuser@demo.com',
     phone: '+1234567890',
-  }
+  },
 } as const;
 
 /**
@@ -86,7 +86,7 @@ export const UI_STATES = {
   LOADING_STATES: {
     SPINNER: '[data-testid="loading-spinner"]',
     OVERLAY: '.loading-overlay',
-  }
+  },
 } as const;
 
 /**
@@ -117,7 +117,7 @@ export const COMMON_SELECTORS = {
     ERROR: '[data-testid="error-message"]',
     WARNING: '[data-testid="warning-message"]',
     INFO: '[data-testid="info-message"]',
-  }
+  },
 } as const;
 
 /**
@@ -133,5 +133,5 @@ export const BROWSER_CONFIG = {
     CHROME: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
     FIREFOX: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101',
     SAFARI: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15',
-  }
+  },
 } as const;

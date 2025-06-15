@@ -1,5 +1,7 @@
 import { PostsApiService } from '../services/posts-api.service';
 import { PostsValidator } from '../validators/posts-validator';
+import { createPostPayload } from '../fixtures/test-data';
+import { TEST_DATA } from '../constants/test-constants';
 
 export class PostsOperations {
   
@@ -64,26 +66,25 @@ export class PostsOperations {
     
     return response;
   }
-
   /**
-   * Generates test post data
+   * Generates test post data using centralized test data factory
    */
   static generateTestPostData(userId: number = 1): any {
-    return {
-      title: 'Test Post Title',
-      body: 'This is a test post body content that contains meaningful information for testing purposes.',
+    return createPostPayload({
+      title: TEST_DATA.POSTS.VALID_POST.title,
+      body: TEST_DATA.POSTS.VALID_POST.body,
       userId: userId,
-    };
+    });
   }
 
   /**
-   * Generates updated test post data
+   * Generates updated test post data using centralized test data factory
    */
   static generateUpdatedTestPostData(userId: number = 1): any {
-    return {
+    return createPostPayload({
       title: 'Updated Test Post Title',
       body: 'This is an updated test post body content with modified information for testing purposes.',
       userId: userId,
-    };
+    });
   }
 }
