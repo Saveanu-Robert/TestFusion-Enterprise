@@ -140,7 +140,7 @@ export class ConfigurationManager {
           community: this.getEnvVar('WEB_COMMUNITY_PATH', '/community/welcome'),
           search: this.getEnvVar('WEB_SEARCH_PATH', '/search'),
         },        selectors: {
-          searchBox: this.getEnvVar('WEB_SEARCH_BOX_SELECTOR', '[placeholder="Search docs"]'),
+          searchBox: this.getEnvVar('WEB_SEARCH_BOX_SELECTOR', '[placeholder*="Search"]'),
           searchButton: this.getEnvVar('WEB_SEARCH_BUTTON_SELECTOR', 'button[type="submit"]'),
           docsLink: this.getEnvVar('WEB_DOCS_LINK_SELECTOR', 'a[href="/docs/intro"]'),
           apiLink: this.getEnvVar('WEB_API_LINK_SELECTOR', 'a[href="/docs/api"]'),
