@@ -170,30 +170,48 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint:check
-
   api-tests:
     name: API Tests (No Browser)
     runs-on: ubuntu-latest
     needs: detect-test-type
     if: needs.detect-test-type.outputs.test-api == 'true'
-    env:
-      # API Configuration - using defaults for PR tests
-      API_BASE_URL: https://jsonplaceholder.typicode.com
-      API_TIMEOUT: 30000
-      API_RETRY_ATTEMPTS: 3
-      # Test Environment
-      TEST_ENV: development
-      # Logging Configuration
-      LOG_LEVEL: INFO
-      ENABLE_REQUEST_LOGGING: true
-      ENABLE_RESPONSE_LOGGING: true
-      # Reporting Configuration (minimal for CI)
-      ENABLE_SCREENSHOTS: false
-      ENABLE_VIDEOS: false
-      ENABLE_TRACING: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Load environment variables from .env
+        run: |
+          echo "📋 Loading configuration from .env file for API tests..."
+          if [ -f .env ]; then
+            # Load .env file and export variables (excluding comments and empty lines)
+            set -a
+            source <(cat .env | grep -v '^#' | grep -v '^$')
+            set +a
+            
+            # Export CI-specific overrides
+            echo "CI_ENVIRONMENT=github-actions" >> $GITHUB_ENV
+            echo "CI_HEADLESS=true" >> $GITHUB_ENV
+            echo "CI_WORKERS=2" >> $GITHUB_ENV
+            echo "CI_RETRIES=2" >> $GITHUB_ENV
+            echo "CI_SCREENSHOT_MODE=only-on-failure" >> $GITHUB_ENV
+            echo "CI_VIDEO_MODE=retain-on-failure" >> $GITHUB_ENV
+            echo "CI_TRACE_MODE=retain-on-failure" >> $GITHUB_ENV
+            
+            # Export API configuration
+            echo "API_BASE_URL=${API_BASE_URL}" >> $GITHUB_ENV
+            echo "API_TIMEOUT=${API_TIMEOUT}" >> $GITHUB_ENV
+            echo "API_RETRY_ATTEMPTS=${API_RETRY_ATTEMPTS}" >> $GITHUB_ENV
+            echo "LOG_LEVEL=${LOG_LEVEL}" >> $GITHUB_ENV
+            echo "ENABLE_REQUEST_LOGGING=${ENABLE_REQUEST_LOGGING}" >> $GITHUB_ENV
+            echo "ENABLE_RESPONSE_LOGGING=${ENABLE_RESPONSE_LOGGING}" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_WORKERS=${CI_WORKERS}" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_RETRIES=${CI_RETRIES}" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_FULLY_PARALLEL=true" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_FORBID_ONLY=false" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_REPORTER=html,list" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_OUTPUT_DIR=playwright-report" >> $GITHUB_ENV          else
+            echo "⚠️ .env file not found, using defaults"
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -216,7 +234,7 @@ jobs:
           name: api-test-results
           path: |
             test-results/
-            enterprise-reports/
+            playwright-report/
           retention-days: 7
 
   web-tests:
@@ -252,8 +270,7 @@ jobs:
           else
             echo "⚠️ No web tests found, skipping web tests"
             mkdir -p test-results
-            echo "No web tests available in this project" > test-results/web-tests-info.txt
-          fi
+            echo "No web tests available in this project" > test-results/web-tests-info.txt          fi
 
       - name: Upload Web test results
         uses: actions/upload-artifact@v4
@@ -262,34 +279,66 @@ jobs:
           name: web-test-results-${{ matrix.browser }}
           path: |
             test-results/
-            enterprise-reports/
+            playwright-report/
           retention-days: 7
   all-tests:
     name: All Tests (API + Web)
     runs-on: ubuntu-latest
     needs: detect-test-type
     if: needs.detect-test-type.outputs.test-all == 'true'
-    env:
-      # API Configuration - using defaults for PR tests
-      API_BASE_URL: https://jsonplaceholder.typicode.com
-      API_TIMEOUT: 30000
-      API_RETRY_ATTEMPTS: 3
-      # Test Environment
-      TEST_ENV: development
-      # Logging Configuration
-      LOG_LEVEL: INFO
-      ENABLE_REQUEST_LOGGING: true
-      ENABLE_RESPONSE_LOGGING: true
-      # Reporting Configuration (minimal for CI)
-      ENABLE_SCREENSHOTS: false
-      ENABLE_VIDEOS: false
-      ENABLE_TRACING: false
     strategy:
       matrix:
         browser: [chromium, firefox, webkit]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Load environment variables from .env
+        run: |
+          echo "📋 Loading configuration from .env file for all tests..."
+          if [ -f .env ]; then
+            # Load .env file and export variables (excluding comments and empty lines)
+            set -a
+            source <(cat .env | grep -v '^#' | grep -v '^$')
+            set +a
+            
+            # Export CI-specific overrides
+            echo "CI_ENVIRONMENT=github-actions" >> $GITHUB_ENV
+            echo "CI_BROWSER=${{ matrix.browser }}" >> $GITHUB_ENV
+            echo "CI_HEADLESS=true" >> $GITHUB_ENV
+            echo "CI_WORKERS=2" >> $GITHUB_ENV
+            echo "CI_RETRIES=2" >> $GITHUB_ENV
+            echo "CI_SCREENSHOT_MODE=only-on-failure" >> $GITHUB_ENV
+            echo "CI_VIDEO_MODE=retain-on-failure" >> $GITHUB_ENV
+            echo "CI_TRACE_MODE=retain-on-failure" >> $GITHUB_ENV
+            
+            # Export configuration from .env
+            echo "API_BASE_URL=${API_BASE_URL}" >> $GITHUB_ENV
+            echo "API_TIMEOUT=${API_TIMEOUT}" >> $GITHUB_ENV
+            echo "API_RETRY_ATTEMPTS=${API_RETRY_ATTEMPTS}" >> $GITHUB_ENV
+            echo "WEB_BASE_URL=${WEB_BASE_URL}" >> $GITHUB_ENV
+            echo "WEB_NAVIGATION_TIMEOUT=${WEB_NAVIGATION_TIMEOUT}" >> $GITHUB_ENV
+            echo "WEB_ELEMENT_TIMEOUT=${WEB_ELEMENT_TIMEOUT}" >> $GITHUB_ENV
+            echo "WEB_ASSERTION_TIMEOUT=${WEB_ASSERTION_TIMEOUT}" >> $GITHUB_ENV
+            echo "WEB_RETRY_ATTEMPTS=${WEB_RETRY_ATTEMPTS}" >> $GITHUB_ENV
+            echo "WEB_HEADLESS=${CI_HEADLESS}" >> $GITHUB_ENV
+            echo "WEB_SLOW_MO=${WEB_SLOW_MO}" >> $GITHUB_ENV
+            echo "WEB_VIEWPORT_WIDTH=${WEB_VIEWPORT_WIDTH}" >> $GITHUB_ENV
+            echo "WEB_VIEWPORT_HEIGHT=${WEB_VIEWPORT_HEIGHT}" >> $GITHUB_ENV
+            echo "LOG_LEVEL=${LOG_LEVEL}" >> $GITHUB_ENV
+            echo "ENABLE_REQUEST_LOGGING=${ENABLE_REQUEST_LOGGING}" >> $GITHUB_ENV
+            echo "ENABLE_RESPONSE_LOGGING=${ENABLE_RESPONSE_LOGGING}" >> $GITHUB_ENV
+            echo "ENABLE_SCREENSHOTS=${CI_SCREENSHOT_MODE}" >> $GITHUB_ENV
+            echo "ENABLE_VIDEOS=${CI_VIDEO_MODE}" >> $GITHUB_ENV
+            echo "ENABLE_TRACING=${CI_TRACE_MODE}" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_WORKERS=${CI_WORKERS}" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_RETRIES=${CI_RETRIES}" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_FULLY_PARALLEL=true" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_FORBID_ONLY=false" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_REPORTER=html,list" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_OUTPUT_DIR=playwright-report" >> $GITHUB_ENV          else
+            echo "⚠️ .env file not found, using defaults"
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -315,7 +364,7 @@ jobs:
           name: all-test-results-${{ matrix.browser }}
           path: |
             test-results/
-            enterprise-reports/
+            playwright-report/
           retention-days: 7
 
   test-summary:
