@@ -18,6 +18,13 @@ on:
         - minor
         - major
 
+# Add explicit permissions for the workflow
+permissions:
+  contents: read
+  actions: read
+  issues: write
+  pull-requests: read
+
 env:
   # This is the only secret needed - the encryption key for decrypting .env values
   ENV_ENCRYPTION_KEY: ${{ secrets.ENV_ENCRYPTION_KEY }}

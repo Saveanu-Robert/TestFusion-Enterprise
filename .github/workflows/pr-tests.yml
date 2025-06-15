@@ -9,6 +9,13 @@ on:
       - '.gitignore'
       - 'LICENSE'
 
+# Add explicit permissions for the workflow
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+
 env:
   # This is the only secret needed - the encryption key for decrypting .env values
   ENV_ENCRYPTION_KEY: ${{ secrets.ENV_ENCRYPTION_KEY }}
