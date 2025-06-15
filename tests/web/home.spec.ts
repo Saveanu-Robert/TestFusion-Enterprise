@@ -6,6 +6,7 @@
 import { test, expect } from '../fixtures/web-fixtures';
 import { HomePage } from './pages/home.page';
 import { WEB_CONSTANTS } from '../constants/test-constants';
+import { Logger } from '../utils/logger';
 
 test.describe('Home Page Tests', () => {
   let homePage: HomePage;
@@ -69,15 +70,17 @@ test.describe('Home Page Tests', () => {
       expect(title).toContain('Playwright');
     });
   });
-
-  test('should load within acceptable time', async () => {
-    await test.step('Measure page load performance', async () => {
+  test('should load within acceptable time', async ({ webPage }) => {
+    await test.step('Measure page load performance', async () => {      const logger = Logger.getInstance();
       const startTime = Date.now();
       await homePage.navigate();
       await homePage.waitForPageLoad();
       const loadTime = Date.now() - startTime;
       
-      console.log(`Page load time: ${loadTime}ms`);
+      logger.info(`Home page loaded successfully in ${loadTime}ms`, {
+        loadTime,
+        url: webPage.url(),
+      });
       expect(loadTime).toBeLessThan(15000); // 15 seconds max
     });
   });
