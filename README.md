@@ -1,15 +1,20 @@
 # TestFusion Enterprise
 
-A comprehensive enterprise-grade test automation framework built with Playwright for end-to-end testing.
+A comprehensive enterprise-grade test automation framework built with Playwright for end-to-end testing of both API and web applications.
 
 ## 🚀 Features
 
+- **Dual Testing Modes**: Complete support for both API and Web UI testing
 - **Cross-browser Testing**: Support for Chromium, Firefox, and WebKit
 - **Parallel Execution**: Run tests in parallel for faster execution
-- **Rich Reporting**: HTML and JUnit reports with screenshots and videos
+- **Rich Reporting**: HTML reports with screenshots, videos, and trace files
 - **Page Object Model**: Organized test structure with reusable components
 - **TypeScript Support**: Full TypeScript support for better development experience
+- **Centralized Configuration**: Single configuration source for easy customization
+- **Professional Logging**: Structured logging with request correlation and debugging support
 - **CI/CD Ready**: Configured for continuous integration pipelines
+- **Data Validation**: Comprehensive validation framework for API responses
+- **Environment Management**: Support for multiple environments (dev, staging, prod)
 
 ## 📋 Prerequisites
 
@@ -34,6 +39,44 @@ npm install
 npm run install:browsers
 ```
 
+4. Configure environment variables:
+```bash
+# Copy the example .env file and customize for your environment
+cp .env .env.local
+# Edit .env.local with your specific configuration
+```
+
+## ⚙️ Configuration
+
+The framework uses a centralized configuration system managed through environment variables. All settings are defined in the `.env` file:
+
+### Key Configuration Areas:
+- **API Testing**: Base URLs, timeouts, endpoints, authentication
+- **Web Testing**: Browser settings, selectors, page paths
+- **Logging**: Log levels, request/response logging
+- **Reporting**: Screenshots, videos, trace collection
+- **Validation**: Data validation rules and thresholds
+
+### Environment Variables:
+```env
+# API Configuration
+API_BASE_URL=https://jsonplaceholder.typicode.com
+API_TIMEOUT=30000
+API_RETRY_ATTEMPTS=3
+
+# Web Configuration  
+WEB_BASE_URL=https://playwright.dev
+WEB_HEADLESS=true
+WEB_VIEWPORT_WIDTH=1920
+WEB_VIEWPORT_HEIGHT=1080
+
+# Logging
+LOG_LEVEL=INFO
+ENABLE_REQUEST_LOGGING=true
+
+# See .env file for complete configuration options
+```
+
 ## 🏃‍♂️ Running Tests
 
 ### Basic Commands
@@ -41,6 +84,12 @@ npm run install:browsers
 ```bash
 # Run all tests
 npm test
+
+# Run API tests only
+npm run test:api
+
+# Run web tests only  
+npm run test:web
 
 # Run tests in headed mode (visible browser)
 npm run test:headed
@@ -55,17 +104,17 @@ npm run test:debug
 npm run test:report
 ```
 
-### Test Execution Options
+### Specific Test Execution
 
 ```bash
-# Run specific test file
-npx playwright test tests/example.spec.ts
+# Run specific API tests
+npm run test:posts
+npm run test:users
+npm run test:comments
 
-# Run tests with specific browser
+# Run tests with custom configuration
 npx playwright test --project=chromium
-
-# Run tests with custom reporter
-npx playwright test --reporter=line
+npx playwright test tests/web/ --headed
 ```
 
 ## 📁 Project Structure
@@ -73,25 +122,49 @@ npx playwright test --reporter=line
 ```
 TestFusion-Enterprise/
 ├── tests/
-│   ├── pages/           # Page Object Model files
-│   ├── utils/           # Utility functions and helpers
-│   ├── fixtures/        # Test fixtures and data
-│   └── *.spec.ts        # Test files
-├── playwright.config.ts # Playwright configuration
-├── package.json        # Project dependencies
-└── README.md           # This file
+│   ├── api/                 # API test specifications
+│   ├── web/                 # Web UI test specifications
+│   │   └── pages/          # Page Object Model files
+│   ├── clients/            # HTTP and browser clients
+│   ├── config/             # Configuration management
+│   ├── constants/          # Test constants and validation rules
+│   ├── fixtures/           # Test fixtures and data models
+│   ├── operations/         # Business logic operations
+│   ├── services/           # API service layers
+│   ├── utils/              # Utility functions and helpers
+│   └── validators/         # Data validation logic
+├── .env                    # Environment configuration
+├── playwright.config.ts    # Playwright configuration
+├── package.json           # Project dependencies
+└── README.md              # This file
 ```
 
-## 🔧 Configuration
+## 🔧 Advanced Configuration
 
-The main configuration is in `playwright.config.ts`. Key settings include:
+### Configuration Manager
 
-- **Test Directory**: `./tests`
-- **Browsers**: Chromium, Firefox, WebKit
-- **Reporters**: HTML, JUnit
-- **Screenshots**: On failure
-- **Videos**: On failure
-- **Traces**: On first retry
+The framework provides a centralized configuration manager:
+
+```typescript
+import { ConfigurationManager } from './tests/config/configuration-manager';
+
+const config = ConfigurationManager.getInstance();
+const apiConfig = config.getApiConfig();
+const webConfig = config.getWebConfig();
+```
+
+### Logging System
+
+Professional logging with request correlation:
+
+```typescript
+import { Logger } from './tests/utils/logger';
+
+const logger = Logger.getInstance();
+logger.info('Test execution started');
+logger.logRequest('GET', '/api/users');
+logger.logValidation('email', expected, actual, isValid);
+```
 
 ## 📊 Reporting
 

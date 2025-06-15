@@ -1,33 +1,68 @@
 /**
- * Validation constants and patterns
+ * Validation Constants and Patterns for TestFusion-Enterprise
+ * 
+ * This module provides standardized validation patterns and constants used across
+ * the test framework for data validation and schema verification.
+ * 
+ * @file validation-constants.ts
+ * @author TestFusion-Enterprise Team
+ * @version 1.0.0
  */
 
 /**
- * Email validation patterns - more strict than the basic ones
+ * Primary validation patterns - RFC compliant and production-ready
  */
-export const EMAIL_REGEX =
-  // eslint-disable-next-line max-len
-  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+export const VALIDATION_PATTERNS = {
+  /**
+   * RFC 5322 compliant email validation pattern
+   * Validates email addresses according to official specification
+   */
+  EMAIL: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+
+  /**
+   * Username validation pattern
+   * Allows alphanumeric characters with dots, dashes, and underscores (3-20 chars)
+   */
+  USERNAME: /^[a-zA-Z0-9._-]{3,20}$/,
+
+  /**
+   * International phone number validation pattern
+   * Supports various formats including country codes and extensions
+   */
+  PHONE: /^\+?[\d\s-()x]{10,}$/,
+
+  /**
+   * Website domain validation pattern
+   * Validates domain names without protocol (used for website field validation)
+   */
+  WEBSITE: /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/,
+
+  /**
+   * UUID validation pattern (v4)
+   * Validates standard UUID format
+   */
+  UUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+
+  /**
+   * URL validation pattern
+   * Validates complete URLs with http/https protocol
+   */
+  URL: /^https?:\/\/.+/,
+} as const;
 
 /**
- * Username validation pattern - alphanumeric with optional dots, dashes, underscores
+ * Legacy patterns for backward compatibility
+ * @deprecated Use VALIDATION_PATTERNS instead - these will be removed in v2.0.0
  */
-export const USERNAME_REGEX = /^[a-zA-Z0-9._-]{3,20}$/;
+export const EMAIL_PATTERN = VALIDATION_PATTERNS.EMAIL;
+export const PHONE_PATTERN = VALIDATION_PATTERNS.PHONE;
+export const WEBSITE_PATTERN = VALIDATION_PATTERNS.WEBSITE;
 
 /**
- * Phone validation pattern - stricter format (includes extensions)
+ * Additional legacy exports for backward compatibility
+ * @deprecated Use VALIDATION_PATTERNS instead
  */
-export const PHONE_REGEX = /^\+?[\d\s-()x]{10,}$/;
-
-/**
- * Website validation pattern - stricter format
- */
-export const WEBSITE_REGEX =
-  /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-
-/**
- * Legacy patterns for backward compatibility - consider migrating to stricter versions above
- */
-export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-export const PHONE_PATTERN = /^[\d\s-()x+-]+$/;
-export const WEBSITE_PATTERN = /^[a-zA-Z0-9-.]+\.[a-zA-Z]{2,}$/;
+export const EMAIL_REGEX = VALIDATION_PATTERNS.EMAIL;
+export const USERNAME_REGEX = VALIDATION_PATTERNS.USERNAME;
+export const PHONE_REGEX = VALIDATION_PATTERNS.PHONE;
+export const WEBSITE_REGEX = VALIDATION_PATTERNS.WEBSITE;

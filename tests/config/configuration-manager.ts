@@ -1,7 +1,28 @@
 /**
  * Centralized Configuration Manager for TestFusion-Enterprise
- * Provides unified configuration for API and Web testing
- * Users can easily customize all testing parameters from this single source
+ * 
+ * This module provides a unified configuration system that consolidates all testing
+ * parameters into a single, manageable source. It follows the Singleton pattern to
+ * ensure consistent configuration access across the entire test framework.
+ * 
+ * Key Features:
+ * - Environment variable-based configuration with fallback defaults
+ * - Separate API and Web testing configurations
+ * - Runtime validation of required configuration values
+ * - Type-safe configuration interfaces
+ * - Easy customization through .env files
+ * - Supports multiple environments (development, staging, production)
+ * 
+ * Usage:
+ * ```typescript
+ * const config = ConfigurationManager.getInstance();
+ * const apiConfig = config.getApiConfig();
+ * const webConfig = config.getWebConfig();
+ * ```
+ * 
+ * @file configuration-manager.ts
+ * @author TestFusion-Enterprise Team
+ * @version 1.0.0
  */
 
 import { config } from 'dotenv';
@@ -9,12 +30,21 @@ import { config } from 'dotenv';
 // Load environment variables from .env file
 config();
 
+/**
+ * Configuration interface for API testing
+ */
 export interface ApiConfig {
+  /** Base URL for API endpoints */
   baseUrl: string;
+  /** Request timeout in milliseconds */
   timeout: number;
+  /** Number of retry attempts for failed requests */
   retryAttempts: number;
+  /** Default HTTP headers for API requests */
   headers: Record<string, string>;
+  /** Current test environment */
   environment: string;
+  /** API endpoint paths */
   endpoints: {
     posts: string;
     users: string;
@@ -23,15 +53,23 @@ export interface ApiConfig {
   };
 }
 
+/**
+ * Configuration interface for web testing
+ */
 export interface WebConfig {
+  /** Base URL for web application */
   baseUrl: string;
+  /** Timeout configurations for various operations */
   timeout: {
     navigation: number;
     element: number;
     assertion: number;
   };
+  /** Number of retry attempts for failed operations */
   retryAttempts: number;
+  /** Current test environment */
   environment: string;
+  /** Browser-specific configurations */
   browsers: {
     headless: boolean;
     slowMo: number;
@@ -39,13 +77,15 @@ export interface WebConfig {
       width: number;
       height: number;
     };
-  };  pages: {
+  };  /** Page paths relative to base URL */
+  pages: {
     home: string;
     docs: string;
     api: string;
     community: string;
     search: string;
-  };  selectors: {
+  };  /** CSS selectors for web elements */
+  selectors: {
     searchBox: string;
     searchButton: string;
     docsLink: string;
@@ -58,15 +98,22 @@ export interface WebConfig {
   };
 }
 
+/**
+ * Master configuration interface containing all test configurations
+ */
 export interface TestConfig {
+  /** API testing configuration */
   api: ApiConfig;
+  /** Web testing configuration */
   web: WebConfig;
+  /** Logging configuration */
   logging: {
     level: string;
     enableRequestLogging: boolean;
     enableResponseLogging: boolean;
     enableConsoleLogging: boolean;
   };
+  /** Test reporting configuration */
   reporting: {
     enableScreenshots: boolean;
     enableVideos: boolean;
@@ -74,6 +121,7 @@ export interface TestConfig {
     screenshotMode: 'only-on-failure' | 'on' | 'off';
     videoMode: 'retain-on-failure' | 'on' | 'off';
   };
+  /** Data validation configuration */
   validation: {
     strictMode: boolean;
     enableDataValidation: boolean;
@@ -82,20 +130,34 @@ export interface TestConfig {
   };
 }
 
+/**
+ * Singleton Configuration Manager class
+ * 
+ * Provides centralized access to all test configuration parameters.
+ * Follows the Singleton pattern to ensure consistent configuration
+ * across the entire test framework.
+ */
 export class ConfigurationManager {
   private static instance: ConfigurationManager;
   private config: TestConfig;
 
+  /**
+   * Private constructor to enforce singleton pattern
+   */
   private constructor() {
     this.config = this.loadConfiguration();
   }
 
+  /**
+   * Gets the singleton instance of the configuration manager
+   * @returns The ConfigurationManager instance
+   */
   public static getInstance(): ConfigurationManager {
     if (!ConfigurationManager.instance) {
       ConfigurationManager.instance = new ConfigurationManager();
     }
     return ConfigurationManager.instance;
-  }  private loadConfiguration(): TestConfig {
+  }private loadConfiguration(): TestConfig {
     // Validate required environment variables
     this.validateRequiredConfig();
     
@@ -171,27 +233,52 @@ export class ConfigurationManager {
         maxResponseTime: this.getNumberEnvVar('MAX_RESPONSE_TIME'),
       },
     };
-  }
+  }  /**
+   * Gets the API configuration settings
+   * @returns API configuration object with endpoints, timeouts, and headers
+   */
   public getApiConfig(): ApiConfig {
     return this.config.api;
   }
 
+  /**
+   * Gets the web testing configuration settings
+   * @returns Web configuration object with browser settings, selectors, and timeouts
+   */
   public getWebConfig(): WebConfig {
     return this.config.web;
   }
 
+  /**
+   * Gets the complete test configuration
+   * @returns Full configuration object including API, web, logging, and validation settings
+   */
   public getTestConfig(): TestConfig {
     return this.config;
   }
 
+  /**
+   * Updates API configuration with partial settings
+   * @param updates - Partial API configuration to merge with existing settings
+   */
   public updateApiConfig(updates: Partial<ApiConfig>): void {
     this.config.api = { ...this.config.api, ...updates };
   }
 
+  /**
+   * Updates web configuration with partial settings
+   * @param updates - Partial web configuration to merge with existing settings
+   */
   public updateWebConfig(updates: Partial<WebConfig>): void {
     this.config.web = { ...this.config.web, ...updates };
   }
 
+  /**
+   * Gets a configuration property by dot notation path
+   * @param key - Dot-separated path to the configuration property (e.g., 'api.timeout')
+   * @param defaultValue - Default value to return if property is not found
+   * @returns The configuration value or default value
+   */
   public getProperty(key: string, defaultValue?: any): any {
     const keys = key.split('.');
     let value: any = this.config;
@@ -204,6 +291,11 @@ export class ConfigurationManager {
     return value !== undefined ? value : defaultValue;
   }
 
+  /**
+   * Sets a configuration property by dot notation path
+   * @param key - Dot-separated path to the configuration property
+   * @param value - Value to set for the property
+   */
   public setProperty(key: string, value: any): void {
     const keys = key.split('.');
     const lastKey = keys.pop()!;
