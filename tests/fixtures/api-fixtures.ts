@@ -1,11 +1,13 @@
-import { test as base, APIRequestContext, expect } from '@playwright/test';
+import { test as base, APIRequestContext, expect, TestInfo } from '@playwright/test';
 import { ApiClient } from '../clients/api-client';
 import { Logger, LogLevel } from '../utils/logger';
 import { ConfigurationManager } from '../config/configuration-manager';
+import { ApiReporter } from '../utils/api-reporter';
 
 export interface ApiTestFixtures {
   apiClient: ApiClient;
   logger: Logger;
+  apiReporter: ApiReporter;
 }
 
 export interface ApiWorkerFixtures {
@@ -43,9 +45,8 @@ export const test = base.extend<ApiTestFixtures, ApiWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  
-  apiClient: async ({ apiRequestContext, apiConfig }, use) => {
-    const client = new ApiClient(apiRequestContext, apiConfig.baseUrl);
+  apiClient: async ({ apiRequestContext, apiConfig, apiReporter }, use) => {
+    const client = new ApiClient(apiRequestContext, apiConfig.baseUrl, apiReporter);
     await use(client);
   },
   
@@ -53,6 +54,10 @@ export const test = base.extend<ApiTestFixtures, ApiWorkerFixtures>({
     const logger = Logger.getInstance();
     logger.setLogLevel(LogLevel.INFO);
     await use(logger);
+  },
+  apiReporter: async ({}, use: (r: ApiReporter) => Promise<void>, testInfo: TestInfo) => {
+    const reporter = new ApiReporter(testInfo);
+    await use(reporter);
   },
 });
 
