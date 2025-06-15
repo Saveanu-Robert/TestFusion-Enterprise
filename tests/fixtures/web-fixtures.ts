@@ -8,12 +8,14 @@ import { test as base, Page, expect } from '@playwright/test';
 import { Logger } from '../utils/logger';
 import { ConfigurationManager } from '../config/configuration-manager';
 import { WebClient } from '../clients/web-client';
+import { WebReporter } from '../utils/web-reporter';
 
 export interface WebTestFixtures {
   webClient: WebClient;
   logger: Logger;
   webPage: Page;
   webConfig: ReturnType<ConfigurationManager['getWebConfig']>;
+  webReporter: WebReporter;
 }
 
 export interface WebWorkerFixtures {
@@ -92,6 +94,12 @@ export const test = base.extend<WebTestFixtures, WebWorkerFixtures>({
   webClient: async ({ webPage, configManager }, use) => {
     const webClient = new WebClient(webPage, configManager);
     await use(webClient);
+  },
+  // Web reporter fixture
+  webReporter: async ({ webPage }, use, testInfo) => {
+    const webReporter = new WebReporter(webPage, testInfo);
+    webReporter.startPerformanceTracking();
+    await use(webReporter);
   },
 
   // Logger fixture
