@@ -3,418 +3,94 @@ name: PR Tests
 on:
   pull_request:
     branches: [ main, develop ]
-    types: [opened, synchronize, reopened, labeled, unlabeled]
-  push:
-    branches: [ feature/*, bugfix/*, hotfix/* ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'LICENSE'
 
 env:
-  NODE_VERSION: '20'
+  # This is the only secret needed - the encryption key for decrypting .env values
+  ENV_ENCRYPTION_KEY: ${{ secrets.ENV_ENCRYPTION_KEY }}
 
 jobs:
-  detect-test-type:
-    name: Detect Test Type
+  test:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
-    outputs:
-      test-api: ${{ steps.detect.outputs.test-api }}
-      test-web: ${{ steps.detect.outputs.test-web }}
-      test-all: ${{ steps.detect.outputs.test-all }}
-      run-lint: ${{ steps.detect.outputs.run-lint }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Detect test scope
-        id: detect
-        run: |
-          # Default values
-          TEST_API="false"
-          TEST_WEB="false"
-          TEST_ALL="false"
-          RUN_LINT="true"
-          
-          # Check for PR title keywords (if this is a PR)
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            PR_TITLE="${{ github.event.pull_request.title }}"
-            LABELS="${{ join(github.event.pull_request.labels.*.name, ' ') }}"
-            echo "PR Title: $PR_TITLE"
-            echo "PR Labels: $LABELS"
-            
-            # Priority 1: Check PR title for keywords
-            if [[ "$PR_TITLE" == *"[ALL]"* ]] || [[ "$PR_TITLE" == *"[all]"* ]]; then
-              TEST_ALL="true"
-              echo "🚀 Running ALL tests due to '[ALL]' in PR title"
-            elif [[ "$PR_TITLE" == *"[API]"* ]] || [[ "$PR_TITLE" == *"[api]"* ]]; then
-              TEST_API="true"
-              echo "📡 Running API tests due to '[API]' in PR title"
-            elif [[ "$PR_TITLE" == *"[WEB]"* ]] || [[ "$PR_TITLE" == *"[web]"* ]]; then
-              TEST_WEB="true"
-              echo "🌐 Running WEB tests due to '[WEB]' in PR title"
-            elif [[ "$PR_TITLE" == *"[SKIP]"* ]] || [[ "$PR_TITLE" == *"[skip]"* ]]; then
-              echo "⏭️ Skipping tests due to '[SKIP]' in PR title"
-            # Priority 2: Check PR labels
-            elif [[ "$LABELS" == *"test:all"* ]]; then
-              TEST_ALL="true"
-              echo "🚀 Running ALL tests due to 'test:all' label"
-            elif [[ "$LABELS" == *"test:api"* ]]; then
-              TEST_API="true"
-              echo "� Running API tests due to 'test:api' label"
-            elif [[ "$LABELS" == *"test:web"* ]]; then
-              TEST_WEB="true"
-              echo "🌐 Running WEB tests due to 'test:web' label"
-            elif [[ "$LABELS" == *"skip-tests"* ]]; then
-              echo "⏭️ Skipping tests due to 'skip-tests' label"
-            else
-              # Priority 3: Auto-detect based on changed files
-              echo "🔍 Auto-detecting test scope from changed files..."
-              
-              # Get changed files
-              git diff --name-only origin/main...HEAD > changed_files.txt
-              cat changed_files.txt
-              
-              # Check for API-related changes
-              if grep -E "(tests/api/|tests/operations/|tests/validators/|tests/clients/api)" changed_files.txt; then
-                TEST_API="true"
-                echo "📡 API tests detected from file changes"
-              fi
-              
-              # Check for Web/UI-related changes
-              if grep -E "(tests/pages/|tests/web/|tests/ui/|\.page\.ts|playwright\.config)" changed_files.txt; then
-                TEST_WEB="true"
-                echo "🌐 Web tests detected from file changes"
-              fi
-              
-              # Check for core framework changes (run all tests)
-              if grep -E "(tests/config/|tests/fixtures/|tests/utils/|package\.json|tsconfig|eslint)" changed_files.txt; then
-                TEST_ALL="true"
-                echo "⚙️ Core framework changes detected - running all tests"
-              fi
-              
-              # If no specific changes detected, run API tests (default)
-              if [[ "$TEST_API" == "false" && "$TEST_WEB" == "false" && "$TEST_ALL" == "false" ]]; then
-                TEST_API="true"
-                echo "� No specific changes detected - defaulting to API tests"
-              fi
-            fi
-          else
-            # For push events, auto-detect based on branch name and changes
-            echo "📝 Push event detected - auto-detecting from branch and changes..."
-            
-            BRANCH_NAME="${{ github.ref_name }}"
-            echo "Branch: $BRANCH_NAME"
-            
-            # Get changed files compared to main
-            git diff --name-only origin/main...HEAD > changed_files.txt
-            cat changed_files.txt
-            
-            # Branch-based detection
-            if [[ "$BRANCH_NAME" == *"api"* ]]; then
-              TEST_API="true"
-              echo "📡 API tests from branch name"
-            elif [[ "$BRANCH_NAME" == *"web"* ]] || [[ "$BRANCH_NAME" == *"ui"* ]]; then              TEST_WEB="true"
-              echo "🌐 Web tests from branch name"
-            else
-              # File-based detection for push events
-              if grep -E "(tests/api/|tests/operations/|tests/validators/|tests/clients/api)" changed_files.txt; then
-                TEST_API="true"
-                echo "📡 API tests from file changes"
-              fi
-              
-              if grep -E "(tests/pages/|tests/web/|tests/ui/|\.page\.ts)" changed_files.txt; then
-                TEST_WEB="true"
-                echo "🌐 Web tests from file changes"
-              fi
-              
-              # Core changes = all tests
-              if grep -E "(tests/config/|tests/fixtures/|tests/utils/|package\.json|tsconfig|eslint)" changed_files.txt; then
-                TEST_ALL="true"
-                echo "⚙️ Core changes - running all tests"
-              fi
-              
-              # Default for push
-              if [[ "$TEST_API" == "false" && "$TEST_WEB" == "false" && "$TEST_ALL" == "false" ]]; then
-                TEST_API="true"
-                echo "� Default to API tests for push"
-              fi
-            fi
-          fi
-          
-          echo "test-api=$TEST_API" >> $GITHUB_OUTPUT
-          echo "test-web=$TEST_WEB" >> $GITHUB_OUTPUT
-          echo "test-all=$TEST_ALL" >> $GITHUB_OUTPUT
-          echo "run-lint=$RUN_LINT" >> $GITHUB_OUTPUT
-          
-          echo "Final test configuration:"
-          echo "  API Tests: $TEST_API"
-          echo "  Web Tests: $TEST_WEB"
-          echo "  All Tests: $TEST_ALL"
-          echo "  Run Lint: $RUN_LINT"
-  lint:
-    name: Code Quality (ESLint)
-    runs-on: ubuntu-latest
-    needs: detect-test-type
-    if: needs.detect-test-type.outputs.run-lint == 'true'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run ESLint
-        run: npm run lint:check
-  api-tests:
-    name: API Tests (No Browser)
-    runs-on: ubuntu-latest
-    needs: detect-test-type
-    if: needs.detect-test-type.outputs.test-api == 'true'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Load environment variables from .env
-        run: |
-          echo "📋 Loading configuration from .env file for API tests..."
-          if [ -f .env ]; then
-            # Load .env file and export variables (excluding comments and empty lines)
-            set -a
-            source <(cat .env | grep -v '^#' | grep -v '^$')
-            set +a
-            
-            # Export CI-specific overrides
-            echo "CI_ENVIRONMENT=github-actions" >> $GITHUB_ENV
-            echo "CI_HEADLESS=true" >> $GITHUB_ENV
-            echo "CI_WORKERS=2" >> $GITHUB_ENV
-            echo "CI_RETRIES=2" >> $GITHUB_ENV
-            echo "CI_SCREENSHOT_MODE=only-on-failure" >> $GITHUB_ENV
-            echo "CI_VIDEO_MODE=retain-on-failure" >> $GITHUB_ENV
-            echo "CI_TRACE_MODE=retain-on-failure" >> $GITHUB_ENV
-            
-            # Export API configuration
-            echo "API_BASE_URL=${API_BASE_URL}" >> $GITHUB_ENV
-            echo "API_TIMEOUT=${API_TIMEOUT}" >> $GITHUB_ENV
-            echo "API_RETRY_ATTEMPTS=${API_RETRY_ATTEMPTS}" >> $GITHUB_ENV
-            echo "LOG_LEVEL=${LOG_LEVEL}" >> $GITHUB_ENV
-            echo "ENABLE_REQUEST_LOGGING=${ENABLE_REQUEST_LOGGING}" >> $GITHUB_ENV
-            echo "ENABLE_RESPONSE_LOGGING=${ENABLE_RESPONSE_LOGGING}" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_WORKERS=${CI_WORKERS}" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_RETRIES=${CI_RETRIES}" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_FULLY_PARALLEL=true" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_FORBID_ONLY=false" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_REPORTER=html,list" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_OUTPUT_DIR=playwright-report" >> $GITHUB_ENV          else
-            echo "⚠️ .env file not found, using defaults"
-          fi
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run API tests
-        run: |
-          echo "📡 Running API tests (using Playwright's request context - no browser needed)"
-          npm run test:api
-
-      - name: Upload API test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: api-test-results
-          path: |
-            test-results/
-            playwright-report/
-          retention-days: 7
-
-  web-tests:
-    name: Web/UI Tests (Browser Required)
-    runs-on: ubuntu-latest
-    needs: detect-test-type
-    if: needs.detect-test-type.outputs.test-web == 'true'
     strategy:
+      fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
+        test-type: [api, web-local, web-grid]
+        include:
+          - test-type: api
+            test-command: npm run test:api
+          - test-type: web-local
+            test-command: npm run test:web
+          - test-type: web-grid
+            test-command: npm run test:web:grid
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+    - name: Install dependencies
+      run: npm ci
 
-      - name: Install Playwright browser - ${{ matrix.browser }}
-        run: npx playwright install --with-deps ${{ matrix.browser }}
-
-      - name: Run Web/UI tests
-        run: |
-          echo "🌐 Running Web/UI tests on ${{ matrix.browser }} browser"
-          # Check if web test directories exist
-          if [ -d "tests/web" ] || [ -d "tests/ui" ] || find tests/ -name "*.page.spec.ts" | grep -q .; then
-            npm run test:web -- --project=${{ matrix.browser }}
-          else
-            echo "⚠️ No web tests found, skipping web tests"
-            mkdir -p test-results
-            echo "No web tests available in this project" > test-results/web-tests-info.txt          fi
-
-      - name: Upload Web test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: web-test-results-${{ matrix.browser }}
-          path: |
-            test-results/
-            playwright-report/
-          retention-days: 7
-  all-tests:
-    name: All Tests (API + Web)
-    runs-on: ubuntu-latest
-    needs: detect-test-type
-    if: needs.detect-test-type.outputs.test-all == 'true'
-    strategy:
-      matrix:
-        browser: [chromium, firefox, webkit]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Load environment variables from .env
-        run: |
-          echo "📋 Loading configuration from .env file for all tests..."
-          if [ -f .env ]; then
-            # Load .env file and export variables (excluding comments and empty lines)
-            set -a
-            source <(cat .env | grep -v '^#' | grep -v '^$')
-            set +a
-            
-            # Export CI-specific overrides
-            echo "CI_ENVIRONMENT=github-actions" >> $GITHUB_ENV
-            echo "CI_BROWSER=${{ matrix.browser }}" >> $GITHUB_ENV
-            echo "CI_HEADLESS=true" >> $GITHUB_ENV
-            echo "CI_WORKERS=2" >> $GITHUB_ENV
-            echo "CI_RETRIES=2" >> $GITHUB_ENV
-            echo "CI_SCREENSHOT_MODE=only-on-failure" >> $GITHUB_ENV
-            echo "CI_VIDEO_MODE=retain-on-failure" >> $GITHUB_ENV
-            echo "CI_TRACE_MODE=retain-on-failure" >> $GITHUB_ENV
-            
-            # Export configuration from .env
-            echo "API_BASE_URL=${API_BASE_URL}" >> $GITHUB_ENV
-            echo "API_TIMEOUT=${API_TIMEOUT}" >> $GITHUB_ENV
-            echo "API_RETRY_ATTEMPTS=${API_RETRY_ATTEMPTS}" >> $GITHUB_ENV
-            echo "WEB_BASE_URL=${WEB_BASE_URL}" >> $GITHUB_ENV
-            echo "WEB_NAVIGATION_TIMEOUT=${WEB_NAVIGATION_TIMEOUT}" >> $GITHUB_ENV
-            echo "WEB_ELEMENT_TIMEOUT=${WEB_ELEMENT_TIMEOUT}" >> $GITHUB_ENV
-            echo "WEB_ASSERTION_TIMEOUT=${WEB_ASSERTION_TIMEOUT}" >> $GITHUB_ENV
-            echo "WEB_RETRY_ATTEMPTS=${WEB_RETRY_ATTEMPTS}" >> $GITHUB_ENV
-            echo "WEB_HEADLESS=${CI_HEADLESS}" >> $GITHUB_ENV
-            echo "WEB_SLOW_MO=${WEB_SLOW_MO}" >> $GITHUB_ENV
-            echo "WEB_VIEWPORT_WIDTH=${WEB_VIEWPORT_WIDTH}" >> $GITHUB_ENV
-            echo "WEB_VIEWPORT_HEIGHT=${WEB_VIEWPORT_HEIGHT}" >> $GITHUB_ENV
-            echo "LOG_LEVEL=${LOG_LEVEL}" >> $GITHUB_ENV
-            echo "ENABLE_REQUEST_LOGGING=${ENABLE_REQUEST_LOGGING}" >> $GITHUB_ENV
-            echo "ENABLE_RESPONSE_LOGGING=${ENABLE_RESPONSE_LOGGING}" >> $GITHUB_ENV
-            echo "ENABLE_SCREENSHOTS=${CI_SCREENSHOT_MODE}" >> $GITHUB_ENV
-            echo "ENABLE_VIDEOS=${CI_VIDEO_MODE}" >> $GITHUB_ENV
-            echo "ENABLE_TRACING=${CI_TRACE_MODE}" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_WORKERS=${CI_WORKERS}" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_RETRIES=${CI_RETRIES}" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_FULLY_PARALLEL=true" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_FORBID_ONLY=false" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_REPORTER=html,list" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_OUTPUT_DIR=playwright-report" >> $GITHUB_ENV          else
-            echo "⚠️ .env file not found, using defaults"
+    - name: Decrypt and load environment variables
+      run: |
+        # Process .env file to decrypt sensitive values and export all variables
+        node scripts/env-crypto.js process-env .env > .env.decrypted
+        
+        # Export all environment variables for subsequent steps
+        while IFS='=' read -r key value; do
+          # Skip comments and empty lines
+          if [[ ! "$key" =~ ^[[:space:]]*# ]] && [[ -n "$key" ]] && [[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+            # Remove quotes if present and export
+            value=$(echo "$value" | sed 's/^"//;s/"$//')
+            echo "$key=$value" >> $GITHUB_ENV
+            echo "::add-mask::$value"  # Mask sensitive values in logs
           fi
+        done < .env.decrypted
+        
+        # Clean up temporary file
+        rm -f .env.decrypted
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+    - name: Install Playwright Browsers (for web tests)
+      if: matrix.test-type != 'api'
+      run: npx playwright install --with-deps
 
-      - name: Install dependencies
-        run: npm ci
+    - name: Setup Selenium Grid (for grid tests)
+      if: matrix.test-type == 'web-grid'
+      run: |
+        # Start Selenium Grid in the background
+        docker run -d -p 4444:4444 -p 7900:7900 --shm-size=2g selenium/standalone-chrome:latest
+        
+        # Wait for grid to be ready
+        timeout 60 bash -c 'until curl -sSf http://localhost:4444/wd/hub/status; do sleep 2; done'
 
-      - name: Install Playwright browser - ${{ matrix.browser }}
-        run: npx playwright install --with-deps ${{ matrix.browser }}
+    - name: Run tests
+      run: ${{ matrix.test-command }}
 
-      - name: Run all tests
-        run: |
-          echo "🚀 Running ALL tests (API + Web) on ${{ matrix.browser }}"
-          npm run test -- --project=${{ matrix.browser }}
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-${{ matrix.test-type }}
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 7
 
-      - name: Upload all test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: all-test-results-${{ matrix.browser }}
-          path: |
-            test-results/
-            playwright-report/
-          retention-days: 7
-
-  test-summary:
-    name: Test Summary
-    runs-on: ubuntu-latest
-    needs: [detect-test-type, lint, api-tests, web-tests, all-tests]
-    if: always()
-    steps:
-      - name: Generate test summary
-        run: |
-          echo "## 🧪 Test Execution Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Test Configuration" >> $GITHUB_STEP_SUMMARY
-          echo "- **API Tests**: ${{ needs.detect-test-type.outputs.test-api }} (No browser needed)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Web Tests**: ${{ needs.detect-test-type.outputs.test-web }} (Browser required)" >> $GITHUB_STEP_SUMMARY
-          echo "- **All Tests**: ${{ needs.detect-test-type.outputs.test-all }} (API + Web)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Linting**: ${{ needs.detect-test-type.outputs.run-lint }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Results" >> $GITHUB_STEP_SUMMARY
-          echo "- **Lint**: ${{ needs.lint.result || 'Skipped' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **API Tests**: ${{ needs.api-tests.result || 'Skipped' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Web Tests**: ${{ needs.web-tests.result || 'Skipped' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **All Tests**: ${{ needs.all-tests.result || 'Skipped' }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          # Determine overall status
-          OVERALL="✅ Success"
-          if [ "${{ contains(needs.*.result, 'failure') }}" = "true" ]; then
-            OVERALL="❌ Failed"
-          elif [ "${{ contains(needs.*.result, 'cancelled') }}" = "true" ]; then
-            OVERALL="⏹️ Cancelled"
-          fi
-          
-          echo "### Overall Status: $OVERALL" >> $GITHUB_STEP_SUMMARY
-          
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### 💡 PR Testing Control" >> $GITHUB_STEP_SUMMARY
-            echo "**📋 PR Title Keywords (Highest Priority):**" >> $GITHUB_STEP_SUMMARY
-            echo "- Add \`[API]\` to PR title to run only API tests (no browser)" >> $GITHUB_STEP_SUMMARY
-            echo "- Add \`[WEB]\` to PR title to run only Web/UI tests (with browsers)" >> $GITHUB_STEP_SUMMARY
-            echo "- Add \`[ALL]\` to PR title to run all tests" >> $GITHUB_STEP_SUMMARY
-            echo "- Add \`[SKIP]\` to PR title to skip all tests" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**🏷️ Labels (Medium Priority):**" >> $GITHUB_STEP_SUMMARY
-            echo "- Use \`test:api\` label for API tests only" >> $GITHUB_STEP_SUMMARY
-            echo "- Use \`test:web\` label for Web tests only" >> $GITHUB_STEP_SUMMARY
-            echo "- Use \`test:all\` label for all tests" >> $GITHUB_STEP_SUMMARY
-            echo "- Use \`skip-tests\` label to skip tests" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**🔍 Auto-detection (Lowest Priority):**" >> $GITHUB_STEP_SUMMARY
-            echo "- Tests are auto-detected based on changed files if no title keywords or labels are used" >> $GITHUB_STEP_SUMMARY
-          fi
+    - name: Upload Playwright Report
+      if: always() && matrix.test-type != 'api'
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-report-${{ matrix.test-type }}
+        path: playwright-report/
+        retention-days: 30

@@ -1,356 +1,159 @@
-name: Manual Test Execution
+name: Manual Tests
 
 on:
   workflow_dispatch:
     inputs:
-      test-type:
-        description: 'Type of tests to run'
+      test_type:
+        description: 'Type of test to run'
         required: true
-        default: 'api'
+        default: 'all'
         type: choice
         options:
-          - api
-          - web
-          - all
-      execution-mode:
-        description: 'Test execution mode'
-        required: true
-        default: 'local'
-        type: choice
-        options:
-          - local
-          - grid
-          - browserstack
+        - all
+        - api
+        - web-local
+        - web-grid
+        - web-browserstack
       browser:
-        description: 'Browser to test with (only for web/all tests)'
+        description: 'Browser to use (for web tests)'
         required: false
         default: 'chromium'
         type: choice
         options:
-          - chromium
-          - firefox
-          - webkit
-          - all
-      grid-url:
-        description: 'Selenium Grid URL (only for grid mode)'
-        required: false
-        default: 'http://localhost:4444/wd/hub'
-        type: string
-      browserstack-username:
-        description: 'BrowserStack username (only for browserstack mode)'
-        required: false
-        type: string
+        - chromium
+        - firefox
+        - webkit
       environment:
         description: 'Test environment'
         required: false
-        default: 'default'
+        default: 'development'
         type: choice
         options:
-          - default
-          - staging
-          - production
-      parallel:
-        description: 'Run tests in parallel'
-        required: false
-        default: true
-        type: boolean
+        - development
+        - staging
+        - production
 
 env:
-  NODE_VERSION: '20'
+  # This is the only secret needed - the encryption key for decrypting .env values
+  ENV_ENCRYPTION_KEY: ${{ secrets.ENV_ENCRYPTION_KEY }}
 
 jobs:
-  manual-tests:
-    name: Manual Test Execution
+  manual-test:
+    timeout-minutes: 90
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
-    env:
-      BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-      API_KEY: ${{ secrets.API_KEY }}
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Load environment variables from .env
-        run: |
-          echo "📋 Loading configuration from .env file..."
-          if [ -f .env ]; then
-            # Load .env file and export variables (excluding comments and empty lines)
-            set -a
-            source <(cat .env | grep -v '^#' | grep -v '^$')
-            set +a
-            
-            # Export key variables to GitHub environment
-            echo "CI_ENVIRONMENT=github-actions" >> $GITHUB_ENV
-            echo "CI_BROWSER=${{ github.event.inputs.browser }}" >> $GITHUB_ENV
-            echo "CI_HEADLESS=true" >> $GITHUB_ENV
-            echo "CI_WORKERS=2" >> $GITHUB_ENV
-            echo "CI_RETRIES=2" >> $GITHUB_ENV
-            echo "CI_TIMEOUT_MULTIPLIER=2" >> $GITHUB_ENV
-            echo "CI_SCREENSHOT_MODE=only-on-failure" >> $GITHUB_ENV
-            echo "CI_VIDEO_MODE=retain-on-failure" >> $GITHUB_ENV
-            echo "CI_TRACE_MODE=retain-on-failure" >> $GITHUB_ENV
-            
-            # Export execution mode configuration
-            echo "TEST_EXECUTION_MODE=${{ github.event.inputs.execution-mode }}" >> $GITHUB_ENV
-            
-            # Export environment variables based on .env file
-            echo "API_BASE_URL=${API_BASE_URL}" >> $GITHUB_ENV
-            echo "API_TIMEOUT=${API_TIMEOUT}" >> $GITHUB_ENV
-            echo "API_RETRY_ATTEMPTS=${API_RETRY_ATTEMPTS}" >> $GITHUB_ENV
-            echo "WEB_BASE_URL=${WEB_BASE_URL}" >> $GITHUB_ENV
-            echo "WEB_NAVIGATION_TIMEOUT=${WEB_NAVIGATION_TIMEOUT}" >> $GITHUB_ENV
-            echo "WEB_ELEMENT_TIMEOUT=${WEB_ELEMENT_TIMEOUT}" >> $GITHUB_ENV
-            echo "WEB_ASSERTION_TIMEOUT=${WEB_ASSERTION_TIMEOUT}" >> $GITHUB_ENV
-            echo "WEB_RETRY_ATTEMPTS=${WEB_RETRY_ATTEMPTS}" >> $GITHUB_ENV
-            echo "WEB_HEADLESS=${CI_HEADLESS}" >> $GITHUB_ENV
-            echo "WEB_SLOW_MO=${WEB_SLOW_MO}" >> $GITHUB_ENV
-            echo "WEB_VIEWPORT_WIDTH=${WEB_VIEWPORT_WIDTH}" >> $GITHUB_ENV
-            echo "WEB_VIEWPORT_HEIGHT=${WEB_VIEWPORT_HEIGHT}" >> $GITHUB_ENV
-            echo "LOG_LEVEL=${LOG_LEVEL}" >> $GITHUB_ENV
-            echo "ENABLE_REQUEST_LOGGING=${ENABLE_REQUEST_LOGGING}" >> $GITHUB_ENV
-            echo "ENABLE_RESPONSE_LOGGING=${ENABLE_RESPONSE_LOGGING}" >> $GITHUB_ENV
-            echo "ENABLE_SCREENSHOTS=${CI_SCREENSHOT_MODE}" >> $GITHUB_ENV
-            echo "ENABLE_VIDEOS=${CI_VIDEO_MODE}" >> $GITHUB_ENV
-            echo "ENABLE_TRACING=${CI_TRACE_MODE}" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_WORKERS=${CI_WORKERS}" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_RETRIES=${CI_RETRIES}" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_FULLY_PARALLEL=true" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_FORBID_ONLY=false" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_REPORTER=html,list" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_OUTPUT_DIR=playwright-report" >> $GITHUB_ENV
-          else
-            echo "⚠️ .env file not found, using defaults"
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Decrypt and load environment variables
+      run: |
+        # Process .env file to decrypt sensitive values and export all variables
+        node scripts/env-crypto.js process-env .env > .env.decrypted
+        
+        # Export all environment variables for subsequent steps
+        while IFS='=' read -r key value; do
+          # Skip comments and empty lines
+          if [[ ! "$key" =~ ^[[:space:]]*# ]] && [[ -n "$key" ]] && [[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+            # Remove quotes if present and export
+            value=$(echo "$value" | sed 's/^"//;s/"$//')
+            echo "$key=$value" >> $GITHUB_ENV
+            echo "::add-mask::$value"  # Mask sensitive values in logs
           fi
+        done < .env.decrypted
+        
+        # Clean up temporary file
+        rm -f .env.decrypted
 
-      - name: Configure execution mode
-        run: |
-          echo "⚙️ Configuring execution mode: ${{ github.event.inputs.execution-mode }}"
-          
-          case "${{ github.event.inputs.execution-mode }}" in
-            "grid")
-              echo "🌐 Setting up Selenium Grid configuration..."
-              GRID_URL="${{ github.event.inputs.grid-url }}"
-              if [ -z "$GRID_URL" ]; then
-                GRID_URL="http://localhost:4444/wd/hub"
-              fi
-              echo "SELENIUM_GRID_URL=$GRID_URL" >> $GITHUB_ENV
-              echo "SELENIUM_GRID_BROWSER=${{ github.event.inputs.browser }}" >> $GITHUB_ENV
-              echo "SELENIUM_GRID_VERSION=latest" >> $GITHUB_ENV
-              echo "SELENIUM_GRID_PLATFORM=ANY" >> $GITHUB_ENV
-              ;;            "browserstack")
-              echo "🚀 Setting up BrowserStack configuration..."
-              BS_USERNAME="${{ github.event.inputs.browserstack-username }}"
-              if [ -z "$BS_USERNAME" ]; then
-                echo "❌ BrowserStack username is required for browserstack mode"
-                exit 1
-              fi
-              echo "BROWSERSTACK_USERNAME=$BS_USERNAME" >> $GITHUB_ENV
-              echo "BROWSERSTACK_PROJECT=TestFusion-Enterprise" >> $GITHUB_ENV
-              echo "BROWSERSTACK_BUILD=manual-${{ github.run_number }}" >> $GITHUB_ENV
-              echo "BROWSERSTACK_SESSION_NAME=Manual Test Session" >> $GITHUB_ENV
-              echo "BROWSERSTACK_BROWSER=${{ github.event.inputs.browser }}" >> $GITHUB_ENV
-              echo "BROWSERSTACK_BROWSER_VERSION=latest" >> $GITHUB_ENV
-              echo "BROWSERSTACK_OS=Windows" >> $GITHUB_ENV
-              echo "BROWSERSTACK_OS_VERSION=10" >> $GITHUB_ENV
-              echo "BROWSERSTACK_RESOLUTION=1920x1080" >> $GITHUB_ENV
-              echo "BROWSERSTACK_LOCAL=false" >> $GITHUB_ENV
-              echo "BROWSERSTACK_DEBUG=true" >> $GITHUB_ENV
-              echo "BROWSERSTACK_NETWORK_LOGS=true" >> $GITHUB_ENV
-              echo "BROWSERSTACK_CONSOLE_LOGS=info" >> $GITHUB_ENV
-              echo "BROWSERSTACK_SELENIUM_LOGS=true" >> $GITHUB_ENV
-              ;;
-            "local"|*)
-              echo "💻 Using local execution mode (default)"
-              ;;
-          esac
+    - name: Override environment variables based on inputs
+      run: |
+        # Override TEST_ENV based on workflow input
+        echo "TEST_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+        
+        # Override browser for web tests if specified
+        if [[ "${{ github.event.inputs.browser }}" != "chromium" ]]; then
+          echo "CI_BROWSER=${{ github.event.inputs.browser }}" >> $GITHUB_ENV
+        fi
 
-      - name: Set test environment
-        run: |
-          echo "🌍 Setting up test environment: ${{ github.event.inputs.environment }}"
-          
-          # Set environment-specific configurations
-          case "${{ github.event.inputs.environment }}" in
-            "staging")
-              echo "TEST_ENV=staging" >> $GITHUB_ENV
-              echo "API_BASE_URL=https://staging-api.example.com" >> $GITHUB_ENV
-              echo "WEB_BASE_URL=https://staging.example.com" >> $GITHUB_ENV
-              ;;            "production")
-              echo "TEST_ENV=production" >> $GITHUB_ENV
-              echo "API_BASE_URL=https://api.example.com" >> $GITHUB_ENV              echo "WEB_BASE_URL=https://example.com" >> $GITHUB_ENV
-              ;;
-            *)
-              echo "TEST_ENV=default" >> $GITHUB_ENV
-              # Keep the default URLs from .env file
-              ;;
-          esac
+    - name: Install Playwright Browsers
+      if: github.event.inputs.test_type != 'api'
+      run: npx playwright install --with-deps
 
-      - name: Configure secrets for execution mode
-        run: |
-          echo "🔐 Configuring secrets for execution mode: ${{ github.event.inputs.execution-mode }}"
-          
-          case "${{ github.event.inputs.execution-mode }}" in
-            "browserstack")
-              if [ -n "$BROWSERSTACK_ACCESS_KEY" ]; then
-                echo "✅ BrowserStack access key configured"
-              else
-                echo "❌ BrowserStack access key not found in secrets"
-                exit 1
-              fi
-              ;;
-          esac
-            # Set API key for production environment
-          if [ "${{ github.event.inputs.environment }}" = "production" ]; then
-            if [ -n "$API_KEY" ]; then
-              echo "✅ API key configured for production"
-            else
-              echo "⚠️ API key not found in secrets for production environment"
-            fi
-          fi
+    - name: Setup Selenium Grid (for grid tests)
+      if: github.event.inputs.test_type == 'web-grid' || github.event.inputs.test_type == 'all'
+      run: |
+        # Start Selenium Grid in the background
+        docker run -d -p 4444:4444 -p 7900:7900 --shm-size=2g selenium/standalone-chrome:latest
+        
+        # Wait for grid to be ready
+        timeout 60 bash -c 'until curl -sSf http://localhost:4444/wd/hub/status; do sleep 2; done'
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+    - name: Run API Tests
+      if: github.event.inputs.test_type == 'api' || github.event.inputs.test_type == 'all'
+      run: npm run test:api
 
-      - name: Install dependencies
-        run: npm ci
+    - name: Run Web Tests (Local)
+      if: github.event.inputs.test_type == 'web-local' || github.event.inputs.test_type == 'all'
+      run: npm run test:web
 
-      - name: Install Playwright browsers
-        if: ${{ github.event.inputs.test-type == 'web' || github.event.inputs.test-type == 'all' }}
-        run: |
-          if [ "${{ github.event.inputs.execution-mode }}" = "local" ]; then
-            if [ "${{ github.event.inputs.browser }}" = "all" ]; then
-              echo "🎭 Installing all Playwright browsers..."
-              npx playwright install --with-deps
-            else
-              echo "🎭 Installing Playwright browser: ${{ github.event.inputs.browser }}"
-              npx playwright install --with-deps ${{ github.event.inputs.browser }}
-            fi          else
-            echo "⏭️ Skipping browser installation for ${{ github.event.inputs.execution-mode }} mode"
-          fi
+    - name: Run Web Tests (Grid)
+      if: github.event.inputs.test_type == 'web-grid' || github.event.inputs.test_type == 'all'
+      run: npm run test:web:grid
 
-      - name: Run tests
-        run: |
-          echo "🚀 Starting test execution..."
-          echo "Execution Mode: ${{ github.event.inputs.execution-mode }}"
-          echo "Test Type: ${{ github.event.inputs.test-type }}"
-          echo "Browser: ${{ github.event.inputs.browser }}"
-          echo "Environment: ${{ github.event.inputs.environment }}"
-          echo "Parallel: ${{ github.event.inputs.parallel }}"
-          
-          # Configure parallel execution
-          WORKERS=""
-          if [ "${{ github.event.inputs.parallel }}" = "true" ]; then
-            WORKERS="--workers=4"
-          else
-            WORKERS="--workers=1"
-          fi
-          
-          # Run specific test type with execution mode consideration
-          case "${{ github.event.inputs.test-type }}" in
-            "api")
-              echo "📡 Running API tests (execution mode: ${{ github.event.inputs.execution-mode }})"
-              npm run test:api $WORKERS --reporter=html,list
-              ;;
-            "web")
-              echo "🌐 Running Web/UI tests (execution mode: ${{ github.event.inputs.execution-mode }})"
-              if [ -d "tests/web" ] || [ -d "tests/ui" ] || find tests/ -name "*.page.spec.ts" | grep -q .; then
-                if [ "${{ github.event.inputs.browser }}" = "all" ]; then
-                  npm run test:web $WORKERS --reporter=html,list
-                else
-                  npm run test:web -- --project=${{ github.event.inputs.browser }} $WORKERS --reporter=html,list
-                fi
-              else
-                echo "⚠️ No web tests found, creating placeholder test result"
-                mkdir -p test-results
-                echo "No web tests available in this project" > test-results/web-tests-info.txt
-              fi
-              ;;
-            "all")
-              echo "🚀 Running ALL tests (execution mode: ${{ github.event.inputs.execution-mode }})"
-              if [ "${{ github.event.inputs.browser }}" = "all" ]; then
-                npm run test $WORKERS --reporter=html,list
-              else
-                npm run test -- --project=${{ github.event.inputs.browser }} $WORKERS --reporter=html,list
-              fi
-              ;;
-          esac
-                echo "No web tests available in this project" > test-results/web-tests-info.txt                echo "No web tests available in this project" > test-results/web-tests-info.txt
-              fi
-              ;;
-            "all")
-              echo "🚀 Running ALL tests (execution mode: ${{ github.event.inputs.execution-mode }})"
-              if [ "${{ github.event.inputs.browser }}" = "all" ]; then
-                npm run test $WORKERS --reporter=html,list
-              else
-                npm run test -- --project=${{ github.event.inputs.browser }} $WORKERS --reporter=html,list
-              fi
-              ;;
-          esac
+    - name: Run Web Tests (BrowserStack)
+      if: github.event.inputs.test_type == 'web-browserstack' || github.event.inputs.test_type == 'all'
+      run: npm run test:web:browserstack
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: manual-test-results-${{ github.event.inputs.execution-mode }}-${{ github.event.inputs.test-type }}-${{ github.event.inputs.test-type == 'api' && 'no-browser' || github.event.inputs.browser }}-${{ github.event.inputs.environment }}
-          path: |
-            test-results/
-            playwright-report/
-          retention-days: 30
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: manual-test-results-${{ github.event.inputs.test_type }}-${{ github.run_number }}
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 14
 
-  test-summary:
-    name: Manual Test Summary
-    runs-on: ubuntu-latest
-    needs: manual-tests
-    if: always()
-    steps:
-      - name: Generate summary
-        run: |
-          echo "## 🧪 Manual Test Execution Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Test Configuration" >> $GITHUB_STEP_SUMMARY
-          echo "- **Test Type**: ${{ github.event.inputs.test-type }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Execution Mode**: ${{ github.event.inputs.execution-mode }}" >> $GITHUB_STEP_SUMMARY
+    - name: Upload Playwright Report
+      if: always() && github.event.inputs.test_type != 'api'
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-report-manual-${{ github.run_number }}
+        path: playwright-report/
+        retention-days: 30
+
+    - name: Comment on commit with results
+      if: always()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const testType = '${{ github.event.inputs.test_type }}';
+          const environment = '${{ github.event.inputs.environment }}';
+          const browser = '${{ github.event.inputs.browser }}';
+          const status = '${{ job.status }}';
           
-          # Only show browser info for web and all tests
-          if [ "${{ github.event.inputs.test-type }}" != "api" ]; then
-            echo "- **Browser**: ${{ github.event.inputs.browser }}" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- **Browser**: Not applicable (API tests only)" >> $GITHUB_STEP_SUMMARY
-          fi
+          const comment = `## Manual Test Results 🧪
           
-          echo "- **Environment**: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Parallel Execution**: ${{ github.event.inputs.parallel }}" >> $GITHUB_STEP_SUMMARY
+          **Test Type:** ${testType}
+          **Environment:** ${environment}
+          **Browser:** ${browser}
+          **Status:** ${status === 'success' ? '✅ Passed' : '❌ Failed'}
+          **Run ID:** ${{ github.run_number }}
           
-          # Show execution mode specific details
-          case "${{ github.event.inputs.execution-mode }}" in
-            "grid")
-              echo "- **Grid URL**: ${{ github.event.inputs.grid-url || 'http://localhost:4444/wd/hub' }}" >> $GITHUB_STEP_SUMMARY
-              ;;
-            "browserstack")
-              echo "- **BrowserStack Username**: ${{ github.event.inputs.browserstack-username }}" >> $GITHUB_STEP_SUMMARY
-              ;;
-          esac
+          View [full report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
           
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Results" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: ${{ needs.manual-tests.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          if [ "${{ needs.manual-tests.result }}" = "success" ]; then
-            echo "✅ **All manual tests completed successfully!**" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ **Manual test execution failed. Check the test artifacts for details.**" >> $GITHUB_STEP_SUMMARY
-          fi
-          
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 💡 Manual Test Configuration Guide" >> $GITHUB_STEP_SUMMARY
-          echo "**🔧 Execution Modes:**" >> $GITHUB_STEP_SUMMARY
-          echo "- **local**: Run tests locally using installed browsers" >> $GITHUB_STEP_SUMMARY
-          echo "- **grid**: Run tests on Selenium Grid (provide grid URL)" >> $GITHUB_STEP_SUMMARY
-          echo "- **browserstack**: Run tests on BrowserStack (requires username and access key)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**🔐 Secrets Required:**" >> $GITHUB_STEP_SUMMARY
-          echo "- **BROWSERSTACK_ACCESS_KEY**: Required for BrowserStack execution" >> $GITHUB_STEP_SUMMARY
-          echo "- **API_KEY**: Required for production environment API testing" >> $GITHUB_STEP_SUMMARY
+          github.rest.repos.createCommitComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            commit_sha: context.sha,
+            body: comment
+          });

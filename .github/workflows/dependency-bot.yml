@@ -1,329 +1,222 @@
-name: Dependency Bot
+name: Dependency Bot Tests
 
 on:
   schedule:
-    # Run every morning at 7:00 AM UTC (Monday to Friday)
-    - cron: '0 7 * * 1-5'
-  workflow_dispatch: # Allow manual trigger
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      update_type:
+        description: 'Type of updates to check'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - security
+        - patch
+        - minor
+        - major
 
 env:
-  NODE_VERSION: '20'
-
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  actions: read
+  # This is the only secret needed - the encryption key for decrypting .env values
+  ENV_ENCRYPTION_KEY: ${{ secrets.ENV_ENCRYPTION_KEY }}
 
 jobs:
-  check-dependencies:
-    name: Check & Update Dependencies
+  dependency-check:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.DEPENDENCY_BOT_TOKEN }}
-          fetch-depth: 0
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
 
-      - name: Configure Git
-        run: |
-          git config --global user.name 'dependency-bot[bot]'
-          git config --global user.email 'dependency-bot[bot]@users.noreply.github.com'
-
-      - name: Install npm-check-updates
-        run: npm install -g npm-check-updates
-
-      - name: Check for dependency updates
-        id: check-updates
-        run: |
-          echo "🔍 Checking for dependency updates..."
-            # Check what can be updated (only actual updates, not current versions)
-          ncu --jsonUpgraded > updates.json
-          
-          # Check if there are any updates available
-          if [ "$(cat updates.json)" = "{}" ]; then
-            echo "✅ All dependencies are up to date!"
-            echo "has-updates=false" >> $GITHUB_OUTPUT
-            exit 0
-          else
-            echo "📦 Dependencies that can be updated:"
-            ncu --format group
-            echo "has-updates=true" >> $GITHUB_OUTPUT
+    - name: Decrypt and load environment variables
+      run: |
+        # Process .env file to decrypt sensitive values and export all variables
+        node scripts/env-crypto.js process-env .env > .env.decrypted
+        
+        # Export all environment variables for subsequent steps
+        while IFS='=' read -r key value; do
+          # Skip comments and empty lines
+          if [[ ! "$key" =~ ^[[:space:]]*# ]] && [[ -n "$key" ]] && [[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+            # Remove quotes if present and export
+            value=$(echo "$value" | sed 's/^"//;s/"$//')
+            echo "$key=$value" >> $GITHUB_ENV
+            echo "::add-mask::$value"  # Mask sensitive values in logs
           fi
+        done < .env.decrypted
+        
+        # Clean up temporary file
+        rm -f .env.decrypted
 
-      - name: Create dependency update branch
-        if: steps.check-updates.outputs.has-updates == 'true'
-        id: create-branch
-        run: |
-          # Create a unique branch name with current date
-          BRANCH_NAME="dependency-updates/$(date +%Y-%m-%d)"
-          echo "branch-name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+    - name: Check for dependency updates
+      run: |
+        # Install npm-check-updates globally
+        npm install -g npm-check-updates
+        
+        # Check for updates and save to file
+        ncu --format json > dependency-updates.json || true
+        
+        # Display current updates
+        echo "📦 Checking for dependency updates..."
+        ncu || true
+
+    - name: Run security audit
+      run: |
+        echo "🔒 Running security audit..."
+        npm audit --audit-level moderate || true
+        
+        # Generate audit report
+        npm audit --json > security-audit.json || true
+
+    - name: Install current dependencies
+      run: npm ci
+
+    - name: Run tests with current dependencies
+      run: |
+        echo "🧪 Running tests with current dependencies..."
+        npm run test:api
+      continue-on-error: true
+
+    - name: Install Playwright for web tests
+      run: npx playwright install --with-deps chromium
+
+    - name: Run web tests with current dependencies
+      run: |
+        echo "🌐 Running web tests with current dependencies..."
+        npm run test:web
+      continue-on-error: true
+
+    - name: Test dependency updates (if manual dispatch)
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        echo "🔄 Testing with updated dependencies..."
+        
+        # Update dependencies based on input
+        case "${{ github.event.inputs.update_type }}" in
+          "security")
+            npm audit fix --audit-level moderate || true
+            ;;
+          "patch")
+            ncu -u --target patch || true
+            ;;
+          "minor")
+            ncu -u --target minor || true
+            ;;
+          "major")
+            ncu -u --target latest || true
+            ;;
+          "all")
+            ncu -u || true
+            ;;
+        esac
+        
+        # Install updated dependencies
+        npm install
+        
+        # Run tests with updated dependencies
+        npm run test:api || echo "❌ API tests failed with updates"
+        npm run test:web || echo "❌ Web tests failed with updates"
+
+    - name: Generate dependency report
+      if: always()
+      run: |
+        echo "📋 Generating dependency report..."
+        
+        # Create a comprehensive report
+        cat > dependency-report.md << 'EOF'
+        # Dependency Report 📦
+        
+        Generated on: $(date)
+        
+        ## Current Dependencies
+        \`\`\`json
+        $(npm list --json --depth=0 2>/dev/null || echo "{}")
+        \`\`\`
+        
+        ## Available Updates
+        \`\`\`
+        $(cat dependency-updates.json 2>/dev/null || echo "No updates available")
+        \`\`\`
+        
+        ## Security Audit
+        \`\`\`json
+        $(cat security-audit.json 2>/dev/null || echo "{}")
+        \`\`\`
+        
+        ## Test Results
+        - API Tests: $(npm run test:api > /dev/null 2>&1 && echo "✅ Passed" || echo "❌ Failed")
+        - Web Tests: $(npm run test:web > /dev/null 2>&1 && echo "✅ Passed" || echo "❌ Failed")
+        EOF
+
+    - name: Upload dependency reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: dependency-reports-${{ github.run_number }}
+        path: |
+          dependency-report.md
+          dependency-updates.json
+          security-audit.json
+        retention-days: 30
+
+    - name: Create issue for security vulnerabilities
+      if: failure()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
           
-          # Check if branch already exists
-          if git ls-remote --exit-code --heads origin $BRANCH_NAME; then
-            echo "Branch $BRANCH_NAME already exists, using timestamp suffix"
-            BRANCH_NAME="dependency-updates/$(date +%Y-%m-%d-%H%M)"
-            echo "branch-name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-          fi
+          let securityIssues = [];
+          try {
+            const auditData = JSON.parse(fs.readFileSync('security-audit.json', 'utf8'));
+            if (auditData.vulnerabilities && Object.keys(auditData.vulnerabilities).length > 0) {
+              securityIssues = Object.entries(auditData.vulnerabilities);
+            }
+          } catch (e) {
+            console.log('No security audit data found');
+          }
           
-          echo "🌿 Creating branch: $BRANCH_NAME"
-          git checkout -b $BRANCH_NAME
-
-      - name: Update dependencies
-        if: steps.check-updates.outputs.has-updates == 'true'
-        run: |
-          echo "📦 Updating dependencies..."
-          
-          # Update dependencies
-          ncu -u
-          
-          # Install updated dependencies
-          npm install
-            echo "✅ Dependencies updated successfully"
-
-      - name: Run linting
-        if: steps.check-updates.outputs.has-updates == 'true'
-        run: |
-          echo "🔍 Running linting checks..."
-          npm run lint:check
-
-      - name: Install Playwright browsers
-        if: steps.check-updates.outputs.has-updates == 'true'
-        run: |
-          echo "🎭 Installing Playwright browsers..."
-          npx playwright install --with-deps
-
-      - name: Load environment variables from .env
-        if: steps.check-updates.outputs.has-updates == 'true'
-        run: |
-          echo "📋 Loading configuration from .env file for dependency tests..."
-          if [ -f .env ]; then
-            # Load .env file and export variables (excluding comments and empty lines)
-            set -a
-            source <(cat .env | grep -v '^#' | grep -v '^$')
-            set +a
+          if (securityIssues.length > 0) {
+            const issueTitle = `🚨 Security Vulnerabilities Detected - ${new Date().toISOString().split('T')[0]}`;
+            const issueBody = `## Security Vulnerabilities Found
             
-            # Export CI-specific overrides for dependency testing
-            echo "CI_ENVIRONMENT=github-actions" >> $GITHUB_ENV
-            echo "CI_BROWSER=chromium" >> $GITHUB_ENV
-            echo "CI_HEADLESS=true" >> $GITHUB_ENV
-            echo "CI_WORKERS=2" >> $GITHUB_ENV
-            echo "CI_RETRIES=1" >> $GITHUB_ENV
-            echo "CI_SCREENSHOT_MODE=only-on-failure" >> $GITHUB_ENV
-            echo "CI_VIDEO_MODE=retain-on-failure" >> $GITHUB_ENV
-            echo "CI_TRACE_MODE=retain-on-failure" >> $GITHUB_ENV
+            This issue was automatically created by the dependency bot workflow.
             
-            # Export configuration from .env
-            echo "API_BASE_URL=${API_BASE_URL}" >> $GITHUB_ENV
-            echo "API_TIMEOUT=${API_TIMEOUT}" >> $GITHUB_ENV
-            echo "API_RETRY_ATTEMPTS=${API_RETRY_ATTEMPTS}" >> $GITHUB_ENV
-            echo "WEB_BASE_URL=${WEB_BASE_URL}" >> $GITHUB_ENV
-            echo "WEB_NAVIGATION_TIMEOUT=${WEB_NAVIGATION_TIMEOUT}" >> $GITHUB_ENV
-            echo "WEB_ELEMENT_TIMEOUT=${WEB_ELEMENT_TIMEOUT}" >> $GITHUB_ENV
-            echo "WEB_ASSERTION_TIMEOUT=${WEB_ASSERTION_TIMEOUT}" >> $GITHUB_ENV
-            echo "WEB_RETRY_ATTEMPTS=${WEB_RETRY_ATTEMPTS}" >> $GITHUB_ENV
-            echo "WEB_HEADLESS=${CI_HEADLESS}" >> $GITHUB_ENV
-            echo "WEB_SLOW_MO=${WEB_SLOW_MO}" >> $GITHUB_ENV
-            echo "WEB_VIEWPORT_WIDTH=${WEB_VIEWPORT_WIDTH}" >> $GITHUB_ENV
-            echo "WEB_VIEWPORT_HEIGHT=${WEB_VIEWPORT_HEIGHT}" >> $GITHUB_ENV
-            echo "LOG_LEVEL=${LOG_LEVEL}" >> $GITHUB_ENV
-            echo "ENABLE_REQUEST_LOGGING=${ENABLE_REQUEST_LOGGING}" >> $GITHUB_ENV
-            echo "ENABLE_RESPONSE_LOGGING=${ENABLE_RESPONSE_LOGGING}" >> $GITHUB_ENV
-            echo "ENABLE_SCREENSHOTS=${CI_SCREENSHOT_MODE}" >> $GITHUB_ENV
-            echo "ENABLE_VIDEOS=${CI_VIDEO_MODE}" >> $GITHUB_ENV
-            echo "ENABLE_TRACING=${CI_TRACE_MODE}" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_WORKERS=${CI_WORKERS}" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_RETRIES=${CI_RETRIES}" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_FULLY_PARALLEL=true" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_FORBID_ONLY=false" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_REPORTER=html,list" >> $GITHUB_ENV
-            echo "PLAYWRIGHT_OUTPUT_DIR=test-results-dependency-check" >> $GITHUB_ENV
-          else
-            echo "⚠️ .env file not found, using defaults"
-          fi
-
-      - name: Run all tests
-        if: steps.check-updates.outputs.has-updates == 'true'
-        id: run-tests
-        run: |
-          echo "🧪 Running all tests to verify dependency updates..."
-          
-          # Run tests with configuration from .env
-          npx playwright test --reporter=html,list --output-dir=test-results-dependency-check
-          
-          echo "test-status=success" >> $GITHUB_OUTPUT
-        continue-on-error: true
-
-      - name: Check test results
-        if: steps.check-updates.outputs.has-updates == 'true'
-        id: check-tests
-        run: |
-          if [ "${{ steps.run-tests.outcome }}" = "failure" ]; then
-            echo "❌ Tests failed with updated dependencies"
-            echo "test-status=failed" >> $GITHUB_OUTPUT
+            **Vulnerabilities:** ${securityIssues.length}
+            **Scan Date:** ${new Date().toISOString()}
             
-            # Still create PR but mark it as failing tests
-            echo "TESTS_FAILED=true" >> $GITHUB_ENV
-          else
-            echo "✅ All tests passed with updated dependencies"
-            echo "test-status=success" >> $GITHUB_OUTPUT
-            echo "TESTS_FAILED=false" >> $GITHUB_ENV
-          fi
-
-      - name: Generate change summary
-        if: steps.check-updates.outputs.has-updates == 'true'
-        run: |
-          echo "📋 Generating dependency change summary..."
-          
-          # Create a detailed summary
-          cat > DEPENDENCY_CHANGES.md << EOF
-          # 🤖 Automatic Dependency Updates
-          
-          This PR was automatically created by the dependency bot to update outdated packages.
-          
-          ## 📦 Updated Dependencies
-          
-          \`\`\`
-          $(ncu --format group)
-          \`\`\`
-          
-          ## 🧪 Test Results
-          
-          EOF
-          
-          if [ "$TESTS_FAILED" = "true" ]; then
-            cat >> DEPENDENCY_CHANGES.md << EOF
-          ❌ **Tests failed with these updates**
-          
-          Please review the test failures before merging this PR. The dependency updates may have introduced breaking changes.
-          
-          ### Next Steps:
-          1. Review the failing tests in the test artifacts
-          2. Check for breaking changes in the updated packages
-          3. Update test code if necessary
-          4. Re-run tests manually once fixes are applied
-          
-          EOF
-          else
-            cat >> DEPENDENCY_CHANGES.md << EOF
-          ✅ **All tests passed**
-          
-          All automated tests have passed with the updated dependencies. This PR is ready for review and merge.
-          
-          EOF
-          fi
-          
-          cat >> DEPENDENCY_CHANGES.md << EOF
-          ## 🔧 What was updated?
-          
-          - Dependencies were updated to their latest versions using \`npm-check-updates\`
-          - Package-lock.json was regenerated
-          - All tests were executed to ensure compatibility
-          
-          ## 🚀 How to merge?
-          
-          If tests are passing:
-          1. Review the changes
-          2. Merge this PR
-          
-          If tests are failing:
-          1. Review the test failures
-          2. Check breaking changes in updated packages
-          3. Make necessary code adjustments
-          4. Push additional commits to this branch
-          
-          ---
-          
-          *This PR was automatically created by the dependency bot on $(date)*
-          EOF
-
-      - name: Commit changes
-        if: steps.check-updates.outputs.has-updates == 'true'
-        run: |
-          echo "💾 Committing dependency updates..."
-          
-          git add .
-          
-          if [ "$TESTS_FAILED" = "true" ]; then
-            git commit -m "🤖 chore: update dependencies (⚠️ tests failing)
-
-          - Updated dependencies to latest versions
-          - ⚠️ Some tests are failing with these updates
-          - Please review test failures before merging
-          - Generated by dependency-bot
-          
-          $(date)"
-          else
-            git commit -m "🤖 chore: update dependencies (✅ tests passing)
-
-          - Updated dependencies to latest versions
-          - ✅ All tests passing with updates
-          - Safe to merge after review
-          - Generated by dependency-bot
-          
-          $(date)"
-          fi
-
-      - name: Push changes and create PR
-        if: steps.check-updates.outputs.has-updates == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.DEPENDENCY_BOT_TOKEN }}
-        run: |
-          echo "🚀 Pushing changes and creating PR..."
-          
-          # Push the branch
-          git push origin ${{ steps.create-branch.outputs.branch-name }}
-            # Create PR with appropriate title and details
-          if [ "$TESTS_FAILED" = "true" ]; then
-            gh pr create \
-              --title "🤖 Dependency Updates $(date +%Y-%m-%d) ⚠️ Tests Failing" \
-              --body-file DEPENDENCY_CHANGES.md \
-              --base main \
-              --head ${{ steps.create-branch.outputs.branch-name }}
+            ### Action Required
+            1. Review the security audit report in the workflow artifacts
+            2. Update vulnerable dependencies
+            3. Run tests to ensure compatibility
+            4. Close this issue once resolved
             
-            # Try to add labels (ignore errors if labels don't exist)
-            gh pr edit ${{ steps.create-branch.outputs.branch-name }} --add-label "dependencies,automated,test:all,needs-review" || echo "⚠️ Could not add labels (labels may not exist)"
-          else
-            gh pr create \
-              --title "🤖 Dependency Updates $(date +%Y-%m-%d) ✅ Tests Passing" \
-              --body-file DEPENDENCY_CHANGES.md \
-              --base main \
-              --head ${{ steps.create-branch.outputs.branch-name }}
+            ### Workflow Run
+            [View Details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
             
-            # Try to add labels (ignore errors if labels don't exist)
-            gh pr edit ${{ steps.create-branch.outputs.branch-name }} --add-label "dependencies,automated,test:all,ready-to-merge" || echo "⚠️ Could not add labels (labels may not exist)"
-          fi
-          echo "✅ PR created successfully!"
-
-      - name: Upload test artifacts
-        if: steps.check-updates.outputs.has-updates == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: dependency-test-results
-          path: |
-            test-results-dependency-check/
-            enterprise-reports/
-          retention-days: 14
-
-      - name: Notify completion
-        if: always()
-        run: |
-          if [ "${{ steps.check-updates.outputs.has-updates }}" = "true" ]; then
-            if [ "$TESTS_FAILED" = "true" ]; then
-              echo "🤖 Dependency bot completed with test failures"
-              echo "📧 PR created with failing tests - manual review required"
-            else
-              echo "🤖 Dependency bot completed successfully"
-              echo "📧 PR created with passing tests - ready for review"
-            fi
-          else
-            echo "🤖 Dependency bot completed - no updates needed"
-            echo "✅ All dependencies are already up to date"
-          fi
+            // Check if similar issue already exists
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['security', 'dependencies'],
+              state: 'open'
+            });
+            
+            if (issues.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: issueTitle,
+                body: issueBody,
+                labels: ['security', 'dependencies', 'automated']
+              });
+            }
+          }
