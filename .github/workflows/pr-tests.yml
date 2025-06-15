@@ -137,7 +137,8 @@ jobs:
         echo "- 🔍 **Debug Information**: Failure analysis and troubleshooting data" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         
-        echo "### How to Access Results" >> $GITHUB_STEP_SUMMARY        echo "- **View Detailed Logs**: Check the workflow run logs above for step by step execution" >> $GITHUB_STEP_SUMMARY
+        echo "### How to Access Results" >> $GITHUB_STEP_SUMMARY
+        echo "- **View Detailed Logs**: Check the workflow run logs above for step by step execution" >> $GITHUB_STEP_SUMMARY
         echo "- **Download Artifacts**: Scroll down to the Artifacts section to download test reports" >> $GITHUB_STEP_SUMMARY
         echo "- **Review Test Files**: Check the tests directory for test case implementations" >> $GITHUB_STEP_SUMMARY
         echo "- **Analyze Failures**: If any tests fail check the debug artifacts for detailed analysis" >> $GITHUB_STEP_SUMMARY
