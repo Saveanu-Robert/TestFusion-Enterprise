@@ -103,11 +103,13 @@ jobs:
 
     - name: Test dependency updates (if manual dispatch)
       if: github.event_name == 'workflow_dispatch'
+      env:
+        UPDATE_TYPE: ${{ github.event.inputs.update_type }}
       run: |
         echo "🔄 Testing with updated dependencies..."
         
         # Update dependencies based on input
-        case "${{ github.event.inputs.update_type }}" in
+        case "$UPDATE_TYPE" in
           "security")
             npm audit fix --audit-level moderate || true
             ;;
@@ -166,8 +168,10 @@ jobs:
     - name: Upload dependency reports
       if: always()
       uses: actions/upload-artifact@v4
+      env:
+        RUN_NUMBER: ${{ github.run_number }}
       with:
-        name: dependency-reports-${{ github.run_number }}
+        name: dependency-reports-${{ env.RUN_NUMBER }}
         path: |
           dependency-report.md
           dependency-updates.json
@@ -177,6 +181,9 @@ jobs:
     - name: Create issue for security vulnerabilities
       if: failure()
       uses: actions/github-script@v7
+      env:
+        REPO_NAME: ${{ github.repository }}
+        RUN_ID: ${{ github.run_id }}
       with:
         script: |
           const fs = require('fs');
@@ -207,7 +214,7 @@ jobs:
             4. Close this issue once resolved
             
             ### Workflow Run
-            [View Details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+            [View Details](https://github.com/${process.env.REPO_NAME}/actions/runs/${process.env.RUN_ID})`;
             
             // Check if similar issue already exists
             const { data: issues } = await github.rest.issues.listForRepo({

@@ -171,25 +171,45 @@ jobs:
             ;;
         esac
         
+        # Anti-masking techniques
+        COMMIT_SHORT=$(printf "%s" "$COMMIT_SHA" | head -c 8)
+        RUN_NUM_DISPLAY="Run-${RUN_NUMBER}"
+        NUMERIC_RUN=$(echo "$RUN_NUMBER" | tr '0-9' 'a-j' | sed 's/./&-/g')
+        
+        # Build URLs safely
+        REPO_SAFE=$(echo "$REPO_NAME" | sed 's|/|-|g')
+        RUN_LINK="https://github.com"
+        RUN_LINK="${RUN_LINK}/${REPO_NAME}"
+        RUN_LINK="${RUN_LINK}/actions"
+        RUN_LINK="${RUN_LINK}/runs"
+        RUN_LINK="${RUN_LINK}/${RUN_ID}"
+        
+        COMMIT_LINK="https://github.com"
+        COMMIT_LINK="${COMMIT_LINK}/${REPO_NAME}"
+        COMMIT_LINK="${COMMIT_LINK}/commit"
+        COMMIT_LINK="${COMMIT_LINK}/${COMMIT_SHA}"
+        
+        REPO_LINK="https://github.com/${REPO_NAME}"
+        
         # Create a comprehensive test results summary
         echo "# ${STATUS_EMOJI} Manual Test Results" > test-summary.md
         echo "" >> test-summary.md
         echo "| Field | Value |" >> test-summary.md
         echo "|-------|-------|" >> test-summary.md
-        echo "| **Test Type** | \`${TEST_TYPE_INPUT}\` |" >> test-summary.md
-        echo "| **Environment** | \`${ENVIRONMENT_INPUT}\` |" >> test-summary.md
-        echo "| **Browser** | \`${BROWSER_INPUT}\` |" >> test-summary.md
+        echo "| **Test Type** | ${TEST_TYPE_INPUT} |" >> test-summary.md
+        echo "| **Environment** | ${ENVIRONMENT_INPUT} |" >> test-summary.md
+        echo "| **Browser** | ${BROWSER_INPUT} |" >> test-summary.md
         echo "| **Status** | ${STATUS} |" >> test-summary.md
-        echo "| **Run ID** | \`${RUN_NUMBER}\` |" >> test-summary.md
-        echo "| **Commit** | \`${COMMIT_SHA:0:8}\` |" >> test-summary.md
-        echo "| **Timestamp** | \`$(date -u +"%Y-%m-%d %H:%M:%S UTC")\` |" >> test-summary.md
+        echo "| **Run ID** | ${RUN_NUM_DISPLAY} |" >> test-summary.md
+        echo "| **Commit** | ${COMMIT_SHORT} |" >> test-summary.md
+        echo "| **Timestamp** | $(date -u +'%Y-%m-%d %H:%M:%S UTC') |" >> test-summary.md
         echo "" >> test-summary.md
         
-        # Add workflow links
-        echo "## 🔗 Links" >> test-summary.md
-        echo "- 🏃 [View Workflow Run](https://github.com/${REPO_NAME}/actions/runs/${RUN_ID})" >> test-summary.md
-        echo "- 📊 [All Workflow Runs](https://github.com/${REPO_NAME}/actions)" >> test-summary.md
-        echo "- 📝 [Repository](https://github.com/${REPO_NAME})" >> test-summary.md
+        # Add workflow links with anti-masking
+        echo "## 🔗 Quick Links" >> test-summary.md
+        echo "- 🏃 [View Workflow Run](${RUN_LINK})" >> test-summary.md
+        echo "- � [Repository](${REPO_LINK})" >> test-summary.md
+        echo "- � [Commit Details](${COMMIT_LINK})" >> test-summary.md
         echo "" >> test-summary.md
         
         # Add test type specific information
