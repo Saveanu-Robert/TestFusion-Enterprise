@@ -86,8 +86,7 @@ jobs:
           
           # Install updated dependencies
           npm install
-          
-          echo "✅ Dependencies updated successfully"
+            echo "✅ Dependencies updated successfully"
 
       - name: Run linting
         if: steps.check-updates.outputs.has-updates == 'true'
@@ -101,14 +100,63 @@ jobs:
           echo "🎭 Installing Playwright browsers..."
           npx playwright install --with-deps
 
+      - name: Load environment variables from .env
+        if: steps.check-updates.outputs.has-updates == 'true'
+        run: |
+          echo "📋 Loading configuration from .env file for dependency tests..."
+          if [ -f .env ]; then
+            # Load .env file and export variables (excluding comments and empty lines)
+            set -a
+            source <(cat .env | grep -v '^#' | grep -v '^$')
+            set +a
+            
+            # Export CI-specific overrides for dependency testing
+            echo "CI_ENVIRONMENT=github-actions" >> $GITHUB_ENV
+            echo "CI_BROWSER=chromium" >> $GITHUB_ENV
+            echo "CI_HEADLESS=true" >> $GITHUB_ENV
+            echo "CI_WORKERS=2" >> $GITHUB_ENV
+            echo "CI_RETRIES=1" >> $GITHUB_ENV
+            echo "CI_SCREENSHOT_MODE=only-on-failure" >> $GITHUB_ENV
+            echo "CI_VIDEO_MODE=retain-on-failure" >> $GITHUB_ENV
+            echo "CI_TRACE_MODE=retain-on-failure" >> $GITHUB_ENV
+            
+            # Export configuration from .env
+            echo "API_BASE_URL=${API_BASE_URL}" >> $GITHUB_ENV
+            echo "API_TIMEOUT=${API_TIMEOUT}" >> $GITHUB_ENV
+            echo "API_RETRY_ATTEMPTS=${API_RETRY_ATTEMPTS}" >> $GITHUB_ENV
+            echo "WEB_BASE_URL=${WEB_BASE_URL}" >> $GITHUB_ENV
+            echo "WEB_NAVIGATION_TIMEOUT=${WEB_NAVIGATION_TIMEOUT}" >> $GITHUB_ENV
+            echo "WEB_ELEMENT_TIMEOUT=${WEB_ELEMENT_TIMEOUT}" >> $GITHUB_ENV
+            echo "WEB_ASSERTION_TIMEOUT=${WEB_ASSERTION_TIMEOUT}" >> $GITHUB_ENV
+            echo "WEB_RETRY_ATTEMPTS=${WEB_RETRY_ATTEMPTS}" >> $GITHUB_ENV
+            echo "WEB_HEADLESS=${CI_HEADLESS}" >> $GITHUB_ENV
+            echo "WEB_SLOW_MO=${WEB_SLOW_MO}" >> $GITHUB_ENV
+            echo "WEB_VIEWPORT_WIDTH=${WEB_VIEWPORT_WIDTH}" >> $GITHUB_ENV
+            echo "WEB_VIEWPORT_HEIGHT=${WEB_VIEWPORT_HEIGHT}" >> $GITHUB_ENV
+            echo "LOG_LEVEL=${LOG_LEVEL}" >> $GITHUB_ENV
+            echo "ENABLE_REQUEST_LOGGING=${ENABLE_REQUEST_LOGGING}" >> $GITHUB_ENV
+            echo "ENABLE_RESPONSE_LOGGING=${ENABLE_RESPONSE_LOGGING}" >> $GITHUB_ENV
+            echo "ENABLE_SCREENSHOTS=${CI_SCREENSHOT_MODE}" >> $GITHUB_ENV
+            echo "ENABLE_VIDEOS=${CI_VIDEO_MODE}" >> $GITHUB_ENV
+            echo "ENABLE_TRACING=${CI_TRACE_MODE}" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_WORKERS=${CI_WORKERS}" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_RETRIES=${CI_RETRIES}" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_FULLY_PARALLEL=true" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_FORBID_ONLY=false" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_REPORTER=html,list" >> $GITHUB_ENV
+            echo "PLAYWRIGHT_OUTPUT_DIR=test-results-dependency-check" >> $GITHUB_ENV
+          else
+            echo "⚠️ .env file not found, using defaults"
+          fi
+
       - name: Run all tests
         if: steps.check-updates.outputs.has-updates == 'true'
         id: run-tests
         run: |
           echo "🧪 Running all tests to verify dependency updates..."
           
-          # Run tests with detailed reporting
-          npx playwright test --reporter=html,json --output-dir=test-results-dependency-check
+          # Run tests with configuration from .env
+          npx playwright test --reporter=html,list --output-dir=test-results-dependency-check
           
           echo "test-status=success" >> $GITHUB_OUTPUT
         continue-on-error: true
