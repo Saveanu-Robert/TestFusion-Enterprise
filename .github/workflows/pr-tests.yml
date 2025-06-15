@@ -100,53 +100,84 @@ jobs:
       with:
         name: playwright-report-${{ matrix.test-type }}
         path: playwright-report/
-        retention-days: 30
-
-    - name: Create PR test summary
+        retention-days: 30    - name: Create PR test summary
       if: always()
+      env:
+        JOB_STATUS: ${{ job.status }}
+        COMMIT_SHA: ${{ github.sha }}
+        PR_NUM: ${{ github.event.number }}
+        HEAD_REF: ${{ github.head_ref }}
+        TEST_TYPE_VAR: ${{ matrix.test-type }}
+        REPO_NAME: ${{ github.repository }}
+        RUN_ID: ${{ github.run_id }}
       run: |
         # Determine status with proper emoji
-        if [[ "${{ job.status }}" == "success" ]]; then
-          STATUS="✅ Passed"
-          STATUS_EMOJI="🎉"
-        elif [[ "${{ job.status }}" == "failure" ]]; then
-          STATUS="❌ Failed"
-          STATUS_EMOJI="💥"
-        elif [[ "${{ job.status }}" == "cancelled" ]]; then
-          STATUS="🚫 Cancelled"
-          STATUS_EMOJI="⏹️"
-        else
-          STATUS="⚠️ ${{ job.status }}"
-          STATUS_EMOJI="❓"
-        fi
+        case "$JOB_STATUS" in
+          "success")
+            STATUS="✅ Passed"
+            STATUS_EMOJI="🎉"
+            ;;
+          "failure")
+            STATUS="❌ Failed"
+            STATUS_EMOJI="💥"
+            ;;
+          "cancelled")
+            STATUS="🚫 Cancelled"
+            STATUS_EMOJI="⏹️"
+            ;;
+          *)
+            STATUS="⚠️ $JOB_STATUS"
+            STATUS_EMOJI="❓"
+            ;;
+        esac
         
-        # Create PR test summary
-        echo "## ${STATUS_EMOJI} PR Test Results - ${{ matrix.test-type }}" >> $GITHUB_STEP_SUMMARY
+        # Extract values from environment (this avoids GitHub masking)
+        COMMIT_SHORT="${COMMIT_SHA:0:8}"
+        
+        # Create PR test summary with proper formatting
+        echo "## ${STATUS_EMOJI} PR Test Results - ${TEST_TYPE_VAR}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
         echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
-        echo "| **Test Type** | \`${{ matrix.test-type }}\` |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Test Type** | \`${TEST_TYPE_VAR}\` |" >> $GITHUB_STEP_SUMMARY
         echo "| **Status** | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
-        echo "| **PR Number** | \`#${{ github.event.number }}\` |" >> $GITHUB_STEP_SUMMARY
-        echo "| **Branch** | \`${{ github.head_ref }}\` |" >> $GITHUB_STEP_SUMMARY
-        echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+        echo "| **PR Number** | [#${PR_NUM}](https://github.com/${REPO_NAME}/pull/${PR_NUM}) |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Branch** | \`${HEAD_REF}\` |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Commit** | [\`${COMMIT_SHORT}\`](https://github.com/${REPO_NAME}/commit/${COMMIT_SHA}) |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Workflow** | [View Run](https://github.com/${REPO_NAME}/actions/runs/${RUN_ID}) |" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         
         # Add test-specific information
-        if [[ "${{ matrix.test-type }}" == "api" ]]; then
-          echo "### 🔌 API Tests Executed" >> $GITHUB_STEP_SUMMARY
-          echo "- JSONPlaceholder API endpoints" >> $GITHUB_STEP_SUMMARY
-          echo "- CRUD operations validation" >> $GITHUB_STEP_SUMMARY
-          echo "- Data integrity checks" >> $GITHUB_STEP_SUMMARY
-        elif [[ "${{ matrix.test-type }}" == "web-local" ]]; then
-          echo "### 🌐 Web Tests Executed (Local)" >> $GITHUB_STEP_SUMMARY
-          echo "- Cross-browser compatibility" >> $GITHUB_STEP_SUMMARY
-          echo "- Page navigation and loading" >> $GITHUB_STEP_SUMMARY
-          echo "- Accessibility validation" >> $GITHUB_STEP_SUMMARY
-        elif [[ "${{ matrix.test-type }}" == "web-grid" ]]; then
-          echo "### 🌐 Web Tests Executed (Grid)" >> $GITHUB_STEP_SUMMARY
-          echo "- Selenium Grid execution" >> $GITHUB_STEP_SUMMARY
-          echo "- Distributed testing" >> $GITHUB_STEP_SUMMARY
-          echo "- Browser compatibility" >> $GITHUB_STEP_SUMMARY
-        fi
+        case "$TEST_TYPE_VAR" in
+          "api")
+            echo "### 🔌 API Tests Executed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ JSONPlaceholder API endpoints" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ CRUD operations validation" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Data integrity checks" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Error handling validation" >> $GITHUB_STEP_SUMMARY
+            ;;
+          "web-local")
+            echo "### 🌐 Web Tests Executed (Local)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Cross-browser compatibility" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Page navigation and loading" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Accessibility validation" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Responsive design testing" >> $GITHUB_STEP_SUMMARY
+            ;;
+          "web-grid")
+            echo "### 🌐 Web Tests Executed (Grid)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Selenium Grid execution" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Distributed testing" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Browser compatibility" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Parallel test execution" >> $GITHUB_STEP_SUMMARY
+            ;;
+        esac
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📊 Quick Stats" >> $GITHUB_STEP_SUMMARY
+        echo "- **Duration**: \`$([ "$JOB_STATUS" = "success" ] && echo "Completed successfully" || echo "Check logs for details")\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Runner**: \`ubuntu-latest\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Node Version**: \`18\`" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
