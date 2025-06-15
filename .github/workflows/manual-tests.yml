@@ -33,6 +33,14 @@ on:
         - staging
         - production
 
+# Add explicit permissions for the workflow
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+  issues: write
+
 env:
   # This is the only secret needed - the encryption key for decrypting .env values
   ENV_ENCRYPTION_KEY: ${{ secrets.ENV_ENCRYPTION_KEY }}
@@ -131,29 +139,55 @@ jobs:
         path: playwright-report/
         retention-days: 30
 
-    - name: Comment on commit with results
+    - name: Generate test results summary
       if: always()
-      uses: actions/github-script@v7
+      run: |
+        # Create a test results summary
+        echo "# Manual Test Results 🧪" > test-summary.md
+        echo "" >> test-summary.md
+        echo "**Test Type:** ${{ github.event.inputs.test_type }}" >> test-summary.md
+        echo "**Environment:** ${{ github.event.inputs.environment }}" >> test-summary.md
+        echo "**Browser:** ${{ github.event.inputs.browser }}" >> test-summary.md
+        echo "**Status:** ${{ job.status == 'success' && '✅ Passed' || '❌ Failed' }}" >> test-summary.md
+        echo "**Run ID:** ${{ github.run_number }}" >> test-summary.md
+        echo "**Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> test-summary.md
+        echo "" >> test-summary.md
+        echo "View [full workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> test-summary.md
+        echo "" >> test-summary.md
+        
+        # Add test type specific information
+        if [[ "${{ github.event.inputs.test_type }}" == "api" ]]; then
+          echo "## API Test Results" >> test-summary.md
+          echo "- Tested JSONPlaceholder API endpoints" >> test-summary.md
+          echo "- Validated CRUD operations for posts, users, and comments" >> test-summary.md
+        elif [[ "${{ github.event.inputs.test_type }}" =~ web ]]; then
+          echo "## Web Test Results" >> test-summary.md
+          echo "- Tested Playwright documentation site" >> test-summary.md
+          echo "- Validated navigation and accessibility" >> test-summary.md
+          echo "- Browser: ${{ github.event.inputs.browser }}" >> test-summary.md
+        fi
+        
+        # Display the summary in the workflow logs
+        echo "==================== TEST SUMMARY ===================="
+        cat test-summary.md
+        echo "======================================================"
+
+    - name: Upload test summary
+      if: always()
+      uses: actions/upload-artifact@v4
       with:
-        script: |
-          const testType = '${{ github.event.inputs.test_type }}';
-          const environment = '${{ github.event.inputs.environment }}';
-          const browser = '${{ github.event.inputs.browser }}';
-          const status = '${{ job.status }}';
-          
-          const comment = `## Manual Test Results 🧪
-          
-          **Test Type:** ${testType}
-          **Environment:** ${environment}
-          **Browser:** ${browser}
-          **Status:** ${status === 'success' ? '✅ Passed' : '❌ Failed'}
-          **Run ID:** ${{ github.run_number }}
-          
-          View [full report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
-          
-          github.rest.repos.createCommitComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            commit_sha: context.sha,
-            body: comment
-          });
+        name: test-summary-${{ github.event.inputs.test_type }}-${{ github.run_number }}
+        path: test-summary.md
+        retention-days: 30
+
+    - name: Create job summary
+      if: always()
+      run: |
+        # Add the test summary to GitHub's job summary
+        cat test-summary.md >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "- [Test Results](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+        if [[ "${{ github.event.inputs.test_type }}" != "api" ]]; then
+          echo "- [Playwright Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+        fi
