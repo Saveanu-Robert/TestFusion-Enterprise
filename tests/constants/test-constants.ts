@@ -181,20 +181,20 @@ export const TEST_DATA = {
         zipcode: '12345-678',
         geo: {
           lat: '40.7128',
-          lng: '-74.0060'
-        }
+          lng: '-74.0060',
+        },
       },
       company: {
         name: 'Test Company',
         catchPhrase: 'Testing Excellence',
-        bs: 'quality test solutions'
-      }
+        bs: 'quality test solutions',
+      },
     },
     INVALID_USER: {
       name: '',
       email: 'invalid-email',
-      phone: 'invalid-phone'
-    }
+      phone: 'invalid-phone',
+    },
   },
   
   // Post Test Data
@@ -202,13 +202,13 @@ export const TEST_DATA = {
     VALID_POST: {
       title: 'Test Post Title',
       body: 'This is a test post body content that contains meaningful information for testing purposes.',
-      userId: 1
+      userId: 1,
     },
     INVALID_POST: {
       title: '',
       body: '',
-      userId: 'invalid'
-    }
+      userId: 'invalid',
+    },
   },
   
   // Comment Test Data
@@ -217,13 +217,13 @@ export const TEST_DATA = {
       name: 'Test Comment',
       email: 'testcommenter@example.com',
       body: 'This is a test comment body content',
-      postId: 1
+      postId: 1,
     },
     INVALID_COMMENT: {
       name: '',
       email: 'invalid-email',
-      body: ''
-    }
+      body: '',
+    },
   },
   
   // Common Test Values
@@ -231,31 +231,31 @@ export const TEST_DATA = {
     VALID_EMAILS: [
       'test@example.com',
       'user.test@domain.co.uk',
-      'test+label@example.org'
+      'test+label@example.org',
     ],
     INVALID_EMAILS: [
       'invalid-email',
       '@example.com',
       'test@',
-      'test..test@example.com'
+      'test..test@example.com',
     ],
     VALID_PHONE_NUMBERS: [
       '555-123-4567',
       '+1-555-123-4567',
-      '(555) 123-4567'
+      '(555) 123-4567',
     ],
     INVALID_PHONE_NUMBERS: [
       '123',
       'invalid-phone',
-      '555-123-456789'
+      '555-123-456789',
     ],
     SEARCH_TERMS: [
       'automation',
       'testing',
       'playwright',
-      'javascript'
-    ]
-  }
+      'javascript',
+    ],
+  },
 } as const;
 
 // ===========================================
@@ -269,11 +269,10 @@ export const VALIDATION_CONSTANTS = {
     ACCEPTABLE: config.getProperty('validation.maxResponseTime', 5000),
     SLOW: 10000,
   },
-  
   // Data Validation Rules
   RULES: {
     EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    PHONE: /^\+?[\d\s\-\(\)]+$/,
+    PHONE: /^\+?[\d\s\-()]+$/,
     URL: /^https?:\/\/.+/,
     UUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
   },

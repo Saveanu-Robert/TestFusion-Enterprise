@@ -113,7 +113,7 @@ export class HomePage extends BasePage {
     return {
       title: await this.getPageTitle(),
       url: await this.getCurrentUrl(),
-      mainHeading: await this.getText('h1').catch(() => 'No main heading found')
+      mainHeading: await this.getText('h1').catch(() => 'No main heading found'),
     };
   }
 }

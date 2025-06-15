@@ -1,5 +1,7 @@
 import { UsersApiService } from '../services/users-api.service';
 import { UsersValidator } from '../validators/users-validator';
+import { createUserPayload } from '../fixtures/test-data';
+import { TEST_DATA } from '../constants/test-constants';
 
 export class UsersOperations {
   
@@ -51,32 +53,18 @@ export class UsersOperations {
     
     return response;
   }
-
   /**
-   * Generates test user data
+   * Generates test user data using centralized test data factory
    */
   static generateTestUserData(): any {
-    return {
-      name: 'Test User',
-      username: 'testuser',
-      email: 'testuser@example.com',
-      phone: '555-123-4567',
-      website: 'testuser.example.com',
-      address: {
-        street: '123 Test Street',
-        suite: 'Apt 456',
-        city: 'Test City',
-        zipcode: '12345-678',
-        geo: {
-          lat: '40.7128',
-          lng: '-74.0060',
-        },
-      },
-      company: {
-        name: 'Test Company',
-        catchPhrase: 'Testing Excellence',
-        bs: 'quality test solutions',
-      },
-    };
+    return createUserPayload({
+      name: TEST_DATA.USERS.VALID_USER.name,
+      username: TEST_DATA.USERS.VALID_USER.username,
+      email: TEST_DATA.USERS.VALID_USER.email,
+      phone: TEST_DATA.USERS.VALID_USER.phone,
+      website: TEST_DATA.USERS.VALID_USER.website,
+      address: TEST_DATA.USERS.VALID_USER.address,
+      company: TEST_DATA.USERS.VALID_USER.company,
+    });
   }
 }

@@ -113,12 +113,11 @@ test.describe('Home Page Tests', () => {
   test('should collect and validate page metrics', async () => {
     await test.step('Get page metrics', async () => {
       const metrics = await homePage.getPageMetrics();
-      
       expect(metrics.title).toContain('Playwright');
       expect(metrics.url).toContain(WEB_CONSTANTS.BASE_URL);
       expect(metrics.mainHeading).toBeTruthy();
       
-      console.log('📊 Page Metrics:', JSON.stringify(metrics, null, 2));
+      Logger.getInstance().info('📊 Home Page Metrics collected', { metrics });
     });
   });
 });

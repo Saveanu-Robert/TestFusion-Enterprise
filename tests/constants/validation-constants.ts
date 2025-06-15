@@ -12,12 +12,11 @@
 /**
  * Primary validation patterns - RFC compliant and production-ready
  */
-export const VALIDATION_PATTERNS = {
-  /**
+export const VALIDATION_PATTERNS = {  /**
    * RFC 5322 compliant email validation pattern
    * Validates email addresses according to official specification
    */
-  EMAIL: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+  EMAIL: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
 
   /**
    * Username validation pattern

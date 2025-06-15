@@ -30,7 +30,7 @@ export class WebClient {
 
   constructor(
     private readonly page: Page,
-    configManager: ConfigurationManager
+    configManager: ConfigurationManager,
   ) {
     this.config = configManager.getWebConfig();
     this.logger = Logger.getInstance();
@@ -44,7 +44,7 @@ export class WebClient {
     
     await this.page.goto(url, {
       timeout: options.waitForTimeout || this.config.timeout.navigation,
-      waitUntil: options.waitForNetworkIdle ? 'networkidle' : 'domcontentloaded'
+      waitUntil: options.waitForNetworkIdle ? 'networkidle' : 'domcontentloaded',
     });
 
     if (options.waitForSelector) {
@@ -63,7 +63,7 @@ export class WebClient {
     this.logger.info('Reloading page');
     await this.page.reload({
       timeout: options.waitForTimeout || this.config.timeout.navigation,
-      waitUntil: options.waitForNetworkIdle ? 'networkidle' : 'domcontentloaded'
+      waitUntil: options.waitForNetworkIdle ? 'networkidle' : 'domcontentloaded',
     });
   }
 
@@ -75,7 +75,7 @@ export class WebClient {
     const element = this.page.locator(selector);
     await element.waitFor({
       timeout: options.timeout || this.config.timeout.element,
-      state: 'visible'
+      state: 'visible',
     });
     return element;
   }
@@ -85,7 +85,7 @@ export class WebClient {
     const element = await this.waitForElement(selector, options);
     await element.click({
       timeout: options.timeout || this.config.timeout.element,
-      force: options.force
+      force: options.force,
     });
   }
 
@@ -176,14 +176,14 @@ export class WebClient {
   async waitForUrl(url: string | RegExp, timeout?: number): Promise<void> {
     this.logger.info(`Waiting for URL: ${url}`);
     await this.page.waitForURL(url, {
-      timeout: timeout || this.config.timeout.navigation
+      timeout: timeout || this.config.timeout.navigation,
     });
   }
 
   async waitForResponse(urlPattern: string | RegExp, timeout?: number): Promise<void> {
     this.logger.info(`Waiting for response: ${urlPattern}`);
     await this.page.waitForResponse(urlPattern, {
-      timeout: timeout || this.config.timeout.element
+      timeout: timeout || this.config.timeout.element,
     });
   }
 
@@ -201,7 +201,7 @@ export class WebClient {
   async takeScreenshot(name?: string): Promise<Buffer> {
     const screenshot = await this.page.screenshot({
       fullPage: true,
-      path: name ? `screenshots/${name}.png` : undefined
+      path: name ? `screenshots/${name}.png` : undefined,
     });
     this.logger.info(`Screenshot taken${name ? `: ${name}` : ''}`);
     return screenshot;

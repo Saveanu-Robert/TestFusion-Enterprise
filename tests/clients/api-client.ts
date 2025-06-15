@@ -221,7 +221,7 @@ export class ApiClient {
     startTime: number,
     requestId: string,
     method: string,
-    endpoint: string
+    endpoint: string,
   ): Promise<ApiResponse<T>> {
     const duration = Date.now() - startTime;
     
@@ -265,7 +265,7 @@ export class ApiClient {
     startTime: number,
     requestId: string,
     method: string,
-    endpoint: string
+    endpoint: string,
   ): never {
     const duration = Date.now() - startTime;
     

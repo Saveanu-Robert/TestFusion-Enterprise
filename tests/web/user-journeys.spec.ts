@@ -119,7 +119,7 @@ test.describe('End-to-End User Journeys', () => {
       { name: 'Mobile', width: 375, height: 667 },
       { name: 'Tablet', width: 768, height: 1024 },
       { name: 'Desktop', width: 1200, height: 800 },
-      { name: 'Large Desktop', width: 1920, height: 1080 }
+      { name: 'Large Desktop', width: 1920, height: 1080 },
     ];
 
     for (const viewport of viewports) {
@@ -213,7 +213,7 @@ test.describe('End-to-End User Journeys', () => {
       const performanceMetrics = {
         homePageLoadTime: 0,
         docsPageLoadTime: 0,
-        navigationTime: 0
+        navigationTime: 0,
       };
 
       // Measure home page load time
@@ -247,7 +247,7 @@ test.describe('End-to-End User Journeys', () => {
       // Test handling of non-existent pages
       const response = await webPage.goto(`${WEB_CONSTANTS.BASE_URL}/non-existent-page-12345`, {
         waitUntil: 'domcontentloaded',
-        timeout: 10000
+        timeout: 10000,
       });
       
       if (response) {
@@ -265,7 +265,7 @@ test.describe('End-to-End User Journeys', () => {
           offline: false,
           downloadThroughput: 100 * 1024, // 100kb/s
           uploadThroughput: 100 * 1024,   // 100kb/s
-          latency: 500                     // 500ms latency
+          latency: 500,                     // 500ms latency
         });
         logger.info('Network throttling applied (Chromium only)');
       } else {

@@ -54,29 +54,34 @@ export const test = base.extend<WebTestFixtures, WebWorkerFixtures>({
 
     // Enable logging based on centralized configuration
     const config = ConfigurationManager.getInstance();
-    const loggingConfig = config.getTestConfig().logging;
-
-    if (loggingConfig.enableRequestLogging) {
+    const loggingConfig = config.getTestConfig().logging;    if (loggingConfig.enableRequestLogging) {
       page.on('request', request => {
-        console.log(`[WEB REQUEST] ${request.method()} ${request.url()}`);
+        Logger.getInstance().debug(`🌐 Web Request: ${request.method()} ${request.url()}`, {
+          method: request.method(),
+          url: request.url(),
+        });
       });
     }
 
     if (loggingConfig.enableResponseLogging) {
       page.on('response', response => {
-        console.log(`[WEB RESPONSE] ${response.status()} ${response.url()}`);
+        Logger.getInstance().debug(`📡 Web Response: ${response.status()} ${response.url()}`, {
+          status: response.status(),
+          url: response.url(),
+        });
       });
     }
 
     if (loggingConfig.enableConsoleLogging) {
       page.on('console', msg => {
-        console.log(`[BROWSER CONSOLE] ${msg.type()}: ${msg.text()}`);
+        Logger.getInstance().debug(`🖥️ Browser Console [${msg.type()}]: ${msg.text()}`, {
+          type: msg.type(),
+          text: msg.text(),
+        });
       });
-    }
-
-    // Add error handling
+    }    // Add error handling
     page.on('pageerror', error => {
-      console.log(`[BROWSER ERROR] ${error.message}`);
+      Logger.getInstance().error(`💥 Browser Page Error: ${error.message}`, { error: error.message });
     });
 
     await use(page);

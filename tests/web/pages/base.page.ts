@@ -41,7 +41,7 @@ export abstract class BasePage {
     this.logger.info(`Navigating to page: ${url}`);
     await this.page.goto(url, {
       waitUntil: 'domcontentloaded',
-      timeout: this.config.timeout.navigation
+      timeout: this.config.timeout.navigation,
     });
     await this.waitForPageLoad();
   }
@@ -73,7 +73,7 @@ export abstract class BasePage {
     const element = this.page.locator(selector);
     await element.waitFor({
       timeout: options.timeout || this.config.timeout.element,
-      state: 'visible'
+      state: 'visible',
     });
     return element;
   }
@@ -83,7 +83,7 @@ export abstract class BasePage {
     const element = await this.waitForElement(selector, options);
     await element.click({
       timeout: options.timeout || this.config.timeout.element,
-      force: options.force
+      force: options.force,
     });
   }
 
@@ -136,7 +136,7 @@ export abstract class BasePage {
   async waitForUrl(url: string | RegExp, timeout?: number): Promise<void> {
     this.logger.info(`Waiting for URL: ${url}`);
     await this.page.waitForURL(url, {
-      timeout: timeout || this.config.timeout.navigation
+      timeout: timeout || this.config.timeout.navigation,
     });
   }
 
@@ -156,7 +156,7 @@ export abstract class BasePage {
   async takeScreenshot(name?: string): Promise<Buffer> {
     const screenshot = await this.page.screenshot({
       fullPage: true,
-      path: name ? `screenshots/${name}.png` : undefined
+      path: name ? `screenshots/${name}.png` : undefined,
     });
     this.logger.info(`Screenshot taken${name ? `: ${name}` : ''}`);
     return screenshot;

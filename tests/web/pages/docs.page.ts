@@ -158,7 +158,7 @@ export class DocsPage extends BasePage {
     if (isDesktop) {
       // On desktop, expect sidebar to be visible
       await this.assertElementVisible('.theme-doc-sidebar-container', 'Sidebar should be visible');
-        // Check for some expected sidebar items
+      // Check for some expected sidebar items
       const sidebarItems = await this.page.locator('.theme-doc-sidebar-item-link').count();
       if (sidebarItems === 0) {
         throw new Error('No sidebar navigation items found');
@@ -199,7 +199,7 @@ export class DocsPage extends BasePage {
       title: await this.getPageTitle(),
       url: await this.getCurrentUrl(),
       mainHeading: await this.getMainHeadingText(),
-      sidebarItemCount
+      sidebarItemCount,
     };
   }
 
