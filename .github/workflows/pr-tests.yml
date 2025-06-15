@@ -100,7 +100,9 @@ jobs:
       with:
         name: playwright-report-${{ matrix.test-type }}
         path: playwright-report/
-        retention-days: 30    - name: Create PR test summary
+        retention-days: 30
+
+    - name: Create PR test summary
       if: always()
       env:
         JOB_STATUS: ${{ job.status }}
