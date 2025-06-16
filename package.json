@@ -17,7 +17,8 @@
     "test:all-files": "playwright test --project=api",
     "test:parallel": "playwright test --workers=4",
     "test:ci": "playwright test",
-    "test:ci:api": "playwright test --project=api",    "test:ci:web": "playwright test --project=chromium --project=firefox --project=webkit",
+    "test:ci:api": "playwright test --project=api",
+    "test:ci:web": "playwright test --project=chromium --project=firefox --project=webkit",
     "test:web:grid": "playwright test --project=chromium",
     "test:web:browserstack": "playwright test --project=browserstack",
     "install:browsers": "playwright install",
@@ -46,7 +47,8 @@
     "@typescript-eslint/parser": "^8.34.0",
     "eslint": "^9.29.0",
     "eslint-plugin-playwright": "^2.2.0",
-    "fs-extra": "^11.3.0"
+    "fs-extra": "^11.3.0",
+    "playwright-qase-reporter": "^2.1.3"
   },
   "dependencies": {
     "dotenv": "^16.5.0"
