@@ -10,6 +10,7 @@
  */
 
 import { test, expect } from '../fixtures/web-fixtures';
+import { qase } from 'playwright-qase-reporter';
 import { HomePage } from './pages/home.page';
 import { WEB_CONSTANTS } from '../constants/test-constants';
 import { Logger } from '../utils/logger';
@@ -20,7 +21,7 @@ test.describe('Home Page Tests', () => {
   test.beforeEach(async ({ webPage }) => {
     homePage = new HomePage(webPage);
     await homePage.navigate();
-  });  test('Should load home page successfully and validate core elements', async ({ webReporter }) => {
+  });  test(qase(32, 'Should load home page successfully and validate core elements'), async ({ webReporter }) => {
     // Mark as smoke test for core functionality validation
     test.info().annotations.push({ type: 'tag', description: 'smoke' });
     test.info().annotations.push({ type: 'feature', description: 'home-page-loading' });
@@ -70,7 +71,7 @@ test.describe('Home Page Tests', () => {
       pageUrl: homePage.getPageUrl(),
       testType: 'smoke',
     });
-  });  test('Should display hero section correctly and validate visual elements', async ({ webReporter }) => {
+  });  test(qase(33, 'Should display hero section correctly and validate visual elements'), async ({ webReporter }) => {
     test.info().annotations.push({ type: 'feature', description: 'hero-section' });
     test.info().annotations.push({ type: 'tag', description: 'ui-validation' });
     
@@ -111,7 +112,7 @@ test.describe('Home Page Tests', () => {
     // Attach user interaction timeline
     await webReporter.attachUserInteractionTimeline('Hero Section Test');
   });
-  test('Should display navigation elements and validate accessibility', async () => {
+  test(qase(34, 'Should display navigation elements and validate accessibility'), async () => {
     test.info().annotations.push({ type: 'feature', description: 'navigation' });
     test.info().annotations.push({ type: 'tag', description: 'accessibility' });
     
@@ -135,7 +136,7 @@ test.describe('Home Page Tests', () => {
       });
     });
   });
-  test('Should navigate to docs page', async ({ webPage, webReporter }) => {
+  test(qase(35, 'Should navigate to docs page'), async ({ webPage, webReporter }) => {
     await test.step('Click get started button', async () => {
       // Capture screenshot before interaction
       await webReporter.attachScreenshot('Before Get Started Click');
@@ -176,7 +177,7 @@ test.describe('Home Page Tests', () => {
       navigationTarget: 'docs',
     });
   });
-  test('Should work on mobile viewport', async ({ webPage, webReporter }) => {
+  test(qase(36, 'Should work on mobile viewport'), async ({ webPage, webReporter }) => {
     await test.step('Set mobile viewport and reload', async () => {
       // Capture desktop screenshot first
       await webReporter.attachScreenshot('Before Mobile Viewport');
@@ -217,7 +218,7 @@ test.describe('Home Page Tests', () => {
       deviceType: 'mobile',
     });
   });
-  test('Should load within acceptable time', async ({ webPage }) => {
+  test(qase(37, 'Should load within acceptable time'), async ({ webPage }) => {
     await test.step('Measure page load performance', async () => {      const logger = Logger.getInstance();
       const startTime = Date.now();
       await homePage.navigate();
@@ -231,7 +232,7 @@ test.describe('Home Page Tests', () => {
       expect(loadTime).toBeLessThan(15000); // 15 seconds max
     });
   });
-  test('Should have proper SEO elements and validate page structure', async ({ webPage }) => {
+  test(qase(38, 'Should have proper SEO elements and validate page structure'), async ({ webPage }) => {
     test.info().annotations.push({ type: 'feature', description: 'seo' });
     test.info().annotations.push({ type: 'tag', description: 'content-validation' });
     await test.step('Validate page title length meets SEO best practices', async () => {
@@ -259,7 +260,7 @@ test.describe('Home Page Tests', () => {
       });
     });
   });
-  test('Should handle keyboard navigation', async ({ webReporter }) => {
+  test(qase(39, 'Should handle keyboard navigation'), async ({ webReporter }) => {
     // Attach initial context
     await webReporter.attachVisualContext({ 
       reducedMotion: false,
@@ -311,7 +312,7 @@ test.describe('Home Page Tests', () => {
     });
   });
 
-  test('Should collect and validate page metrics', async () => {
+  test(qase(44, 'Should collect and validate page metrics'), async () => {
     await test.step('Get page metrics', async () => {
       const metrics = await homePage.getPageMetrics();
       expect(metrics.title).toContain('Playwright');

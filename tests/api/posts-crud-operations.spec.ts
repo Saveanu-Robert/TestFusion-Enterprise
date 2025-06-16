@@ -10,6 +10,7 @@
  */
 
 import { test, expect } from '../fixtures/api-fixtures';
+import { qase } from 'playwright-qase-reporter';
 import { PostsApiService } from '../services/posts-api.service';
 import { PostsOperations } from '../operations/posts-operations';
 import { HTTP_STATUS_CODES } from '../constants/api-constants';
@@ -59,7 +60,7 @@ test.describe('Posts API - CRUD Operations', () => {
     });
   });
 
-  test('Should retrieve all posts successfully and validate response structure', async ({ logger, apiReporter }) => {
+  test(qase(20, 'Should retrieve all posts successfully and validate response structure'), async ({ logger, apiReporter }) => {
     // Mark as smoke test for core functionality validation
     test.info().annotations.push({ type: 'tag', description: 'smoke' });
     test.info().annotations.push({ type: 'feature', description: 'posts-retrieval' });
@@ -93,7 +94,7 @@ test.describe('Posts API - CRUD Operations', () => {
     });
   });
 
-  test('Should retrieve a specific post by ID and validate post data integrity', async ({ logger, apiReporter }) => {
+  test(qase(21, 'Should retrieve a specific post by ID and validate post data integrity'), async ({ logger, apiReporter }) => {
     test.info().annotations.push({ type: 'feature', description: 'posts-by-id' });
     test.info().annotations.push({ type: 'priority', description: 'high' });
     const postId = 1;
@@ -130,7 +131,7 @@ test.describe('Posts API - CRUD Operations', () => {
     });
   });
 
-  test('Should create a new post successfully and validate creation response', async ({ logger, apiReporter }) => {
+  test(qase(22, 'Should create a new post successfully and validate creation response'), async ({ logger, apiReporter }) => {
     // Mark as CRUD test for data manipulation validation
     test.info().annotations.push({ type: 'tag', description: 'crud' });
     test.info().annotations.push({ type: 'feature', description: 'posts-creation' });
@@ -178,7 +179,7 @@ test.describe('Posts API - CRUD Operations', () => {
     });
   });
 
-  test('Should return 404 error for non-existent post ID and validate error response', async ({ logger, apiReporter }) => {
+  test(qase(23, 'Should return 404 error for non-existent post ID and validate error response'), async ({ logger, apiReporter }) => {
     // Mark as error handling test for negative scenarios
     test.info().annotations.push({ type: 'tag', description: 'error-handling' });
     test.info().annotations.push({ type: 'feature', description: 'posts-not-found' });
