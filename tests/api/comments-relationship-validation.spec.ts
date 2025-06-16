@@ -10,6 +10,7 @@
  */
 
 import { test, expect } from '../fixtures/api-fixtures';
+import { qase } from 'playwright-qase-reporter';
 import { CommentsApiService } from '../services/comments-api.service';
 import { CommentsOperations } from '../operations/comments-operations';
 
@@ -58,7 +59,7 @@ test.describe('Comments API - Relationship Validation', () => {
     });
   });
 
-  test('Should retrieve all comments successfully and validate response structure', async ({ logger, apiReporter }) => {
+  test(qase(24, 'Should retrieve all comments successfully and validate response structure'), async ({ logger, apiReporter }) => {
     // Mark as smoke test for core functionality validation
     test.info().annotations.push({ type: 'tag', description: 'smoke' });
     test.info().annotations.push({ type: 'feature', description: 'comments-retrieval' });
@@ -91,7 +92,7 @@ test.describe('Comments API - Relationship Validation', () => {
     });
   });
 
-  test('Should retrieve a specific comment by ID and validate comment structure', async ({ logger, apiReporter }) => {
+  test(qase(25, 'Should retrieve a specific comment by ID and validate comment structure'), async ({ logger, apiReporter }) => {
     test.info().annotations.push({ type: 'feature', description: 'comments-by-id' });
     test.info().annotations.push({ type: 'priority', description: 'high' });
     const commentId = 1;
@@ -130,7 +131,7 @@ test.describe('Comments API - Relationship Validation', () => {
     });
   });
 
-  test('Should retrieve comments by post ID and validate post-comment relationships', async ({ logger, apiReporter }) => {
+  test(qase(26, 'Should retrieve comments by post ID and validate post-comment relationships'), async ({ logger, apiReporter }) => {
     test.info().annotations.push({ type: 'feature', description: 'comments-by-post' });
     test.info().annotations.push({ type: 'priority', description: 'critical' });
     const postId = 1;
@@ -167,7 +168,7 @@ test.describe('Comments API - Relationship Validation', () => {
     });
   });
 
-  test('Should create a new comment successfully and validate creation response', async ({ logger, apiReporter }) => {
+  test(qase(27, 'Should create a new comment successfully and validate creation response'), async ({ logger, apiReporter }) => {
     // Mark as CRUD test for data manipulation validation
     test.info().annotations.push({ type: 'tag', description: 'crud' });
     test.info().annotations.push({ type: 'feature', description: 'comments-creation' });

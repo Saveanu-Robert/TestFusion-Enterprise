@@ -10,6 +10,7 @@
  */
 
 import { test, expect } from '../fixtures/web-fixtures';
+import { qase } from 'playwright-qase-reporter';
 import { DocsPage } from './pages/docs.page';
 import { WEB_CONSTANTS } from '../constants/test-constants';
 import { Logger } from '../utils/logger';
@@ -23,7 +24,7 @@ test.describe('Docs Page Tests', () => {
     logger = Logger.getInstance();
     await docsPage.navigate();
   });
-  test('Should load docs page successfully and validate core documentation elements', async () => {
+  test(qase(40, 'Should load docs page successfully and validate core documentation elements'), async () => {
     // Mark as smoke test for core functionality validation
     test.info().annotations.push({ type: 'tag', description: 'smoke' });
     test.info().annotations.push({ type: 'feature', description: 'docs-page-loading' });
@@ -47,7 +48,7 @@ test.describe('Docs Page Tests', () => {
       });
     });
   });
-  test('Should display sidebar navigation and validate navigation functionality', async () => {
+  test(qase(41, 'Should display sidebar navigation and validate navigation functionality'), async () => {
     test.info().annotations.push({ type: 'feature', description: 'sidebar-navigation' });
     test.info().annotations.push({ type: 'tag', description: 'navigation' });
     
@@ -72,7 +73,7 @@ test.describe('Docs Page Tests', () => {
     });
   });
 
-  test('should display main content structure', async () => {
+  test(qase(45, 'should display main content structure'), async () => {
     await test.step('Validate content structure', async () => {
       await docsPage.validateContentStructure();
     });
@@ -86,7 +87,7 @@ test.describe('Docs Page Tests', () => {
       });
     });
   });
-  test('should have functional search', async () => {
+  test(qase(46, 'should have functional search'), async () => {
     await test.step('Validate search functionality', async () => {
       // Use the updated validateSearchFunctionality method that handles missing search boxes gracefully
       await docsPage.validateSearchFunctionality();
@@ -112,7 +113,7 @@ test.describe('Docs Page Tests', () => {
         logger.info('ℹ️ Search box not visible on this page - skipping search interaction test');
       }
     });
-  });test('should support keyboard navigation', async () => {
+  });test(qase(47, 'should support keyboard navigation'), async () => {
     await test.step('Test sidebar navigation with keyboard', async () => {
       // Check if we have sidebar links available
       const sidebarLinks = await docsPage.pageInstance.locator('.theme-doc-sidebar-item-link').count();
@@ -150,7 +151,7 @@ test.describe('Docs Page Tests', () => {
     });
   });
 
-  test('should display page metrics correctly', async () => {
+  test(qase(48, 'should display page metrics correctly'), async () => {
     await test.step('Collect and validate page metrics', async () => {
       const metrics = await docsPage.getPageMetrics();
       
@@ -161,7 +162,7 @@ test.describe('Docs Page Tests', () => {
       logger.info('📊 Docs Page Metrics collected', { metrics });
     });
   });
-  test('should work on different screen sizes', async ({ webPage }) => {
+  test(qase(49, 'should work on different screen sizes'), async ({ webPage }) => {
     await test.step('Test on mobile viewport', async () => {
       await webPage.setViewportSize({ width: 375, height: 667 });
       await docsPage.navigate();
@@ -190,7 +191,7 @@ test.describe('Docs Page Tests', () => {
     });
   });
 
-  test('should handle pagination if available', async () => {
+  test(qase(50, 'should handle pagination if available'), async () => {
     await test.step('Check for pagination elements', async () => {
       const hasNextPage = await docsPage.isVisible('.pagination-nav__link--next');
       const hasPrevPage = await docsPage.isVisible('.pagination-nav__link--prev');
@@ -211,7 +212,7 @@ test.describe('Docs Page Tests', () => {
     });
   });
 
-  test('should maintain accessibility standards', async ({ webPage }) => {
+  test(qase(51, 'should maintain accessibility standards'), async ({ webPage }) => {
     await test.step('Validate heading structure', async () => {
       const h1Count = await webPage.locator('h1').count();
       expect(h1Count).toBeGreaterThanOrEqual(1);
@@ -236,7 +237,7 @@ test.describe('Docs Page Tests', () => {
     });
   });
 
-  test('should load content efficiently', async () => {
+  test(qase(52, 'should load content efficiently'), async () => {
     await test.step('Measure content load time', async () => {
       const startTime = Date.now();
       await docsPage.navigate();      await docsPage.validateContentStructure();

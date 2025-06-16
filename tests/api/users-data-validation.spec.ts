@@ -10,6 +10,7 @@
  */
 
 import { test, expect } from '../fixtures/api-fixtures';
+import { qase } from 'playwright-qase-reporter';
 import { UsersApiService } from '../services/users-api.service';
 import { UsersOperations } from '../operations/users-operations';
 import { HTTP_STATUS_CODES } from '../constants/api-constants';
@@ -57,7 +58,7 @@ test.describe('Users API - Data Validation', () => {
       duration: testInfo.duration,
       retries: testInfo.retry,
     });
-  });  test('Should retrieve all users successfully and validate response structure', async ({ logger, apiReporter }) => {
+  });  test(qase(28, 'Should retrieve all users successfully and validate response structure'), async ({ logger, apiReporter }) => {
     // Mark as smoke test for core functionality validation
     test.info().annotations.push({ type: 'tag', description: 'smoke' });
     test.info().annotations.push({ type: 'feature', description: 'users-retrieval' });
@@ -88,7 +89,7 @@ test.describe('Users API - Data Validation', () => {
         responseTime: response.duration, 
       });
     });
-  });  test('Should retrieve a specific user by ID and validate comprehensive user data', async ({ logger, apiReporter }) => {
+  });  test(qase(29, 'Should retrieve a specific user by ID and validate comprehensive user data'), async ({ logger, apiReporter }) => {
     test.info().annotations.push({ type: 'feature', description: 'users-by-id' });
     test.info().annotations.push({ type: 'tag', description: 'data-validation' });
     test.info().annotations.push({ type: 'priority', description: 'high' });
@@ -131,7 +132,7 @@ test.describe('Users API - Data Validation', () => {
         responseTime: response.duration, 
       });
     });
-  });  test('Should create a new user successfully and validate creation response', async ({ logger, apiReporter }) => {
+  });  test(qase(30, 'Should create a new user successfully and validate creation response'), async ({ logger, apiReporter }) => {
     // Mark as CRUD test for data manipulation validation
     test.info().annotations.push({ type: 'tag', description: 'crud' });
     test.info().annotations.push({ type: 'feature', description: 'users-creation' });
@@ -178,7 +179,7 @@ test.describe('Users API - Data Validation', () => {
         responseTime: response.duration, 
       });
     });
-  });  test('Should return 404 error for non-existent user ID and validate error response', async ({ logger, apiReporter }) => {
+  });  test(qase(31, 'Should return 404 error for non-existent user ID and validate error response'), async ({ logger, apiReporter }) => {
     // Mark as error handling test for negative scenarios
     test.info().annotations.push({ type: 'tag', description: 'error-handling' });
     test.info().annotations.push({ type: 'feature', description: 'users-not-found' });

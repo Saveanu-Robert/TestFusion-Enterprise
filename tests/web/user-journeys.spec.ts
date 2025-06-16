@@ -10,11 +10,12 @@
  */
 
 import { test, expect } from '../fixtures/web-fixtures';
+import { qase } from 'playwright-qase-reporter';
 import { HomePage } from './pages/home.page';
 import { DocsPage } from './pages/docs.page';
 import { WEB_CONSTANTS } from '../constants/test-constants';
 
-test.describe('End-to-End User Journeys', () => {  test('Should complete new user workflow from home page to documentation successfully', async ({ webPage, webClient, logger }) => {
+test.describe('End-to-End User Journeys', () => {  test(qase(43, 'Should complete new user workflow from home page to documentation successfully'), async ({ webPage, webClient, logger }) => {
   // Mark as end-to-end test for complete user workflow validation
   test.info().annotations.push({ type: 'tag', description: 'e2e' });
   test.info().annotations.push({ type: 'feature', description: 'home-to-docs-workflow' });
@@ -70,7 +71,7 @@ test.describe('End-to-End User Journeys', () => {  test('Should complete new use
   logger.info('🎉 Completed new user workflow test successfully - full journey validated');
 });
 
-test('documentation exploration journey', async ({ webPage, webClient, logger }) => {
+test(qase(53, 'documentation exploration journey'), async ({ webPage, webClient, logger }) => {
   logger.info('Starting documentation exploration journey');
 
   await test.step('Start from docs page', async () => {
@@ -121,7 +122,7 @@ test('documentation exploration journey', async ({ webPage, webClient, logger })
   logger.info('Completed documentation exploration journey');
 });
 
-test('responsive design journey', async ({ webPage, webClient, logger }) => {
+test(qase(54, 'responsive design journey'), async ({ webPage, webClient, logger }) => {
   logger.info('Starting responsive design journey');
 
   const viewports = [
@@ -160,7 +161,7 @@ test('responsive design journey', async ({ webPage, webClient, logger }) => {
   logger.info('Completed responsive design journey');
 });
 
-test('accessibility and keyboard navigation journey', async ({ webPage, webClient, logger }) => {
+test(qase(55, 'accessibility and keyboard navigation journey'), async ({ webPage, webClient, logger }) => {
   logger.info('Starting accessibility and keyboard navigation journey');
 
   await test.step('Test keyboard navigation on home page', async () => {
@@ -215,7 +216,7 @@ test('accessibility and keyboard navigation journey', async ({ webPage, webClien
   logger.info('Completed accessibility and keyboard navigation journey');
 });
 
-test('performance and error handling journey', async ({ webPage, webClient, logger }) => {
+test(qase(56, 'performance and error handling journey'), async ({ webPage, webClient, logger }) => {
   logger.info('Starting performance and error handling journey');
 
   await test.step('Measure page load performance', async () => {

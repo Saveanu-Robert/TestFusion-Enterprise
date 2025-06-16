@@ -12,10 +12,37 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [
+  workers: process.env.CI ? 1 : undefined,  /* Reporter to use. See https://playwright.dev/docs/test-reporters */  reporter: [
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
-    ['list'],
+    ['dot'], // Less verbose than 'list' - shows dots for passed tests, details only for failures
+    [
+      'playwright-qase-reporter',
+      {
+        mode: process.env.QASE_MODE || 'off',
+        debug: process.env.QASE_DEBUG === 'true', // Only enable debug when explicitly set to 'true'
+        verbose: false, // Reduces Qase reporter output noise
+        environment: process.env.QASE_ENVIRONMENT,
+        testops: {
+          api: {
+            token: process.env.QASE_TESTOPS_API_TOKEN,
+          },
+          project: process.env.QASE_TESTOPS_PROJECT,
+          uploadAttachments: true,
+          run: {
+            id: process.env.QASE_TESTOPS_RUN_ID,
+            title: process.env.QASE_TESTOPS_RUN_TITLE,
+            description: process.env.QASE_TESTOPS_RUN_DESCRIPTION,
+            complete: true,
+          },
+        },
+        framework: {
+          browser: {
+            addAsParameter: true,
+            parameterName: 'browser',
+          },
+        },
+      },
+    ],
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
