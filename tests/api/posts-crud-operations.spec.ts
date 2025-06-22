@@ -73,13 +73,8 @@ test.describe('Posts API - CRUD Operations', () => {
       expected_behavior: 'API should return complete list of posts with valid structure',
       validation_criteria: ['Response status 200', 'Valid JSON structure', 'Reasonable post count'],
     });
-    
-    await test.step('Send GET request to retrieve all posts from API endpoint', async () => {
-      const { response, count } = await postsOperations.getAllPostsWithValidation();
-      
-      // Validate that we receive a reasonable number of posts
-      expect(count).toBeGreaterThan(0);
-      expect(count).toBeLessThanOrEqual(500); // Reasonable upper bound
+      await test.step('Send GET request to retrieve all posts from API endpoint', async () => {
+      const { response, count } = await postsOperations.getAllPostsWithCountValidation();
       
       // Attach additional performance metrics
       await apiReporter.attachPerformanceMetrics({
@@ -105,15 +100,8 @@ test.describe('Posts API - CRUD Operations', () => {
       expected_behavior: 'API should return correct post data with all required fields',
       validation_criteria: ['Correct post ID', 'Valid user ID', 'Non-empty title and body'],
     });
-    
-    await test.step(`Send GET request to retrieve post with ID ${postId}`, async () => {
-      const response = await postsOperations.getPostByIdWithValidation(postId);
-      
-      // Validate post structure and data integrity
-      expect(response.data.id).toBe(postId);
-      expect(response.data.userId).toBeGreaterThan(0);
-      expect(response.data.title).toBeTruthy();
-      expect(response.data.body).toBeTruthy();
+      await test.step(`Send GET request to retrieve post with ID ${postId}`, async () => {
+      const response = await postsOperations.getPostByIdWithComprehensiveValidation(postId);
       
       // Attach data validation results
       await apiReporter.attachValidationResults({
@@ -143,8 +131,7 @@ test.describe('Posts API - CRUD Operations', () => {
       expected_behavior: 'API should create post and return it with assigned ID',
       validation_criteria: ['Status 201', 'Assigned post ID', 'Data integrity preservation'],
     });
-    
-    await test.step('Send POST request to create new post with valid data', async () => {
+      await test.step('Send POST request to create new post with valid data', async () => {
       const newPostData = PostsOperations.generateTestPostData();
       
       // Attach test data for traceability
@@ -155,13 +142,7 @@ test.describe('Posts API - CRUD Operations', () => {
         timestamp: new Date().toISOString(),
       });
       
-      const response = await postsOperations.createPostWithValidation(newPostData);
-      
-      // Validate created post contains expected data
-      expect(response.data.id).toBeTruthy();
-      expect(response.data.userId).toBe(newPostData.userId);
-      expect(response.data.title).toBe(newPostData.title);
-      expect(response.data.body).toBe(newPostData.body);
+      const response = await postsOperations.createPostWithComprehensiveValidation(newPostData);
       
       // Attach creation validation results
       await apiReporter.attachValidationResults({
@@ -193,24 +174,19 @@ test.describe('Posts API - CRUD Operations', () => {
       expected_behavior: 'API should return 404 status code and appropriate error response',
       validation_criteria: ['Status 404', 'Appropriate error handling', 'No server errors'],
     });
-    
-    await test.step(`Send GET request for non-existent post ID ${nonExistentId}`, async () => {
-      const response = await postsService.getPostById(nonExistentId);
-
-      await test.step('Validate that API returns 404 status code for missing resource', async () => {
-        expect(response.status).toBe(HTTP_STATUS_CODES.NOT_FOUND);
-        
-        // Attach error validation results
-        await apiReporter.attachValidationResults({
-          status_code_validation: { expected: 404, actual: response.status, status: 'PASS' },
-          error_handling: { expected: 'graceful_404', actual: 'graceful_404', status: 'PASS' },
-        });
-        
-        logger.info('✅ Correctly returned 404 error for non-existent post', { 
-          requestedPostId: nonExistentId,
-          statusCode: response.status,
-          responseTime: response.duration, 
-        });
+      await test.step(`Send GET request for non-existent post ID ${nonExistentId}`, async () => {
+      const response = await postsOperations.validatePostNotFoundError(nonExistentId);
+      
+      // Attach error validation results
+      await apiReporter.attachValidationResults({
+        status_code_validation: { expected: 404, actual: response.status, status: 'PASS' },
+        error_handling: { expected: 'graceful_404', actual: 'graceful_404', status: 'PASS' },
+      });
+      
+      logger.info('✅ Correctly returned 404 error for non-existent post', { 
+        requestedPostId: nonExistentId,
+        statusCode: response.status,
+        responseTime: response.duration, 
       });
     });
   });

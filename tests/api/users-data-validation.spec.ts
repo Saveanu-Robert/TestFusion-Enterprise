@@ -70,13 +70,8 @@ test.describe('Users API - Data Validation', () => {
       expected_behavior: 'API should return complete list of users with valid structure',
       validation_criteria: ['Response status 200', 'Valid JSON structure', 'Reasonable user count'],
     });
-    
-    await test.step('Send GET request to retrieve all users from API endpoint', async () => {
-      const { response, count } = await usersOperations.getAllUsersWithValidation();
-      
-      // Validate that we receive a reasonable number of users
-      expect(count).toBeGreaterThan(0);
-      expect(count).toBeLessThanOrEqual(100); // Reasonable upper bound for users
+      await test.step('Send GET request to retrieve all users from API endpoint', async () => {
+      const { response, count } = await usersOperations.getAllUsersWithCountValidation();
       
       // Attach additional performance metrics
       await apiReporter.attachPerformanceMetrics({
@@ -102,27 +97,16 @@ test.describe('Users API - Data Validation', () => {
       expected_behavior: 'API should return correct user data with comprehensive validation',
       validation_criteria: ['Correct user ID', 'Valid user data structure', 'Complete user information'],
     });
-    
-    await test.step(`Send GET request to retrieve user with ID ${userId}`, async () => {
-      const response = await usersOperations.getUserByIdWithValidation(userId);
+      await test.step(`Send GET request to retrieve user with ID ${userId}`, async () => {
+      const response = await usersOperations.getUserByIdWithComprehensiveValidation(userId);
       
-      await test.step('Validate comprehensive user data structure and content', async () => {
-        await usersOperations.validateUserDataComprehensively(response.data);
-        
-        // Additional validations for user data integrity
-        expect(response.data.id).toBe(userId);
-        expect(response.data.name).toBeTruthy();
-        expect(response.data.email).toBeTruthy();
-        expect(response.data.username).toBeTruthy();
-        
-        // Attach comprehensive data validation results
-        await apiReporter.attachValidationResults({
-          user_id_validation: { expected: userId, actual: response.data.id, status: 'PASS' },
-          name_validation: { expected: 'non-empty', actual: !!response.data.name, status: 'PASS' },
-          email_validation: { expected: 'non-empty', actual: !!response.data.email, status: 'PASS' },
-          username_validation: { expected: 'non-empty', actual: !!response.data.username, status: 'PASS' },
-          comprehensive_validation: { expected: 'complete_user_data', actual: 'validated', status: 'PASS' },
-        });
+      // Attach comprehensive data validation results
+      await apiReporter.attachValidationResults({
+        user_id_validation: { expected: userId, actual: response.data.id, status: 'PASS' },
+        name_validation: { expected: 'non-empty', actual: !!response.data.name, status: 'PASS' },
+        email_validation: { expected: 'non-empty', actual: !!response.data.email, status: 'PASS' },
+        username_validation: { expected: 'non-empty', actual: !!response.data.username, status: 'PASS' },
+        comprehensive_validation: { expected: 'complete_user_data', actual: 'validated', status: 'PASS' },
       });
 
       logger.info('✅ Successfully retrieved specific user with comprehensive data validation', { 
@@ -144,8 +128,7 @@ test.describe('Users API - Data Validation', () => {
       expected_behavior: 'API should create user and return it with assigned ID',
       validation_criteria: ['Status 201', 'Assigned user ID', 'Data integrity preservation'],
     });
-    
-    await test.step('Send POST request to create new user with valid data', async () => {
+      await test.step('Send POST request to create new user with valid data', async () => {
       const newUserData = UsersOperations.generateTestUserData();
       
       // Attach test data for traceability
@@ -156,13 +139,7 @@ test.describe('Users API - Data Validation', () => {
         timestamp: new Date().toISOString(),
       });
       
-      const response = await usersOperations.createUserWithValidation(newUserData);
-      
-      // Validate created user contains expected data
-      expect(response.data.id).toBeTruthy();
-      expect(response.data.name).toBe(newUserData.name);
-      expect(response.data.email).toBe(newUserData.email);
-      expect(response.data.username).toBe(newUserData.username);
+      const response = await usersOperations.createUserWithComprehensiveValidation(newUserData);
       
       // Attach creation validation results
       await apiReporter.attachValidationResults({
@@ -193,24 +170,19 @@ test.describe('Users API - Data Validation', () => {
       expected_behavior: 'API should return 404 status code and appropriate error response',
       validation_criteria: ['Status 404', 'Appropriate error handling', 'No server errors'],
     });
-    
-    await test.step(`Send GET request for non-existent user ID ${nonExistentId}`, async () => {
-      const response = await usersService.getUserById(nonExistentId);
-
-      await test.step('Validate that API returns 404 status code for missing user resource', async () => {
-        expect(response.status).toBe(HTTP_STATUS_CODES.NOT_FOUND);
-        
-        // Attach error validation results
-        await apiReporter.attachValidationResults({
-          status_code_validation: { expected: 404, actual: response.status, status: 'PASS' },
-          error_handling: { expected: 'graceful_404', actual: 'graceful_404', status: 'PASS' },
-        });
-        
-        logger.info('✅ Correctly returned 404 error for non-existent user', { 
-          requestedUserId: nonExistentId,
-          statusCode: response.status,
-          responseTime: response.duration, 
-        });
+      await test.step(`Send GET request for non-existent user ID ${nonExistentId}`, async () => {
+      const response = await usersOperations.validateUserNotFoundError(nonExistentId);
+      
+      // Attach error validation results
+      await apiReporter.attachValidationResults({
+        status_code_validation: { expected: 404, actual: response.status, status: 'PASS' },
+        error_handling: { expected: 'graceful_404', actual: 'graceful_404', status: 'PASS' },
+      });
+      
+      logger.info('✅ Correctly returned 404 error for non-existent user', { 
+        requestedUserId: nonExistentId,
+        statusCode: response.status,
+        responseTime: response.duration, 
       });
     });
   });
