@@ -71,13 +71,8 @@ test.describe('Comments API - Relationship Validation', () => {
       expected_behavior: 'API should return complete list of comments with valid structure',
       validation_criteria: ['Response status 200', 'Valid JSON structure', 'Reasonable comment count'],
     });
-    
-    await test.step('Send GET request to retrieve all comments from API', async () => {
-      const { response, count } = await commentsOperations.getAllCommentsWithValidation();
-      
-      // Validate that we receive a reasonable number of comments
-      expect(count).toBeGreaterThan(0);
-      expect(count).toBeLessThanOrEqual(1000); // Reasonable upper bound
+      await test.step('Send GET request to retrieve all comments from API', async () => {
+      const { response, count } = await commentsOperations.getAllCommentsWithCountValidation();
       
       // Attach additional performance metrics
       await apiReporter.attachPerformanceMetrics({
@@ -103,16 +98,8 @@ test.describe('Comments API - Relationship Validation', () => {
       expected_behavior: 'API should return correct comment data with all required fields',
       validation_criteria: ['Correct comment ID', 'Valid post ID', 'Valid email format', 'Non-empty name and body'],
     });
-    
-    await test.step(`Send GET request to retrieve comment with ID ${commentId}`, async () => {
-      const response = await commentsOperations.getCommentByIdWithValidation(commentId);
-      
-      // Validate comment ID matches request
-      expect(response.data.id).toBe(commentId);
-      expect(response.data.postId).toBeGreaterThan(0);
-      expect(response.data.name).toBeTruthy();
-      expect(response.data.email).toBeTruthy();
-      expect(response.data.body).toBeTruthy();
+      await test.step(`Send GET request to retrieve comment with ID ${commentId}`, async () => {
+      const response = await commentsOperations.getCommentByIdWithComprehensiveValidation(commentId);
       
       // Attach data validation results
       await apiReporter.attachValidationResults({
@@ -142,16 +129,8 @@ test.describe('Comments API - Relationship Validation', () => {
       expected_behavior: 'API should return all comments belonging to the specified post',
       validation_criteria: ['All comments belong to post', 'Valid comment structure', 'Relationship integrity'],
     });
-    
-    await test.step(`Send GET request to retrieve all comments for post ${postId}`, async () => {
-      const { response, count } = await commentsOperations.getCommentsByPostIdWithValidation(postId);
-      
-      // Validate all comments belong to the specified post
-      response.data.forEach((comment: any) => {
-        expect(comment.postId).toBe(postId);
-      });
-      
-      expect(count).toBeGreaterThan(0);
+      await test.step(`Send GET request to retrieve all comments for post ${postId}`, async () => {
+      const { response, count } = await commentsOperations.getCommentsByPostIdWithCountValidation(postId);
       
       // Attach relationship validation results
       await apiReporter.attachValidationResults({
@@ -180,8 +159,7 @@ test.describe('Comments API - Relationship Validation', () => {
       expected_behavior: 'API should create comment and return it with assigned ID',
       validation_criteria: ['Status 201', 'Assigned comment ID', 'Data integrity preservation'],
     });
-    
-    await test.step('Send POST request to create new comment with valid data', async () => {
+      await test.step('Send POST request to create new comment with valid data', async () => {
       const newCommentData = CommentsOperations.generateTestCommentData();
       
       // Attach test data for traceability
@@ -192,14 +170,7 @@ test.describe('Comments API - Relationship Validation', () => {
         timestamp: new Date().toISOString(),
       });
       
-      const response = await commentsOperations.createCommentWithValidation(newCommentData);
-      
-      // Validate created comment contains expected data
-      expect(response.data.id).toBeTruthy();
-      expect(response.data.postId).toBe(newCommentData.postId);
-      expect(response.data.name).toBe(newCommentData.name);
-      expect(response.data.email).toBe(newCommentData.email);
-      expect(response.data.body).toBe(newCommentData.body);
+      const response = await commentsOperations.createCommentWithComprehensiveValidation(newCommentData);
       
       // Attach creation validation results
       await apiReporter.attachValidationResults({
