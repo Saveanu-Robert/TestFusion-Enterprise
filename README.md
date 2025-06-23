@@ -2,7 +2,9 @@
 
 **Enterprise-Grade Test Automation Framework**
 
-A comprehensive, production-ready test automation framework built with Playwright and TypeScript, designed for both API and web application testing at scale.
+A comprehensive, production-ready test automation framework built with
+Playwright and TypeScript, designed for both API and web application testing at
+scale.
 
 [![CI/CD Pipeline](https://github.com/TestFusion-Enterprise/TestFusion-Enterprise/workflows/CI/badge.svg)](https://github.com/TestFusion-Enterprise/TestFusion-Enterprise/actions)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-blue)](https://www.typescriptlang.org/)
@@ -34,14 +36,14 @@ A comprehensive, production-ready test automation framework built with Playwrigh
 
 ### 🎯 Core Testing Capabilities
 
-| Feature | Description |
-|---------|-------------|
-| **Dual Testing Modes** | Complete support for both API and Web UI testing |
-| **Cross-browser Testing** | Chromium, Firefox, WebKit, Edge support |
-| **Mobile Testing** | iOS Safari and Android Chrome device emulation |
-| **Parallel Execution** | Intelligent parallel execution with configurable workers |
-| **Cloud Testing** | BrowserStack and Selenium Grid integration ready |
-| **Performance Testing** | Built-in performance monitoring and metrics |
+| Feature                   | Description                                              |
+| ------------------------- | -------------------------------------------------------- |
+| **Dual Testing Modes**    | Complete support for both API and Web UI testing         |
+| **Cross-browser Testing** | Chromium, Firefox, WebKit, Edge support                  |
+| **Mobile Testing**        | iOS Safari and Android Chrome device emulation           |
+| **Parallel Execution**    | Intelligent parallel execution with configurable workers |
+| **Cloud Testing**         | BrowserStack and Selenium Grid integration ready         |
+| **Performance Testing**   | Built-in performance monitoring and metrics              |
 
 ### 🏗️ Professional Architecture
 
@@ -94,7 +96,8 @@ graph TB
 
 ### Design Patterns
 
-- **Factory Pattern**: Browser provider factory for different execution environments
+- **Factory Pattern**: Browser provider factory for different execution
+  environments
 - **Strategy Pattern**: Configurable execution strategies (local, grid, cloud)
 - **Page Object Model**: Encapsulated page interactions and elements
 - **Fixture Pattern**: Centralized test setup and teardown
@@ -104,12 +107,12 @@ graph TB
 
 ## 📋 Prerequisites
 
-| Requirement | Version | Purpose |
-|-------------|---------|---------|
+| Requirement | Version  | Purpose                            |
+| ----------- | -------- | ---------------------------------- |
 | **Node.js** | 18.19.0+ | Runtime environment (see `.nvmrc`) |
-| **npm** | 9.0.0+ | Package management |
-| **Git** | Latest | Version control |
-| **Docker** | Latest | Optional: Containerized testing |
+| **npm**     | 9.0.0+   | Package management                 |
+| **Git**     | Latest   | Version control                    |
+| **Docker**  | Latest   | Optional: Containerized testing    |
 
 ### System Requirements
 
@@ -156,19 +159,21 @@ npm run test:web
 
 ## ⚙️ Configuration
 
-The framework uses a sophisticated configuration system with environment-based overrides.
+The framework uses a sophisticated configuration system with environment-based
+overrides.
 
 ### Core Configuration Files
 
-| File | Purpose |
-|------|---------|
-| `.env` | Default environment configuration |
-| `playwright.config.ts` | Playwright-specific settings |
-| `tests/config/configuration-manager.ts` | Centralized configuration logic |
+| File                                    | Purpose                           |
+| --------------------------------------- | --------------------------------- |
+| `.env`                                  | Default environment configuration |
+| `playwright.config.ts`                  | Playwright-specific settings      |
+| `tests/config/configuration-manager.ts` | Centralized configuration logic   |
 
 ### Key Environment Variables
 
 #### API Testing Configuration
+
 ```env
 API_BASE_URL=https://jsonplaceholder.typicode.com
 API_TIMEOUT=30000
@@ -177,6 +182,7 @@ API_RATE_LIMIT=100
 ```
 
 #### Web Testing Configuration
+
 ```env
 WEB_BASE_URL=https://playwright.dev
 WEB_EXECUTION_MODE=local  # local | grid | browserstack
@@ -186,6 +192,7 @@ WEB_VIEWPORT_HEIGHT=1080
 ```
 
 #### Logging & Reporting
+
 ```env
 LOG_LEVEL=INFO
 ENABLE_REQUEST_LOGGING=true
@@ -195,6 +202,7 @@ ENABLE_VIDEO_RECORDING=true
 ```
 
 #### Cloud Testing (Optional)
+
 ```env
 # BrowserStack Configuration
 BROWSERSTACK_USERNAME=your_username
@@ -342,11 +350,11 @@ test.describe('Posts API', () => {
   test('should create a new post', async ({ request }) => {
     const fixtures = new APIFixtures();
     const newPost = fixtures.generateValidPost();
-    
+
     const response = await request.post('/posts', {
-      data: newPost
+      data: newPost,
     });
-    
+
     expect(response.status()).toBe(201);
     const responseData = await response.json();
     expect(responseData).toMatchObject(newPost);
@@ -363,7 +371,7 @@ import { HomePage } from './pages/home.page';
 test.describe('Home Page', () => {
   test('should display main navigation', async ({ page }) => {
     const homePage = new HomePage(page);
-    
+
     await homePage.navigate();
     await expect(homePage.navigation).toBeVisible();
     await expect(homePage.getNavigationItems()).toHaveCount(4);
@@ -388,11 +396,11 @@ export const test = base.extend<TestFixtures>({
     const config = ConfigurationManager.getInstance();
     await use(config);
   },
-  
+
   logger: async ({}, use) => {
     const logger = Logger.getInstance();
     await use(logger);
-  }
+  },
 });
 ```
 
@@ -414,12 +422,12 @@ expect(validationResult.errors).toHaveLength(0);
 
 ### Available Report Formats
 
-| Format | Command | Use Case |
-|--------|---------|----------|
-| **HTML** | `npm run test:report` | Detailed interactive reports |
-| **JUnit** | Automatic | CI/CD integration |
-| **JSON** | Automatic | Programmatic analysis |
-| **Qase.io** | Configure API token | Test management platform |
+| Format      | Command               | Use Case                     |
+| ----------- | --------------------- | ---------------------------- |
+| **HTML**    | `npm run test:report` | Detailed interactive reports |
+| **JUnit**   | Automatic             | CI/CD integration            |
+| **JSON**    | Automatic             | Programmatic analysis        |
+| **Qase.io** | Configure API token   | Test management platform     |
 
 ### Report Locations
 
@@ -519,6 +527,7 @@ npm run test:grid
 ### Common Issues
 
 #### Browser Installation Issues
+
 ```bash
 # Reinstall browsers
 npx playwright install --force
@@ -528,6 +537,7 @@ npx playwright install --dry-run
 ```
 
 #### Configuration Issues
+
 ```bash
 # Validate configuration
 npm run validate:config
@@ -537,6 +547,7 @@ npm run env:check
 ```
 
 #### Test Failures
+
 ```bash
 # Run with debug mode
 npm run test:debug
@@ -550,12 +561,12 @@ npx playwright test path/to/failing/test.spec.ts --headed
 
 ### Performance Issues
 
-| Issue | Solution |
-|-------|----------|
+| Issue               | Solution                                      |
+| ------------------- | --------------------------------------------- |
 | Slow test execution | Reduce parallel workers or optimize selectors |
-| Memory issues | Increase heap size or reduce worker count |
-| Timeout errors | Increase timeout values in configuration |
-| Flaky tests | Improve wait strategies and element selection |
+| Memory issues       | Increase heap size or reduce worker count     |
+| Timeout errors      | Increase timeout values in configuration      |
+| Flaky tests         | Improve wait strategies and element selection |
 
 ### Debugging Tools
 
@@ -601,6 +612,7 @@ type(scope): description
 ```
 
 Examples:
+
 - `feat(api): add user authentication tests`
 - `fix(web): resolve navigation timeout issue`
 - `docs(readme): update installation instructions`
@@ -617,23 +629,27 @@ Examples:
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+for details.
 
 ---
 
 ## 🔗 Resources
 
 ### Documentation
+
 - [Playwright Documentation](https://playwright.dev/)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [Node.js Documentation](https://nodejs.org/docs/)
 
 ### Testing Best Practices
+
 - [Test Automation Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html)
 - [Page Object Model](https://playwright.dev/docs/pom)
 - [API Testing Guide](https://playwright.dev/docs/test-api-testing)
 
 ### Tools & Integrations
+
 - [GitHub Actions](https://docs.github.com/en/actions)
 - [Docker](https://docs.docker.com/)
 - [BrowserStack](https://www.browserstack.com/docs/automate)
@@ -642,12 +658,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/TestFusion-Enterprise/TestFusion-Enterprise/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/TestFusion-Enterprise/TestFusion-Enterprise/discussions)
-- **Wiki**: [Project Wiki](https://github.com/TestFusion-Enterprise/TestFusion-Enterprise/wiki)
+- **Issues**:
+  [GitHub Issues](https://github.com/TestFusion-Enterprise/TestFusion-Enterprise/issues)
+- **Discussions**:
+  [GitHub Discussions](https://github.com/TestFusion-Enterprise/TestFusion-Enterprise/discussions)
+- **Wiki**:
+  [Project Wiki](https://github.com/TestFusion-Enterprise/TestFusion-Enterprise/wiki)
 
 ---
 
-**TestFusion Enterprise** - *Professional Test Automation Framework*
+**TestFusion Enterprise** - _Professional Test Automation Framework_
 
-*Built with ❤️ using Playwright, TypeScript, and modern testing practices*
+_Built with ❤️ using Playwright, TypeScript, and modern testing practices_
