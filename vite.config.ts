@@ -3,6 +3,7 @@
  *
  * Provides modern build tooling for TypeScript compilation,
  * development server, and build optimization.
+ * Note: This is a Node.js-based testing framework, not a browser library.
  */
 import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
@@ -14,20 +15,52 @@ export default defineConfig({
       entry: resolve(__dirname, 'tests/index.ts'),
       name: 'TestFusionEnterprise',
       fileName: 'testfusion-enterprise',
-      formats: ['es', 'cjs'],
+      formats: ['cjs'], // Only CommonJS for Node.js
     },
     rollupOptions: {
-      external: ['@playwright/test', 'dotenv'],
+      external: [
+        // Playwright and testing dependencies
+        '@playwright/test',
+        'playwright',
+
+        // Node.js built-in modules
+        'crypto',
+        'fs',
+        'path',
+        'os',
+        'util',
+        'stream',
+        'events',
+        'buffer',
+        'url',
+        'querystring',
+        'http',
+        'https',
+        'net',
+        'tls',
+        'child_process',
+
+        // External dependencies
+        'dotenv',
+        'fs-extra',
+      ],
       output: {
         globals: {
           '@playwright/test': 'PlaywrightTest',
+          playwright: 'playwright',
           dotenv: 'dotenv',
+          crypto: 'crypto',
+          fs: 'fs',
+          path: 'path',
+          os: 'os',
+          'fs-extra': 'fsExtra',
         },
       },
     },
     sourcemap: true,
-    minify: 'terser',
-    target: 'es2020',
+    minify: false, // Keep unminified for debugging
+    target: 'node18',
+    ssr: true, // Server-side rendering mode for Node.js
   },
   resolve: {
     alias: {

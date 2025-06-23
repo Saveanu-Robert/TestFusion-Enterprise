@@ -16,7 +16,7 @@
  * @version 1.0.0
  */
 
-import { randomUUID } from 'crypto';
+import * as crypto from 'crypto';
 import { ConfigurationManager } from '../config/configuration-manager';
 
 /**
@@ -282,7 +282,7 @@ export class Logger {
    * @returns RFC 4122 v4 UUID
    */
   private generateRequestId(): string {
-    return randomUUID();
+    return crypto.randomUUID();
   }
 
   /**
