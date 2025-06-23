@@ -1,6 +1,8 @@
 const js = require('@eslint/js');
 const tseslint = require('@typescript-eslint/eslint-plugin');
 const tsparser = require('@typescript-eslint/parser');
+const prettier = require('eslint-plugin-prettier');
+const prettierConfig = require('eslint-config-prettier');
 
 module.exports = [
   js.configs.recommended,
@@ -59,15 +61,21 @@ module.exports = [
     },
     plugins: {
       '@typescript-eslint': tseslint,
+      prettier: prettier,
     },
     rules: {
+      // Prettier integration
+      'prettier/prettier': 'error',
+
       // TypeScript specific rules
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-empty-function': 'warn',
-      '@typescript-eslint/no-var-requires': 'error', // General ESLint rules
+      '@typescript-eslint/no-var-requires': 'error',
+
+      // General ESLint rules
       'no-console': 'off', // Allow console in tests
       'no-debugger': 'error',
       'no-duplicate-imports': 'error',
@@ -77,14 +85,8 @@ module.exports = [
       'no-undef': 'off', // Handled by TypeScript
       'no-useless-escape': 'error',
 
-      // Code style rules
-      quotes: ['error', 'single', { avoidEscape: true }],
-      semi: ['error', 'always'],
-      'comma-dangle': ['error', 'always-multiline'],
-      'object-curly-spacing': ['error', 'always'],
-      'array-bracket-spacing': ['error', 'never'],
-      indent: ['error', 2],
-      'max-len': ['warn', { code: 120, ignoreStrings: true, ignoreComments: true }],
+      // Disable formatting rules that conflict with Prettier
+      ...prettierConfig.rules,
     },
   },
   {

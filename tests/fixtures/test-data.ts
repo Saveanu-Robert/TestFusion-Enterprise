@@ -105,7 +105,7 @@ export function createUserPayload(overrides: Partial<Omit<User, 'id'>> = {}): Om
  */
 export function createCommentPayload(
   postId: number,
-  overrides: Partial<Omit<Comment, 'id'>> = {},
+  overrides: Partial<Omit<Comment, 'id'>> = {}
 ): Omit<Comment, 'id'> {
   const timestamp = Date.now();
   return {
@@ -139,7 +139,7 @@ export function createMultiplePostPayloads(count: number, userId: number = 1): O
     createPostPayload({
       title: `Test Post ${i + 1} (${seed + i})`,
       userId,
-    }),
+    })
   );
 }
 
@@ -149,7 +149,7 @@ export function createMultiplePostPayloads(count: number, userId: number = 1): O
 export function createInvalidPostPayload(): Partial<Record<keyof Post, unknown>> & {
   /** Deliberately extra field for negative testing */
   invalidField: string;
-  } {
+} {
   return {
     title: null,
     body: '',

@@ -116,9 +116,9 @@ export class LocalBrowserProvider implements IBrowserProvider {
       acceptDownloads: true,
       recordVideo: this.shouldRecordVideo()
         ? {
-          dir: './test-results/videos/',
-          size: this.config.browsers.viewport,
-        }
+            dir: './test-results/videos/',
+            size: this.config.browsers.viewport,
+          }
         : undefined,
     };
 
@@ -425,19 +425,19 @@ export class BrowserProviderFactory {
     this.logger.info(`🏭 Creating browser provider for execution mode: ${executionMode}`);
 
     switch (executionMode) {
-    case 'local':
-      return new LocalBrowserProvider();
+      case 'local':
+        return new LocalBrowserProvider();
 
-    case 'browserstack':
-      return new BrowserStackProvider();
+      case 'browserstack':
+        return new BrowserStackProvider();
 
-    case 'grid':
-      return new SeleniumGridProvider();
+      case 'grid':
+        return new SeleniumGridProvider();
 
-    default:
-      throw new Error(
-        `Unsupported execution mode: ${executionMode}. ` + 'Supported modes: local, browserstack, grid',
-      );
+      default:
+        throw new Error(
+          `Unsupported execution mode: ${executionMode}. ` + 'Supported modes: local, browserstack, grid'
+        );
     }
   }
 

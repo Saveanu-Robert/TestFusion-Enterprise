@@ -28,7 +28,7 @@ export class TestUtils {
   static generateRandomString(
     length: number = 10,
     includeNumbers: boolean = true,
-    includeSymbols: boolean = false,
+    includeSymbols: boolean = false
   ): string {
     let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
@@ -77,14 +77,14 @@ export class TestUtils {
     const number = Math.floor(Math.random() * 9000) + 1000;
 
     switch (format) {
-    case 'us':
-      return `(${areaCode}) ${exchange}-${number}`;
-    case 'international':
-      return `+1-${areaCode}-${exchange}-${number}`;
-    case 'simple':
-      return `${areaCode}${exchange}${number}`;
-    default:
-      return `${areaCode}-${exchange}-${number}`;
+      case 'us':
+        return `(${areaCode}) ${exchange}-${number}`;
+      case 'international':
+        return `+1-${areaCode}-${exchange}-${number}`;
+      case 'simple':
+        return `${areaCode}${exchange}${number}`;
+      default:
+        return `${areaCode}-${exchange}-${number}`;
     }
   }
 
@@ -106,20 +106,20 @@ export class TestUtils {
    */
   static formatDate(date: Date, format: 'iso' | 'date-only' | 'time-only' | 'display' = 'iso'): string {
     switch (format) {
-    case 'iso':
-      return date.toISOString();
-    case 'date-only':
-      return date.toISOString().split('T')[0];
-    case 'time-only':
-      return date.toTimeString().split(' ')[0];
-    case 'display':
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      });
-    default:
-      return date.toISOString();
+      case 'iso':
+        return date.toISOString();
+      case 'date-only':
+        return date.toISOString().split('T')[0];
+      case 'time-only':
+        return date.toTimeString().split(' ')[0];
+      case 'display':
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        });
+      default:
+        return date.toISOString();
     }
   }
 
@@ -133,26 +133,26 @@ export class TestUtils {
 
     for (const [key, type] of Object.entries(template)) {
       switch (type.toLowerCase()) {
-      case 'string':
-        result[key] = this.generateRandomString(10);
-        break;
-      case 'email':
-        result[key] = this.generateRandomEmail();
-        break;
-      case 'phone':
-        result[key] = this.generateRandomPhone();
-        break;
-      case 'number':
-        result[key] = Math.floor(Math.random() * 1000) + 1;
-        break;
-      case 'boolean':
-        result[key] = Math.random() > 0.5;
-        break;
-      case 'date':
-        result[key] = this.formatDate(new Date());
-        break;
-      default:
-        result[key] = `test_${type}_${this.generateRandomString(5)}`;
+        case 'string':
+          result[key] = this.generateRandomString(10);
+          break;
+        case 'email':
+          result[key] = this.generateRandomEmail();
+          break;
+        case 'phone':
+          result[key] = this.generateRandomPhone();
+          break;
+        case 'number':
+          result[key] = Math.floor(Math.random() * 1000) + 1;
+          break;
+        case 'boolean':
+          result[key] = Math.random() > 0.5;
+          break;
+        case 'date':
+          result[key] = this.formatDate(new Date());
+          break;
+        default:
+          result[key] = `test_${type}_${this.generateRandomString(5)}`;
       }
     }
 
@@ -168,7 +168,7 @@ export class TestUtils {
    */
   static validateData(
     data: Record<string, any>,
-    validationRules: Record<string, RegExp | ((value: any) => boolean)>,
+    validationRules: Record<string, RegExp | ((value: any) => boolean)>
   ): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
@@ -202,7 +202,7 @@ export class TestUtils {
   static async retryOperation<T>(
     operation: () => Promise<T>,
     maxRetries: number = 3,
-    baseDelay: number = 1000,
+    baseDelay: number = 1000
   ): Promise<T> {
     let lastError: Error;
 
@@ -238,7 +238,7 @@ export class TestUtils {
    */
   static async measureExecutionTime<T>(
     operation: () => Promise<T>,
-    operationName: string = 'operation',
+    operationName: string = 'operation'
   ): Promise<{ result: T; duration: number }> {
     const startTime = Date.now();
 

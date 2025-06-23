@@ -80,20 +80,20 @@ export const baseTest = base.extend<BaseTestFixtures, BaseWorkerFixtures>({
     // Set log level based on configuration
     if (testConfig.logging?.level) {
       switch (testConfig.logging.level.toLowerCase()) {
-      case 'debug':
-        logger.setLogLevel(LogLevel.DEBUG);
-        break;
-      case 'info':
-        logger.setLogLevel(LogLevel.INFO);
-        break;
-      case 'warn':
-        logger.setLogLevel(LogLevel.WARN);
-        break;
-      case 'error':
-        logger.setLogLevel(LogLevel.ERROR);
-        break;
-      default:
-        logger.setLogLevel(LogLevel.INFO);
+        case 'debug':
+          logger.setLogLevel(LogLevel.DEBUG);
+          break;
+        case 'info':
+          logger.setLogLevel(LogLevel.INFO);
+          break;
+        case 'warn':
+          logger.setLogLevel(LogLevel.WARN);
+          break;
+        case 'error':
+          logger.setLogLevel(LogLevel.ERROR);
+          break;
+        default:
+          logger.setLogLevel(LogLevel.INFO);
       }
     } else {
       logger.setLogLevel(LogLevel.INFO);
@@ -132,7 +132,7 @@ export const baseTest = base.extend<BaseTestFixtures, BaseWorkerFixtures>({
   testContext: async (
     { logger, testMetadata, testResult },
     use: (context: BaseTestContext) => Promise<void>,
-    testInfo: TestInfo,
+    testInfo: TestInfo
   ) => {
     const context: BaseTestContext = {
       async attachTestContext(metadata: Partial<BaseTestMetadata>): Promise<void> {

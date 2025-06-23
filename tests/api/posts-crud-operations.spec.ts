@@ -95,6 +95,6 @@ test.describe('Posts API - CRUD Operations', () => {
           responseTime: response.duration,
         });
       });
-    },
+    }
   );
 });

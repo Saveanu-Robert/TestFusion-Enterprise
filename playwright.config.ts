@@ -278,11 +278,11 @@ export default defineConfig({
   /* Development server for local testing */
   webServer: process.env.START_DEV_SERVER
     ? {
-      command: 'npm run dev',
-      url: 'http://localhost:3000',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-    }
+        command: 'npm run dev',
+        url: 'http://localhost:3000',
+        reuseExistingServer: !process.env.CI,
+        timeout: 120 * 1000,
+      }
     : undefined,
 
   /* Global setup and teardown */

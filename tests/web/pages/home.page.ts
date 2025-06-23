@@ -101,7 +101,7 @@ export class HomePage extends BasePage {
       // For desktop view, use navbar selectors
       await this.assertElementVisible(
         '.navbar__item.navbar__link[href="/docs/intro"]',
-        'Docs link should be visible in navbar',
+        'Docs link should be visible in navbar'
       );
     }
 

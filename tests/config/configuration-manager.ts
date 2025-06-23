@@ -278,7 +278,7 @@ export class ConfigurationManager {
           projectName: this.getOptionalEnvVar('BROWSERSTACK_PROJECT_NAME', 'TestFusion-Enterprise'),
           buildName: this.getOptionalEnvVar(
             'BROWSERSTACK_BUILD_NAME',
-            `Build-${new Date().toISOString().split('T')[0]}`,
+            `Build-${new Date().toISOString().split('T')[0]}`
           ),
           enableLocal: this.getOptionalBooleanEnvVar('BROWSERSTACK_ENABLE_LOCAL', false),
           capabilities: {
@@ -290,7 +290,7 @@ export class ConfigurationManager {
             enableNetworkLogs: this.getOptionalBooleanEnvVar('BROWSERSTACK_ENABLE_NETWORK_LOGS', true),
             consoleLogLevel: this.getOptionalEnvVar(
               'BROWSERSTACK_CONSOLE_LOG_LEVEL',
-              'errors',
+              'errors'
             ) as BrowserStackConfig['capabilities']['consoleLogLevel'],
           },
         },
@@ -354,20 +354,20 @@ export class ConfigurationManager {
     const mode = webConfig.executionMode;
 
     switch (mode) {
-    case 'local':
-      // Local execution doesn't require additional validation
-      break;
+      case 'local':
+        // Local execution doesn't require additional validation
+        break;
 
-    case 'browserstack':
-      this.validateBrowserStackConfig(webConfig.browserStack);
-      break;
+      case 'browserstack':
+        this.validateBrowserStackConfig(webConfig.browserStack);
+        break;
 
-    case 'grid':
-      this.validateSeleniumGridConfig(webConfig.seleniumGrid);
-      break;
+      case 'grid':
+        this.validateSeleniumGridConfig(webConfig.seleniumGrid);
+        break;
 
-    default:
-      throw new Error(`Invalid web execution mode: ${mode}. Supported modes are: local, grid, browserstack`);
+      default:
+        throw new Error(`Invalid web execution mode: ${mode}. Supported modes are: local, grid, browserstack`);
     }
   }
 
@@ -389,7 +389,7 @@ export class ConfigurationManager {
       throw new Error(
         `BrowserStack configuration missing required fields: ${missingFields.join(', ')}. ` +
           'Please set the following environment variables: ' +
-          missingFields.map(field => `BROWSERSTACK_${field.toUpperCase()}`).join(', '),
+          missingFields.map(field => `BROWSERSTACK_${field.toUpperCase()}`).join(', ')
       );
     }
 
@@ -405,7 +405,7 @@ export class ConfigurationManager {
     if (!validLogLevels.includes(config.capabilities.consoleLogLevel)) {
       throw new Error(
         `Invalid BrowserStack console log level: ${config.capabilities.consoleLogLevel}. ` +
-          `Valid options: ${validLogLevels.join(', ')}`,
+          `Valid options: ${validLogLevels.join(', ')}`
       );
     }
   }
@@ -452,17 +452,17 @@ export class ConfigurationManager {
     this.validateWebExecutionConfig(webConfig);
 
     switch (webConfig.executionMode) {
-    case 'local':
-      return this.getLocalBrowserConfig(webConfig);
+      case 'local':
+        return this.getLocalBrowserConfig(webConfig);
 
-    case 'browserstack':
-      return this.getBrowserStackConfig(webConfig);
+      case 'browserstack':
+        return this.getBrowserStackConfig(webConfig);
 
-    case 'grid':
-      return this.getSeleniumGridConfig(webConfig);
+      case 'grid':
+        return this.getSeleniumGridConfig(webConfig);
 
-    default:
-      throw new Error(`Unsupported execution mode: ${webConfig.executionMode}`);
+      default:
+        throw new Error(`Unsupported execution mode: ${webConfig.executionMode}`);
     }
   }
 
@@ -655,7 +655,7 @@ export class ConfigurationManager {
     if (missingVars.length > 0) {
       throw new Error(
         `Missing required environment variables: ${missingVars.join(', ')}. ` +
-          'Please ensure all required variables are set in your .env file.',
+          'Please ensure all required variables are set in your .env file.'
       );
     }
   }

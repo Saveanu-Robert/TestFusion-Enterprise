@@ -101,7 +101,7 @@ export class WebReporter {
 
   constructor(
     private page: Page,
-    private testInfo: TestInfo,
+    private testInfo: TestInfo
   ) {
     this.logger = Logger.getInstance();
     this.setupNetworkMonitoring();
@@ -118,7 +118,7 @@ export class WebReporter {
       clip?: { x: number; y: number; width: number; height: number };
       element?: Locator;
       annotate?: boolean;
-    } = {},
+    } = {}
   ): Promise<void> {
     try {
       let screenshot: Buffer;
@@ -291,7 +291,7 @@ export class WebReporter {
   async recordUserInteraction(
     action: string,
     element: string,
-    additionalData: Partial<UserInteractionData> = {},
+    additionalData: Partial<UserInteractionData> = {}
   ): Promise<void> {
     const interaction: UserInteractionData = {
       action,
@@ -429,7 +429,7 @@ export class WebReporter {
   async attachTestSummary(
     testName: string,
     result: 'passed' | 'failed' | 'skipped',
-    additionalData: Record<string, any> = {},
+    additionalData: Record<string, any> = {}
   ): Promise<void> {
     try {
       const summary = {

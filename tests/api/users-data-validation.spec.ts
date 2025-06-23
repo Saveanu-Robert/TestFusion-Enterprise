@@ -75,7 +75,7 @@ test.describe('Users API - Data Validation', () => {
           responseTime: response.duration,
         });
       });
-    },
+    }
   );
   test(qase(30, 'Should create a new user successfully and validate creation response'), async ({ testContext }) => {
     await test.step('Send POST request to create new user with valid data', async () => {
@@ -104,6 +104,6 @@ test.describe('Users API - Data Validation', () => {
           responseTime: response.duration,
         });
       });
-    },
+    }
   );
 });

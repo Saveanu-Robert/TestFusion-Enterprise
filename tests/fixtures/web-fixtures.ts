@@ -53,7 +53,7 @@ export const test = baseTest.extend<WebTestFixtures, WebWorkerFixtures>({
   // Web configuration fixture
   webConfig: async (
     { configManager },
-    use: (config: ReturnType<ConfigurationManager['getWebConfig']>) => Promise<void>,
+    use: (config: ReturnType<ConfigurationManager['getWebConfig']>) => Promise<void>
   ) => {
     await use(configManager.getWebConfig());
   },

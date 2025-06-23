@@ -59,7 +59,7 @@ test.describe('Comments API - Relationship Validation', () => {
           responseTime: response.duration,
         });
       });
-    },
+    }
   );
   test(qase(25, 'Should retrieve a specific comment by ID and validate comment structure'), async ({ testContext }) => {
     const commentId = 1;
@@ -88,7 +88,7 @@ test.describe('Comments API - Relationship Validation', () => {
           responseTime: response.duration,
         });
       });
-    },
+    }
   );
   test(qase(27, 'Should create a new comment successfully and validate creation response'), async ({ testContext }) => {
     await test.step('Send POST request to create new comment with valid data', async () => {

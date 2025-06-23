@@ -30,7 +30,7 @@ export class WebClient {
 
   constructor(
     private readonly page: Page,
-    configManager: ConfigurationManager,
+    configManager: ConfigurationManager
   ) {
     this.config = configManager.getWebConfig();
     this.logger = Logger.getInstance();

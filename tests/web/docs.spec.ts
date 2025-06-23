@@ -49,7 +49,7 @@ test.describe('Docs Page Tests', () => {
           urlPattern: 'docs',
         });
       });
-    },
+    }
   );
   test(qase(41, 'Should display sidebar navigation and validate navigation functionality'), async ({ testContext }) => {
     await test.step('Validate that sidebar navigation elements are properly rendered', async () => {

@@ -70,7 +70,7 @@ test.describe('End-to-End User Journeys', () => {
       });
 
       testContext.logInfo('🎉 Completed new user workflow test successfully - full journey validated');
-    },
+    }
   );
 
   test(qase(53, 'documentation exploration journey'), async ({ webPage, testContext }) => {

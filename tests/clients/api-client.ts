@@ -66,7 +66,7 @@ export class ApiClient {
   constructor(
     private requestContext: APIRequestContext,
     private baseUrl: string,
-    apiReporter?: ApiReporter,
+    apiReporter?: ApiReporter
   ) {
     this.logger = Logger.getInstance();
     this.apiReporter = apiReporter;
@@ -297,7 +297,7 @@ export class ApiClient {
     requestId: string,
     method: string,
     endpoint: string,
-    requestDetails: RequestDetails,
+    requestDetails: RequestDetails
   ): Promise<ApiResponse<T>> {
     const duration = Date.now() - startTime;
 
@@ -311,7 +311,7 @@ export class ApiClient {
     } // Convert headers array to object
     const headers = await response.headersArray();
     const headersObject = Object.fromEntries(
-      headers.map((header: { name: string; value: string }) => [header.name, header.value]),
+      headers.map((header: { name: string; value: string }) => [header.name, header.value])
     );
 
     const apiResponse: ApiResponse<T> = {
@@ -357,7 +357,7 @@ export class ApiClient {
     requestId: string,
     method: string,
     endpoint: string,
-    requestDetails: RequestDetails,
+    requestDetails: RequestDetails
   ): Promise<void> {
     const duration = Date.now() - startTime;
 
