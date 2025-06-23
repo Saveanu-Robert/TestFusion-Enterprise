@@ -1,19 +1,19 @@
 /**
  * Browser Provider Factory for TestFusion-Enterprise
- * 
+ *
  * This module implements the Factory pattern and Strategy pattern to provide
  * different browser execution strategies for web testing. It supports:
  * - Local browser execution
  * - Remote Selenium Grid execution
  * - BrowserStack cloud execution
- * 
+ *
  * The factory follows SOLID principles:
  * - Single Responsibility: Each provider handles one execution strategy
  * - Open/Closed: Easy to extend with new providers without modifying existing code
  * - Liskov Substitution: All providers implement the same interface
  * - Interface Segregation: Providers only implement methods they need
  * - Dependency Inversion: Depends on abstractions, not concrete implementations
- * 
+ *
  * @file browser-provider-factory.ts
  * @author TestFusion-Enterprise Team
  * @version 1.0.0
@@ -91,21 +91,16 @@ export class LocalBrowserProvider implements IBrowserProvider {
     }
 
     const { chromium } = await import('@playwright/test');
-    
+
     const launchOptions: LaunchOptions = {
       headless: this.config.browsers.headless,
       slowMo: this.config.browsers.slowMo,
-      args: [
-        '--no-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-web-security',
-        '--allow-running-insecure-content',
-      ],
+      args: ['--no-sandbox', '--disable-dev-shm-usage', '--disable-web-security', '--allow-running-insecure-content'],
     };
 
     this.logger.debug('🚀 Launching local browser', { options: launchOptions });
     const browser = await chromium.launch(launchOptions);
-    
+
     this.logger.info('✅ Local browser launched successfully');
     return browser;
   }
@@ -119,22 +114,24 @@ export class LocalBrowserProvider implements IBrowserProvider {
       viewport: this.config.browsers.viewport,
       ignoreHTTPSErrors: true,
       acceptDownloads: true,
-      recordVideo: this.shouldRecordVideo() ? {
-        dir: './test-results/videos/',
-        size: this.config.browsers.viewport,
-      } : undefined,
+      recordVideo: this.shouldRecordVideo()
+        ? {
+          dir: './test-results/videos/',
+          size: this.config.browsers.viewport,
+        }
+        : undefined,
     };
 
     this.logger.debug('🎭 Creating browser context', { options: contextOptions });
     const context = await browser.newContext(contextOptions);
-    
+
     this.logger.info('✅ Browser context created successfully');
     return context;
   }
 
   async createPage(context: BrowserContext): Promise<Page> {
     const page = await context.newPage();
-    
+
     if (this.config) {
       // Set timeouts from configuration
       page.setDefaultTimeout(this.config.timeout.element);
@@ -178,11 +175,11 @@ export class BrowserStackProvider implements IBrowserProvider {
 
   async initialize(config: WebConfig): Promise<void> {
     this.config = config;
-    
+
     // Validate BrowserStack configuration
     const configManager = ConfigurationManager.getInstance();
     configManager.validateWebExecutionConfig(config);
-    
+
     this.logger.info(`☁️ Initializing ${this.getProviderName()} browser provider`, {
       project: config.browserStack.projectName,
       build: config.browserStack.buildName,
@@ -196,7 +193,8 @@ export class BrowserStackProvider implements IBrowserProvider {
       throw new Error('BrowserStackProvider not initialized. Call initialize() first.');
     }
 
-    const { chromium } = await import('@playwright/test');    const { browserStack } = this.config;    // BrowserStack WebDriver endpoint
+    const { chromium } = await import('@playwright/test');
+    const { browserStack } = this.config; // BrowserStack WebDriver endpoint
     const caps = this.encodeBrowserStackCapabilities();
     const baseUrl = `wss://${browserStack.username}:${browserStack.accessKey}@cdp.browserstack.com/playwright`;
     const endpoint = `${baseUrl}?caps=${caps}`;
@@ -204,18 +202,18 @@ export class BrowserStackProvider implements IBrowserProvider {
       wsEndpoint: endpoint,
     };
 
-    this.logger.debug('🌐 Connecting to BrowserStack', { 
+    this.logger.debug('🌐 Connecting to BrowserStack', {
       project: browserStack.projectName,
       build: browserStack.buildName,
     });
 
     const browser = await chromium.connect(connectOptions.wsEndpoint);
-    
+
     this.logger.info('✅ Connected to BrowserStack successfully', {
       browserName: browserStack.capabilities.browserName,
       browserVersion: browserStack.capabilities.browserVersion,
     });
-    
+
     return browser;
   }
 
@@ -238,7 +236,7 @@ export class BrowserStackProvider implements IBrowserProvider {
 
   async createPage(context: BrowserContext): Promise<Page> {
     const page = await context.newPage();
-    
+
     if (this.config) {
       // Set timeouts from configuration
       page.setDefaultTimeout(this.config.timeout.element);
@@ -302,11 +300,11 @@ export class SeleniumGridProvider implements IBrowserProvider {
 
   async initialize(config: WebConfig): Promise<void> {
     this.config = config;
-    
+
     // Validate Selenium Grid configuration
     const configManager = ConfigurationManager.getInstance();
     configManager.validateWebExecutionConfig(config);
-    
+
     this.logger.info(`🔗 Initializing ${this.getProviderName()} browser provider`, {
       hubUrl: config.seleniumGrid.hubUrl,
       browserName: config.seleniumGrid.capabilities.browserName,
@@ -322,22 +320,22 @@ export class SeleniumGridProvider implements IBrowserProvider {
 
     const { chromium } = await import('@playwright/test');
     const { seleniumGrid } = this.config;
-    
+
     // Convert HTTP URL to WebSocket URL for Playwright
     const wsEndpoint = this.buildWebSocketEndpoint(seleniumGrid.hubUrl);
-    
-    this.logger.debug('🌐 Connecting to Selenium Grid', { 
+
+    this.logger.debug('🌐 Connecting to Selenium Grid', {
       hubUrl: seleniumGrid.hubUrl,
       wsEndpoint: wsEndpoint,
     });
 
     const browser = await chromium.connect(wsEndpoint);
-    
+
     this.logger.info('✅ Connected to Selenium Grid successfully', {
       browserName: seleniumGrid.capabilities.browserName,
       platformName: seleniumGrid.capabilities.platformName,
     });
-    
+
     return browser;
   }
 
@@ -358,7 +356,7 @@ export class SeleniumGridProvider implements IBrowserProvider {
 
   async createPage(context: BrowserContext): Promise<Page> {
     const page = await context.newPage();
-    
+
     if (this.config) {
       // Set timeouts from configuration
       page.setDefaultTimeout(this.config.timeout.element);
@@ -429,17 +427,16 @@ export class BrowserProviderFactory {
     switch (executionMode) {
     case 'local':
       return new LocalBrowserProvider();
-        
+
     case 'browserstack':
       return new BrowserStackProvider();
-        
+
     case 'grid':
       return new SeleniumGridProvider();
-        
+
     default:
       throw new Error(
-        `Unsupported execution mode: ${executionMode}. ` +
-          'Supported modes: local, browserstack, grid',
+        `Unsupported execution mode: ${executionMode}. ` + 'Supported modes: local, browserstack, grid',
       );
     }
   }

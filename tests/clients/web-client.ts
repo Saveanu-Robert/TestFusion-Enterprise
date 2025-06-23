@@ -41,7 +41,7 @@ export class WebClient {
    */
   async navigateTo(url: string, options: NavigationOptions = {}): Promise<void> {
     this.logger.info(`Navigating to: ${url}`);
-    
+
     await this.page.goto(url, {
       timeout: options.waitForTimeout || this.config.timeout.navigation,
       waitUntil: options.waitForNetworkIdle ? 'networkidle' : 'domcontentloaded',
@@ -113,10 +113,10 @@ export class WebClient {
    */
   async fillForm(formData: FormData, selectorPrefix: string = ''): Promise<void> {
     this.logger.info('Filling form with data');
-    
+
     for (const [field, value] of Object.entries(formData)) {
       const selector = selectorPrefix ? `${selectorPrefix} [name="${field}"]` : `[name="${field}"]`;
-      
+
       if (typeof value === 'string') {
         await this.fillInput(selector, value);
       } else if (typeof value === 'boolean') {
@@ -130,7 +130,7 @@ export class WebClient {
   }
   async submitForm(formSelector: string = 'form', submitButtonSelector?: string): Promise<void> {
     this.logger.info('Submitting form');
-    
+
     if (submitButtonSelector) {
       await this.clickElement(submitButtonSelector);
     } else {

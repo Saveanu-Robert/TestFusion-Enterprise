@@ -1,26 +1,67 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
+ * Professional Playwright Configuration for TestFusion-Enterprise
+ *
+ * Features:
+ * - Multi-project setup for API and Web testing
+ * - Environment-based configuration
+ * - Professional reporting with multiple formats
+ * - CI/CD optimizations
+ * - Performance monitoring
+ * - Retry strategies
+ *
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
   testDir: './tests',
-  /* Run tests in files in parallel */
+
+  /* Global test settings */
   fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,  /* Reporter to use. See https://playwright.dev/docs/test-reporters */  reporter: [
-    ['html', { outputFolder: 'playwright-report', open: 'never' }],
-    ['dot'], // Less verbose than 'list' - shows dots for passed tests, details only for failures
+  workers: process.env.CI ? 2 : undefined,
+
+  /* Global timeout configurations */
+  timeout: 30 * 1000, // 30 seconds per test
+  expect: {
+    timeout: 10 * 1000, // 10 seconds for assertions
+  },
+
+  /* Output directories */
+  outputDir: 'test-results/',
+  /* Reporter configuration - multiple formats for different needs */
+  reporter: [
+    // HTML report for detailed analysis
+    [
+      'html',
+      {
+        outputFolder: 'playwright-report',
+        open: process.env.CI ? 'never' : 'on-failure',
+        host: 'localhost',
+        port: 9323,
+      },
+    ],
+
+    // Compact dot reporter for CI
+    ['dot'],
+
+    // JUnit XML for CI integration
+    ['junit', { outputFile: 'test-results/junit-results.xml' }],
+
+    // JSON report for programmatic analysis
+    ['json', { outputFile: 'test-results/test-results.json' }],
+
+    // GitHub Actions reporter when in CI
+    ...(process.env.GITHUB_ACTIONS ? [['github'] as const] : []),
+
+    // Qase test management integration
     [
       'playwright-qase-reporter',
       {
         mode: process.env.QASE_MODE || 'off',
-        debug: process.env.QASE_DEBUG === 'true', // Only enable debug when explicitly set to 'true'
-        verbose: false, // Reduces Qase reporter output noise
+        debug: process.env.QASE_DEBUG === 'true',
+        verbose: false,
         environment: process.env.QASE_ENVIRONMENT,
         testops: {
           api: {
@@ -42,71 +83,209 @@ export default defineConfig({
           },
         },
       },
-    ],
+    ] as const,
   ],
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-  use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    // baseURL: 'http://127.0.0.1:3000',
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+  /* Global test configuration */
+  use: {
+    /* Tracing and debugging */
+    trace: process.env.CI ? 'retain-on-failure' : 'on-first-retry',
+    screenshot: process.env.CI ? 'only-on-failure' : 'only-on-failure',
+    video: process.env.CI ? 'retain-on-failure' : 'retain-on-failure',
+
+    /* Performance monitoring */
+    actionTimeout: 10 * 1000,
+    navigationTimeout: 30 * 1000,
+
+    /* Accept downloads and handle popups */
+    acceptDownloads: true,
+
+    /* Ignore HTTPS errors for testing */
+    ignoreHTTPSErrors: true,
+
+    /* Viewport for consistent testing */
+    viewport: { width: 1280, height: 720 },
+
+    /* Locale and timezone */
+    locale: 'en-US',
+    timezoneId: 'America/New_York',
+
+    /* User agent */
+    userAgent: 'TestFusion-Enterprise/1.0.0 (Test Automation)',
   },
-  /* Configure projects for different test types */
+
+  /* Test projects for different execution contexts */
   projects: [
-    // API Tests - No browser needed
+    // API Testing Project
     {
       name: 'api',
       testDir: './tests/api',
+      testMatch: '**/*.spec.ts',
       use: {
-        // API tests don't need browser context
+        baseURL: process.env.API_BASE_URL || 'https://jsonplaceholder.typicode.com',
+        extraHTTPHeaders: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'User-Agent': 'TestFusion-Enterprise-API/1.0.0',
+        },
       },
-    },    // Web/UI Tests - Browser required
+      metadata: {
+        type: 'api',
+        environment: process.env.TEST_ENV || 'development',
+      },
+    },
+
+    // Desktop Browser Testing
     {
       name: 'chromium',
       testDir: './tests/web',
-      use: { ...devices['Desktop Chrome'] },
+      testMatch: '**/*.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
+        // Use bundled Chromium instead of system Chrome
+      },
+      metadata: {
+        type: 'web',
+        browser: 'chromium',
+        environment: process.env.TEST_ENV || 'development',
+      },
     },
 
     {
       name: 'firefox',
       testDir: './tests/web',
-      use: { ...devices['Desktop Firefox'] },
+      testMatch: '**/*.spec.ts',
+      use: {
+        ...devices['Desktop Firefox'],
+        baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
+      },
+      metadata: {
+        type: 'web',
+        browser: 'firefox',
+        environment: process.env.TEST_ENV || 'development',
+      },
     },
 
     {
       name: 'webkit',
       testDir: './tests/web',
-      use: { ...devices['Desktop Safari'] },
+      testMatch: '**/*.spec.ts',
+      use: {
+        ...devices['Desktop Safari'],
+        baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
+      },
+      metadata: {
+        type: 'web',
+        browser: 'webkit',
+        environment: process.env.TEST_ENV || 'development',
+      },
     },
 
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
+    // Mobile Testing Projects
+    {
+      name: 'mobile-chrome',
+      testDir: './tests/web',
+      testMatch: '**/*.mobile.spec.ts',
+      use: {
+        ...devices['Pixel 5'],
+        baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
+      },
+      metadata: {
+        type: 'mobile',
+        browser: 'chromium',
+        device: 'pixel5',
+      },
+    },
 
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
+    {
+      name: 'mobile-safari',
+      testDir: './tests/web',
+      testMatch: '**/*.mobile.spec.ts',
+      use: {
+        ...devices['iPhone 12'],
+        baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
+      },
+      metadata: {
+        type: 'mobile',
+        browser: 'webkit',
+        device: 'iphone12',
+      },
+    },
+
+    // Performance Testing Project
+    {
+      name: 'performance',
+      testDir: './tests/performance',
+      testMatch: '**/*.perf.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
+      },
+      metadata: {
+        type: 'performance',
+        purpose: 'load-testing',
+      },
+    },
+
+    // Accessibility Testing Project
+    {
+      name: 'accessibility',
+      testDir: './tests/accessibility',
+      testMatch: '**/*.a11y.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
+      },
+      metadata: {
+        type: 'accessibility',
+        purpose: 'a11y-validation',
+      },
+    },
+
+    // Cross-Browser Edge Testing
+    {
+      name: 'edge',
+      testDir: './tests/web',
+      testMatch: '**/*.spec.ts',
+      use: {
+        ...devices['Desktop Edge'],
+        channel: 'msedge',
+        baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
+      },
+      metadata: {
+        type: 'web',
+        browser: 'edge',
+      },
+    },
+
+    // BrowserStack Cloud Testing
+    {
+      name: 'browserstack',
+      testDir: './tests/web',
+      testMatch: '**/*.spec.ts',
+      use: {
+        baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
+        // BrowserStack configuration will be handled by browser provider factory
+      },
+      metadata: {
+        type: 'cloud',
+        provider: 'browserstack',
+      },
+    },
   ],
 
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://127.0.0.1:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  /* Development server for local testing */
+  webServer: process.env.START_DEV_SERVER
+    ? {
+      command: 'npm run dev',
+      url: 'http://localhost:3000',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+    }
+    : undefined,
+
+  /* Global setup and teardown */
+  globalSetup: require.resolve('./tests/config/global-setup.ts'),
+  globalTeardown: require.resolve('./tests/config/global-teardown.ts'),
 });

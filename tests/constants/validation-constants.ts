@@ -1,9 +1,9 @@
 /**
  * Validation Constants and Patterns for TestFusion-Enterprise
- * 
+ *
  * This module provides standardized validation patterns and constants used across
  * the test framework for data validation and schema verification.
- * 
+ *
  * @file validation-constants.ts
  * @author TestFusion-Enterprise Team
  * @version 1.0.0
@@ -12,7 +12,8 @@
 /**
  * Primary validation patterns - RFC compliant and production-ready
  */
-export const VALIDATION_PATTERNS = {  /**
+export const VALIDATION_PATTERNS = {
+  /**
    * RFC 5322 compliant email validation pattern
    * Validates email addresses according to official specification
    */

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":semanticCommits",
+    ":dependencyDashboard",
+    ":timezone(America/New_York)",
+    "group:monorepos",
+    "group:recommended",
+    "workarounds:all"
+  ],
+  "labels": ["dependencies", "automated"],
+  "assignees": ["@TestFusion-Enterprise-Team"],
+  "reviewers": ["@TestFusion-Enterprise-Team"],
+  "branchPrefix": "renovate/",
+  "rangeStrategy": "bump",
+  "bumpVersion": "patch",
+  "semanticCommits": "enabled",
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "🤖 Dependency Dashboard",
+  "dependencyDashboardApproval": true,
+  "schedule": ["before 4am on monday"],
+  "timezone": "America/New_York",
+  "prHourlyLimit": 2,
+  "prConcurrentLimit": 10,
+  "rebaseWhen": "conflicted",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 4am on monday"]
+  },
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["^@playwright"],
+      "groupName": "Playwright packages",
+      "schedule": ["before 4am on monday"]
+    },
+    {
+      "matchPackagePatterns": ["^@types/"],
+      "groupName": "Type definitions",
+      "minor": {
+        "groupName": "Type definitions (minor)"
+      }
+    },
+    {
+      "matchDepTypes": ["peerDependencies"],
+      "enabled": false
+    },
+    {
+      "matchPackagePatterns": ["eslint", "prettier", "@typescript-eslint"],
+      "groupName": "Linting and formatting",
+      "schedule": ["before 4am on monday"]
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true,
+      "addLabels": ["major-update"]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "requiredStatusChecks": ["Quality Gate", "Build & Validate"]
+    },
+    {
+      "matchCategories": ["test"],
+      "groupName": "Test dependencies",
+      "schedule": ["before 4am on monday"]
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "schedule": ["at any time"]
+  },
+  "osvVulnerabilityAlerts": true,
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "to v{{newVersion}}",
+  "commitMessageSuffix": "",
+  "prTitle": "{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to {{#if isRange}}{{newVersion}}{{else}}v{{newVersion}}{{/if}}",
+  "prBodyTemplate": "This PR {{#if isPin}}pins{{else}}updates{{/if}} dependency [{{depName}}]({{depName}}).\n\n{{#if releases.length}}\n## Release Notes\n{{#each releases}}\n### [{{title}}]({{releaseNotes}})\n{{#if summary}}\n{{{summary}}}\n{{/if}}\n{{/each}}\n{{/if}}\n\n{{#if hasReleaseNotes}}\n---\n\n### Release Notes\n\n{{#each releases}}\n<details>\n<summary>{{title}}</summary>\n\n{{{body}}}\n\n</details>\n{{/each}}\n{{/if}}\n\n---\n\n**Schedule**: {{schedule}}\n\n**Branch**: {{branchName}}\n\n**Automerge**: {{automerge}}\n\n**Rebasing**: {{rebaseLabel}}\n\n**Ignore**: Close this PR and you won't be reminded about {{#if isSingleUpdate}}this update{{else}}these updates{{/if}} again.\n\n{{#if hasErrors}}\n\n---\n\n## Configuration Errors\n\n{{#each errors}}\n- {{.}}\n{{/each}}\n\n{{/if}}"
+}

@@ -60,11 +60,11 @@ export class DocsPage extends BasePage {
 
   /**
    * Page Loading Methods
-   */  async waitForPageLoad(): Promise<void> {
+   */ async waitForPageLoad(): Promise<void> {
     // Check viewport size to determine which element to wait for
     const viewport = this.page.viewportSize();
     const isDesktop = viewport && viewport.width >= 1024;
-    
+
     if (isDesktop) {
       // On desktop, sidebar should be visible, so wait for it
       const uniqueElement = this.getUniquePageElement();
@@ -75,7 +75,7 @@ export class DocsPage extends BasePage {
       // On mobile and tablet, sidebar is hidden, so wait for content area instead
       await this.waitForElement('.theme-doc-markdown');
     }
-    
+
     // Always wait for DOM to be ready
     await this.page.waitForLoadState('domcontentloaded');
   }
@@ -114,13 +114,13 @@ export class DocsPage extends BasePage {
 
   /**
    * Page Validations
-   */  async validatePageLoaded(): Promise<void> {
+   */ async validatePageLoaded(): Promise<void> {
     this.logger.info('Validating docs page loaded');
-    
+
     // Check viewport size to determine expected layout
     const viewport = this.page.viewportSize();
     const isDesktop = viewport && viewport.width >= 1024;
-    
+
     if (isDesktop) {
       // On desktop, expect sidebar to be visible
       await this.assertElementVisible('.theme-doc-sidebar-container', 'Sidebar should be visible');
@@ -130,15 +130,15 @@ export class DocsPage extends BasePage {
       // On mobile and tablet, sidebar might be hidden/collapsed
       await this.assertElementVisible('.theme-doc-markdown', 'Content area should be visible');
       await this.assertPageUrl(/\/docs/, 'URL should contain /docs');
-      
+
       // Check if sidebar exists but might be hidden
-      const sidebarExists = await this.page.locator('.theme-doc-sidebar-container').count() > 0;
+      const sidebarExists = (await this.page.locator('.theme-doc-sidebar-container').count()) > 0;
       this.logger.info(`Mobile/tablet viewport detected. Sidebar exists: ${sidebarExists}`);
     }
   }
   async validateSearchFunctionality(): Promise<void> {
     this.logger.info('Validating search functionality');
-    
+
     // Wait for search box to be available, but don't fail if it doesn't exist
     try {
       await this.page.waitForSelector(WEB_CONSTANTS.SELECTORS.searchBox, { timeout: 5000 });
@@ -148,13 +148,14 @@ export class DocsPage extends BasePage {
       this.logger.warn('Search box not found - this may be expected on some doc pages');
       // Don't throw error, just log the warning
     }
-  }  async validateSidebarNavigation(): Promise<void> {
+  }
+  async validateSidebarNavigation(): Promise<void> {
     this.logger.info('Validating sidebar navigation');
-    
+
     // Check viewport size to determine expected layout
     const viewport = this.page.viewportSize();
     const isDesktop = viewport && viewport.width >= 1024;
-    
+
     if (isDesktop) {
       // On desktop, expect sidebar to be visible
       await this.assertElementVisible('.theme-doc-sidebar-container', 'Sidebar should be visible');
@@ -166,9 +167,9 @@ export class DocsPage extends BasePage {
       this.logger.info(`Found ${sidebarItems} sidebar navigation items`);
     } else {
       // On mobile and tablet, sidebar might be hidden or require interaction to show
-      const sidebarExists = await this.page.locator('.theme-doc-sidebar-container').count() > 0;
+      const sidebarExists = (await this.page.locator('.theme-doc-sidebar-container').count()) > 0;
       this.logger.info(`Mobile/tablet viewport: Sidebar container exists: ${sidebarExists}`);
-      
+
       if (sidebarExists) {
         // Try to check for sidebar items without requiring visibility
         const sidebarItems = await this.page.locator('.theme-doc-sidebar-item-link').count();

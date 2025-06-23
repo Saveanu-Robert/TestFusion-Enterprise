@@ -17,10 +17,10 @@ export const API_CONSTANTS = {
   BASE_URL: config.getApiConfig().baseUrl,
   TIMEOUT: config.getApiConfig().timeout,
   RETRY_ATTEMPTS: config.getApiConfig().retryAttempts,
-  
+
   // Endpoints
   ENDPOINTS: config.getApiConfig().endpoints,
-  
+
   // HTTP Status Codes
   STATUS_CODES: {
     OK: 200,
@@ -37,7 +37,7 @@ export const API_CONSTANTS = {
     BAD_GATEWAY: 502,
     SERVICE_UNAVAILABLE: 503,
   } as const,
-  
+
   // HTTP Methods
   METHODS: {
     GET: 'GET',
@@ -46,7 +46,7 @@ export const API_CONSTANTS = {
     PATCH: 'PATCH',
     DELETE: 'DELETE',
   } as const,
-  
+
   // Content Types
   CONTENT_TYPES: {
     JSON: 'application/json',
@@ -66,16 +66,16 @@ export const WEB_CONSTANTS = {
   BASE_URL: config.getWebConfig().baseUrl,
   TIMEOUTS: config.getWebConfig().timeout,
   RETRY_ATTEMPTS: config.getWebConfig().retryAttempts,
-  
+
   // Browser Configuration
   BROWSER: config.getWebConfig().browsers,
-  
+
   // Page Paths
   PAGES: config.getWebConfig().pages,
-  
+
   // Common Selectors
   SELECTORS: config.getWebConfig().selectors,
-  
+
   // Additional Common Selectors
   COMMON_SELECTORS: {
     // Form Elements
@@ -86,20 +86,20 @@ export const WEB_CONSTANTS = {
     TEXTAREA: 'textarea',
     CHECKBOX: 'input[type="checkbox"]',
     RADIO: 'input[type="radio"]',
-    
+
     // Navigation Elements
     NAV: 'nav',
     MENU: '[role="menu"]',
     MENU_ITEM: '[role="menuitem"]',
     BREADCRUMB: '[role="breadcrumb"]',
-    
+
     // Content Elements
     MAIN: 'main',
     ARTICLE: 'article',
     SECTION: 'section',
     HEADER: 'header',
     FOOTER: 'footer',
-    
+
     // Interactive Elements
     LINK: 'a',
     MODAL: '[role="dialog"]',
@@ -107,18 +107,18 @@ export const WEB_CONSTANTS = {
     ALERT: '[role="alert"]',
     TAB: '[role="tab"]',
     TAB_PANEL: '[role="tabpanel"]',
-    
+
     // Table Elements
     TABLE: 'table',
     TABLE_ROW: 'tr',
     TABLE_CELL: 'td',
     TABLE_HEADER: 'th',
-    
+
     // List Elements
     LIST: 'ul, ol',
     LIST_ITEM: 'li',
   } as const,
-  
+
   // Browser Events
   EVENTS: {
     CLICK: 'click',
@@ -132,7 +132,7 @@ export const WEB_CONSTANTS = {
     SCROLL: 'scroll',
     RESIZE: 'resize',
   } as const,
-  
+
   // Keyboard Keys
   KEYS: {
     ENTER: 'Enter',
@@ -150,7 +150,7 @@ export const WEB_CONSTANTS = {
     DELETE: 'Delete',
     BACKSPACE: 'Backspace',
   } as const,
-  
+
   // Wait Conditions
   WAIT_CONDITIONS: {
     VISIBLE: 'visible',
@@ -196,7 +196,7 @@ export const TEST_DATA = {
       phone: 'invalid-phone',
     },
   },
-  
+
   // Post Test Data
   POSTS: {
     VALID_POST: {
@@ -210,7 +210,7 @@ export const TEST_DATA = {
       userId: 'invalid',
     },
   },
-  
+
   // Comment Test Data
   COMMENTS: {
     VALID_COMMENT: {
@@ -225,36 +225,14 @@ export const TEST_DATA = {
       body: '',
     },
   },
-  
+
   // Common Test Values
   COMMON: {
-    VALID_EMAILS: [
-      'test@example.com',
-      'user.test@domain.co.uk',
-      'test+label@example.org',
-    ],
-    INVALID_EMAILS: [
-      'invalid-email',
-      '@example.com',
-      'test@',
-      'test..test@example.com',
-    ],
-    VALID_PHONE_NUMBERS: [
-      '555-123-4567',
-      '+1-555-123-4567',
-      '(555) 123-4567',
-    ],
-    INVALID_PHONE_NUMBERS: [
-      '123',
-      'invalid-phone',
-      '555-123-456789',
-    ],
-    SEARCH_TERMS: [
-      'automation',
-      'testing',
-      'playwright',
-      'javascript',
-    ],
+    VALID_EMAILS: ['test@example.com', 'user.test@domain.co.uk', 'test+label@example.org'],
+    INVALID_EMAILS: ['invalid-email', '@example.com', 'test@', 'test..test@example.com'],
+    VALID_PHONE_NUMBERS: ['555-123-4567', '+1-555-123-4567', '(555) 123-4567'],
+    INVALID_PHONE_NUMBERS: ['123', 'invalid-phone', '555-123-456789'],
+    SEARCH_TERMS: ['automation', 'testing', 'playwright', 'javascript'],
   },
 } as const;
 
@@ -276,7 +254,7 @@ export const VALIDATION_CONSTANTS = {
     URL: /^https?:\/\/.+/,
     UUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
   },
-  
+
   // String Length Limits
   LENGTH_LIMITS: {
     NAME: { min: 1, max: 100 },
@@ -286,7 +264,7 @@ export const VALIDATION_CONSTANTS = {
     BODY: { min: 1, max: 5000 },
     USERNAME: { min: 3, max: 50 },
   },
-  
+
   // Numeric Ranges
   NUMERIC_RANGES: {
     USER_ID: { min: 1, max: 10000 },
@@ -321,7 +299,7 @@ export const UTILS = {
     LONG: 5000,
     VERY_LONG: 10000,
   },
-  
+
   // Common Messages
   MESSAGES: {
     SUCCESS: 'Operation completed successfully',
@@ -330,7 +308,7 @@ export const UTILS = {
     VALIDATION_ERROR: 'Validation failed',
     TIMEOUT_ERROR: 'Operation timed out',
   },
-  
+
   // Date Formats
   DATE_FORMATS: {
     ISO: 'YYYY-MM-DDTHH:mm:ss.sssZ',

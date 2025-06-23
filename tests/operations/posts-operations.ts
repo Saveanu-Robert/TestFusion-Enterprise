@@ -5,7 +5,6 @@ import { TEST_DATA } from '../constants/test-constants';
 import { expect } from '@playwright/test';
 
 export class PostsOperations {
-  
   constructor(private postsService: PostsApiService) {}
 
   /**
@@ -13,11 +12,11 @@ export class PostsOperations {
    */
   async getAllPostsWithValidation(): Promise<{ response: any; count: number }> {
     const response = await this.postsService.getAllPosts();
-    
+
     PostsValidator.validateSuccessfulResponse(response);
     PostsValidator.validateResponseDataStructure(response);
     PostsValidator.validatePostStructure(response.data[0]);
-    
+
     return { response, count: response.data.length };
   }
 
@@ -26,11 +25,11 @@ export class PostsOperations {
    */
   async getAllPostsWithCountValidation(): Promise<{ response: any; count: number }> {
     const { response, count } = await this.getAllPostsWithValidation();
-    
+
     // Validate that we receive a reasonable number of posts
     expect(count).toBeGreaterThan(0);
     expect(count).toBeLessThanOrEqual(500); // Reasonable upper bound
-    
+
     return { response, count };
   }
 
@@ -39,10 +38,10 @@ export class PostsOperations {
    */
   async getPostByIdWithValidation(postId: number): Promise<any> {
     const response = await this.postsService.getPostById(postId);
-    
+
     PostsValidator.validateSuccessfulResponse(response);
     PostsValidator.validateSpecificPost(response, postId);
-    
+
     return response;
   }
 
@@ -51,13 +50,13 @@ export class PostsOperations {
    */
   async getPostByIdWithComprehensiveValidation(postId: number): Promise<any> {
     const response = await this.getPostByIdWithValidation(postId);
-    
+
     // Validate post structure and data integrity
     expect(response.data.id).toBe(postId);
     expect(response.data.userId).toBeGreaterThan(0);
     expect(response.data.title).toBeTruthy();
     expect(response.data.body).toBeTruthy();
-    
+
     return response;
   }
 
@@ -66,10 +65,10 @@ export class PostsOperations {
    */
   async createPostWithValidation(postData: any): Promise<any> {
     const response = await this.postsService.createPost(postData);
-    
+
     PostsValidator.validateCreationResponse(response);
     PostsValidator.validateCreatedPost(response, postData);
-    
+
     return response;
   }
 
@@ -78,13 +77,13 @@ export class PostsOperations {
    */
   async createPostWithComprehensiveValidation(postData: any): Promise<any> {
     const response = await this.createPostWithValidation(postData);
-    
+
     // Validate created post contains expected data
     expect(response.data.id).toBeTruthy();
     expect(response.data.userId).toBe(postData.userId);
     expect(response.data.title).toBe(postData.title);
     expect(response.data.body).toBe(postData.body);
-    
+
     return response;
   }
 
@@ -93,10 +92,10 @@ export class PostsOperations {
    */
   async updatePostWithValidation(postId: number, postData: any): Promise<any> {
     const response = await this.postsService.updatePost(postId, postData);
-    
+
     PostsValidator.validateUpdateResponse(response);
     PostsValidator.validateUpdatedPost(response, postData, postId);
-    
+
     return response;
   }
 
@@ -105,13 +104,13 @@ export class PostsOperations {
    */
   async updatePostWithComprehensiveValidation(postId: number, postData: any): Promise<any> {
     const response = await this.updatePostWithValidation(postId, postData);
-    
+
     // Validate updated post contains expected data
     expect(response.data.id).toBe(postId);
     expect(response.data.userId).toBe(postData.userId);
     expect(response.data.title).toBe(postData.title);
     expect(response.data.body).toBe(postData.body);
-    
+
     return response;
   }
 
@@ -120,9 +119,9 @@ export class PostsOperations {
    */
   async deletePostWithValidation(postId: number): Promise<any> {
     const response = await this.postsService.deletePost(postId);
-    
+
     PostsValidator.validateDeleteResponse(response);
-    
+
     return response;
   }
 
@@ -131,10 +130,10 @@ export class PostsOperations {
    */
   async validatePostNotFoundError(postId: number): Promise<any> {
     const response = await this.postsService.getPostById(postId);
-    
+
     // Validate that API returns 404 status code for missing resource
     expect(response.status).toBe(404);
-    
+
     return response;
   }
 
@@ -143,18 +142,18 @@ export class PostsOperations {
    */
   async getPostsByUserIdWithValidation(userId: number): Promise<{ response: any; count: number }> {
     const response = await this.postsService.getPostsByUserId(userId);
-    
+
     PostsValidator.validateSuccessfulResponse(response);
     PostsValidator.validateResponseDataStructure(response);
-    
+
     // Validate that all posts belong to the specified user
     response.data.forEach((post: any) => {
       expect(post.userId).toBe(userId);
     });
-    
+
     return { response, count: response.data.length };
   }
-  
+
   /**
    * Generates test post data using centralized test data factory
    */

@@ -56,12 +56,7 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "lint:check": "eslint . --ext .ts --max-warnings 0"
   },
-  "keywords": [
-    "playwright",
-    "testing",
-    "automation",
-    "e2e"
-  ],
+  "keywords": ["playwright", "testing", "automation", "e2e"],
   "author": "",
   "license": "MIT",
   "devDependencies": {

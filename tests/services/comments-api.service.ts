@@ -35,10 +35,7 @@ export class CommentsApiService {
   /**
    * Creates a new comment
    */
-  async createComment(
-    commentData?: Partial<Omit<Comment, 'id'>>,
-    postId: number = 1,
-  ): Promise<ApiResponse<Comment>> {
+  async createComment(commentData?: Partial<Omit<Comment, 'id'>>, postId: number = 1): Promise<ApiResponse<Comment>> {
     const payload = commentData ?? createCommentPayload(postId);
     return this.apiClient.post<Comment>(API_ENDPOINTS.COMMENTS, payload);
   }

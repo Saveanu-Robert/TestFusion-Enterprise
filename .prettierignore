@@ -1,0 +1,14 @@
+# Prettier ignore patterns
+node_modules/
+dist/
+build/
+test-results/
+playwright-report/
+enterprise-reports/
+coverage/
+*.min.js
+*.min.css
+package-lock.json
+.env
+.env.*
+*.log

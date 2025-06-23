@@ -2,7 +2,6 @@ import { expect } from '@playwright/test';
 import { HTTP_STATUS_CODES } from '../constants/api-constants';
 
 export class PostsValidator {
-  
   /**
    * Validates the response status for successful operations
    */

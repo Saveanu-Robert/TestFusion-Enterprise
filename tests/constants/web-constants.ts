@@ -8,7 +8,7 @@ export const WEB_URLS = {
   SAUCE_DEMO: 'https://www.saucedemo.com',
   AUTOMATION_PRACTICE: 'http://automationpractice.com/index.php',
   THE_INTERNET: 'https://the-internet.herokuapp.com',
-  
+
   // Specific Page Paths
   PATHS: {
     LOGIN: '/login',

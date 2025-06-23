@@ -3,7 +3,6 @@ import { HTTP_STATUS_CODES } from '../constants/api-constants';
 import { EMAIL_REGEX, USERNAME_REGEX, PHONE_REGEX, WEBSITE_REGEX } from '../constants/validation-constants';
 
 export class UsersValidator {
-  
   /**
    * Validates the response status for successful operations
    */

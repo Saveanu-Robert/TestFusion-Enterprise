@@ -1,0 +1,39 @@
+# Docker Compose for Testing Only
+# Lightweight configuration for CI/CD pipelines
+
+version: '3.8'
+
+services:
+  testfusion-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    volumes:
+      - ./test-results:/app/test-results
+      - ./playwright-report:/app/playwright-report
+    environment:
+      - NODE_ENV=test
+      - CI=true
+      - TEST_ENV=ci
+      - HEADLESS=true
+    command: npm run test:ci
+    
+  # Selenium Grid for parallel testing
+  selenium-hub:
+    image: selenium/hub:4.15.0
+    ports:
+      - "4444:4444"
+    environment:
+      - GRID_MAX_SESSION=2
+      - GRID_BROWSER_TIMEOUT=120
+      
+  selenium-chrome:
+    image: selenium/node-chrome:4.15.0
+    shm_size: 1gb
+    environment:
+      - HUB_HOST=selenium-hub
+      - NODE_MAX_INSTANCES=1
+      - NODE_MAX_SESSION=1
+    depends_on:
+      - selenium-hub

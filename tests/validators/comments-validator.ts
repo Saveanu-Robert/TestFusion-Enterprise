@@ -3,7 +3,6 @@ import { HTTP_STATUS_CODES } from '../constants/api-constants';
 import { EMAIL_REGEX } from '../constants/validation-constants';
 
 export class CommentsValidator {
-  
   /**
    * Validates the response status for successful operations
    */

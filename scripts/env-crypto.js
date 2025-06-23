@@ -41,7 +41,7 @@ class SimpleEnvCrypto {
       const plainChar = plaintext.charCodeAt(i);
       encrypted += String.fromCharCode(plainChar ^ keyChar);
     }
-    
+
     const result = Buffer.from(encrypted).toString('base64');
     console.log('Encrypted value:');
     console.log(`ENC:${result}`);
@@ -59,21 +59,21 @@ class SimpleEnvCrypto {
     const cleanData = encryptedData.startsWith('ENC:') ? encryptedData.substring(4) : encryptedData;
     const key = this.getKey();
     const encrypted = Buffer.from(cleanData, 'base64').toString();
-    
+
     let decrypted = '';
     for (let i = 0; i < encrypted.length; i++) {
       const keyChar = key.charCodeAt(i % key.length);
       const encryptedChar = encrypted.charCodeAt(i);
       decrypted += String.fromCharCode(encryptedChar ^ keyChar);
     }
-    
+
     return decrypted;
   }
 
   processEnvContent(content) {
     const lines = content.split('\n');
     const processedLines = [];
-    
+
     for (const line of lines) {
       if (!line.trim() || line.trim().startsWith('#')) {
         processedLines.push(line);
@@ -118,13 +118,13 @@ function main() {
   const args = process.argv.slice(2);
   const command = args[0];
   const envCrypto = new SimpleEnvCrypto();
-  
+
   try {
     switch (command) {
       case 'generate-key':
         envCrypto.generateKey();
         break;
-        
+
       case 'encrypt':
         const plaintext = args[1];
         if (!plaintext) {
@@ -134,7 +134,7 @@ function main() {
         }
         envCrypto.encrypt(plaintext);
         break;
-        
+
       case 'decrypt':
         const encrypted = args[1];
         if (!encrypted) {
@@ -146,12 +146,12 @@ function main() {
         console.log('Decrypted value:');
         console.log(decrypted);
         break;
-        
+
       case 'process-env':
         const envPath = args[1] || '.env';
         envCrypto.processEnvFile(envPath);
         break;
-        
+
       default:
         console.log('Environment Variables Encryption Utility');
         console.log('');

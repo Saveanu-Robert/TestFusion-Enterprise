@@ -1,38 +1,36 @@
-import { test as base, APIRequestContext, expect, TestInfo } from '@playwright/test';
+import { APIRequestContext, expect, TestInfo } from '@playwright/test';
 import { ApiClient } from '../clients/api-client';
-import { Logger, LogLevel } from '../utils/logger';
-import { ConfigurationManager } from '../config/configuration-manager';
 import { ApiReporter } from '../utils/api-reporter';
+import { ConfigurationManager } from '../config/configuration-manager';
+import { baseTest, BaseTestFixtures, BaseWorkerFixtures } from './base-fixtures';
 
-export interface ApiTestFixtures {
+export interface ApiTestFixtures extends BaseTestFixtures {
   apiClient: ApiClient;
-  logger: Logger;
   apiReporter: ApiReporter;
 }
 
-export interface ApiWorkerFixtures {
+export interface ApiWorkerFixtures extends BaseWorkerFixtures {
   apiRequestContext: APIRequestContext;
   apiConfig: ReturnType<ConfigurationManager['getApiConfig']>;
 }
 
-export const test = base.extend<ApiTestFixtures, ApiWorkerFixtures>({
+export const test = baseTest.extend<ApiTestFixtures, ApiWorkerFixtures>({
   // Worker-scoped fixture to cache configuration
   apiConfig: [
-    async ({}, use) => {
-      const config = ConfigurationManager.getInstance();
-      const apiConfig = config.getApiConfig();
+    async ({ configManager }, use: (config: ReturnType<ConfigurationManager['getApiConfig']>) => Promise<void>) => {
+      const apiConfig = configManager.getApiConfig();
       await use(apiConfig);
     },
     { scope: 'worker' },
   ],
-  
+
   apiRequestContext: [
-    async ({ playwright, apiConfig }, use) => {
+    async ({ playwright, apiConfig }, use: (context: APIRequestContext) => Promise<void>) => {
       const requestContext = await playwright.request.newContext({
         baseURL: apiConfig.baseUrl,
         extraHTTPHeaders: {
           ...apiConfig.headers,
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
         timeout: apiConfig.timeout,
       });
@@ -45,17 +43,13 @@ export const test = base.extend<ApiTestFixtures, ApiWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  apiClient: async ({ apiRequestContext, apiConfig, apiReporter }, use) => {
+
+  apiClient: async ({ apiRequestContext, apiConfig, apiReporter }, use: (client: ApiClient) => Promise<void>) => {
     const client = new ApiClient(apiRequestContext, apiConfig.baseUrl, apiReporter);
     await use(client);
   },
-  
-  logger: async ({}, use) => {
-    const logger = Logger.getInstance();
-    logger.setLogLevel(LogLevel.INFO);
-    await use(logger);
-  },
-  apiReporter: async ({}, use: (r: ApiReporter) => Promise<void>, testInfo: TestInfo) => {
+
+  apiReporter: async ({}, use: (reporter: ApiReporter) => Promise<void>, testInfo: TestInfo) => {
     const reporter = new ApiReporter(testInfo);
     await use(reporter);
   },

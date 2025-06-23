@@ -1,6 +1,6 @@
 /**
  * Web Test Reporter for TestFusion-Enterprise
- * 
+ *
  * Provides comprehensive reporting capabilities for web tests including:
  * - Page screenshots and visual evidence
  * - Performance metrics and timing data
@@ -10,7 +10,7 @@
  * - Console logs and error capture
  * - Visual regression detection
  * - Mobile/responsive testing context
- * 
+ *
  * @author TestFusion-Enterprise Team
  * @version 1.0.0
  */
@@ -122,7 +122,7 @@ export class WebReporter {
   ): Promise<void> {
     try {
       let screenshot: Buffer;
-      
+
       if (options.element) {
         screenshot = await options.element.screenshot();
         name = `${name} (Element)`;
@@ -136,7 +136,7 @@ export class WebReporter {
       // Add viewport info to screenshot name
       const viewport = this.page.viewportSize();
       const viewportInfo = viewport ? `${viewport.width}x${viewport.height}` : 'unknown';
-      
+
       await this.testInfo.attach(`${name} [${viewportInfo}]`, {
         body: screenshot,
         contentType: 'image/png',
@@ -157,11 +157,12 @@ export class WebReporter {
    * Attach page performance metrics to the test report
    */
   async attachPerformanceMetrics(context?: string): Promise<WebPerformanceMetrics> {
-    try {      // Simple performance timing using Date.now()
+    try {
+      // Simple performance timing using Date.now()
       const startTime = Date.now();
       await this.page.reload();
       const endTime = Date.now();
-      
+
       const metrics: WebPerformanceMetrics = {
         loadTime: endTime - startTime,
         domContentLoaded: endTime - startTime,
@@ -194,7 +195,8 @@ export class WebReporter {
    * Attach accessibility audit results to the test report
    */
   async attachAccessibilityAudit(context?: string): Promise<AccessibilityAuditResult> {
-    try {      // Basic accessibility checks using Playwright locators
+    try {
+      // Basic accessibility checks using Playwright locators
       const auditResults = {
         violations: [] as any[],
         passes: 0,
@@ -209,7 +211,7 @@ export class WebReporter {
           const img = images[i];
           const alt = await img.getAttribute('alt');
           const ariaLabel = await img.getAttribute('aria-label');
-          
+
           if (!alt && !ariaLabel) {
             auditResults.violations.push({
               id: 'image-alt',
@@ -230,13 +232,13 @@ export class WebReporter {
           const id = await input.getAttribute('id');
           const ariaLabel = await input.getAttribute('aria-label');
           const ariaLabelledBy = await input.getAttribute('aria-labelledby');
-          
+
           let hasLabel = false;
           if (id) {
             const labelCount = await this.page.locator(`label[for="${id}"]`).count();
             hasLabel = labelCount > 0;
           }
-          
+
           if (!hasLabel && !ariaLabel && !ariaLabelledBy) {
             auditResults.violations.push({
               id: 'label',
@@ -309,7 +311,7 @@ export class WebReporter {
   async attachNetworkSummary(context?: string): Promise<NetworkActivitySummary> {
     try {
       const summary = this.analyzeNetworkActivity();
-      
+
       const contextSuffix = context ? ` (${context})` : '';
       await this.testInfo.attach(`Network Activity${contextSuffix}`, {
         body: JSON.stringify(summary, null, 2),
@@ -341,10 +343,12 @@ export class WebReporter {
   async attachVisualContext(additionalContext: Partial<VisualTestContext> = {}): Promise<VisualTestContext> {
     try {
       const viewport = this.page.viewportSize() || { width: 0, height: 0 };
-      const userAgent = await this.page.evaluate(() => {
-        return (global as any).navigator?.userAgent || 'Unknown';
-      }).catch(() => 'Unknown');
-      
+      const userAgent = await this.page
+        .evaluate(() => {
+          return (global as any).navigator?.userAgent || 'Unknown';
+        })
+        .catch(() => 'Unknown');
+
       const context: VisualTestContext = {
         viewport,
         deviceType: this.detectDeviceType(viewport.width),
@@ -375,7 +379,7 @@ export class WebReporter {
   async attachConsoleSummary(context?: string): Promise<ConsoleLogSummary> {
     try {
       const summary = this.analyzeConsoleLogs();
-      
+
       const contextSuffix = context ? ` (${context})` : '';
       await this.testInfo.attach(`Console Logs${contextSuffix}`, {
         body: JSON.stringify(summary, null, 2),
@@ -456,7 +460,7 @@ export class WebReporter {
    * Setup network monitoring
    */
   private setupNetworkMonitoring(): void {
-    this.page.on('request', (request) => {
+    this.page.on('request', request => {
       this.networkRequests.push({
         url: request.url(),
         method: request.method(),
@@ -465,11 +469,9 @@ export class WebReporter {
       });
     });
 
-    this.page.on('response', (response) => {
-      const requestIndex = this.networkRequests.findIndex(
-        req => req.url === response.url() && req.type === 'request',
-      );
-      
+    this.page.on('response', response => {
+      const requestIndex = this.networkRequests.findIndex(req => req.url === response.url() && req.type === 'request');
+
       if (requestIndex >= 0) {
         this.networkRequests[requestIndex] = {
           ...this.networkRequests[requestIndex],
@@ -486,7 +488,7 @@ export class WebReporter {
    * Setup console monitoring
    */
   private setupConsoleMonitoring(): void {
-    this.page.on('console', (msg) => {
+    this.page.on('console', msg => {
       this.consoleLogs.push({
         type: msg.type(),
         text: msg.text(),
@@ -501,7 +503,7 @@ export class WebReporter {
   private analyzeNetworkActivity(): NetworkActivitySummary {
     const completed = this.networkRequests.filter(req => req.type === 'complete');
     const failed = completed.filter(req => req.status >= 400);
-    
+
     const resourceBreakdown: { [key: string]: any } = {};
     const slowestRequests = completed
       .sort((a, b) => b.duration - a.duration)
@@ -518,7 +520,7 @@ export class WebReporter {
     completed.forEach(req => {
       const url = req.url;
       let type = 'other';
-      
+
       if (url.includes('.js')) type = 'javascript';
       else if (url.includes('.css')) type = 'stylesheet';
       else if (url.match(/\.(png|jpg|jpeg|gif|svg|webp)/)) type = 'image';
@@ -528,7 +530,7 @@ export class WebReporter {
       if (!resourceBreakdown[type]) {
         resourceBreakdown[type] = { count: 0, size: 0, totalTime: 0 };
       }
-      
+
       resourceBreakdown[type].count++;
       resourceBreakdown[type].size += req.size || 0;
       resourceBreakdown[type].totalTime += req.duration || 0;
@@ -536,8 +538,7 @@ export class WebReporter {
 
     // Calculate averages
     Object.keys(resourceBreakdown).forEach(type => {
-      resourceBreakdown[type].averageTime = 
-        resourceBreakdown[type].totalTime / resourceBreakdown[type].count;
+      resourceBreakdown[type].averageTime = resourceBreakdown[type].totalTime / resourceBreakdown[type].count;
     });
 
     return {
@@ -556,7 +557,7 @@ export class WebReporter {
     const errors = this.consoleLogs.filter(log => log.type === 'error').map(log => log.text);
     const warnings = this.consoleLogs.filter(log => log.type === 'warning').map(log => log.text);
     const logs = this.consoleLogs.filter(log => log.type === 'log').map(log => log.text);
-    
+
     const counts = {
       error: errors.length,
       warning: warnings.length,

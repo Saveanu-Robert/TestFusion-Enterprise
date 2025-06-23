@@ -5,6 +5,33 @@ const tsparser = require('@typescript-eslint/parser');
 module.exports = [
   js.configs.recommended,
   {
+    files: ['**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        require: 'readonly',
+        module: 'readonly',
+        process: 'readonly',
+        console: 'readonly',
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        exports: 'readonly',
+        global: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+      },
+    },
+    rules: {
+      'no-undef': 'error',
+      'no-unused-vars': 'warn',
+      'no-case-declarations': 'off',
+    },
+  },
+  {
     files: ['**/*.ts'],
     languageOptions: {
       parser: tsparser,
@@ -12,7 +39,8 @@ module.exports = [
         ecmaVersion: 2022,
         sourceType: 'module',
         project: './tsconfig.json',
-      },      globals: {
+      },
+      globals: {
         console: 'readonly',
         process: 'readonly',
         Buffer: 'readonly',
@@ -28,16 +56,18 @@ module.exports = [
         setInterval: 'readonly',
         clearInterval: 'readonly',
       },
-    },    plugins: {
+    },
+    plugins: {
       '@typescript-eslint': tseslint,
-    },rules: {
+    },
+    rules: {
       // TypeScript specific rules
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-empty-function': 'warn',
-      '@typescript-eslint/no-var-requires': 'error',      // General ESLint rules
+      '@typescript-eslint/no-var-requires': 'error', // General ESLint rules
       'no-console': 'off', // Allow console in tests
       'no-debugger': 'error',
       'no-duplicate-imports': 'error',
@@ -48,15 +78,16 @@ module.exports = [
       'no-useless-escape': 'error',
 
       // Code style rules
-      'quotes': ['error', 'single', { avoidEscape: true }],
-      'semi': ['error', 'always'],
+      quotes: ['error', 'single', { avoidEscape: true }],
+      semi: ['error', 'always'],
       'comma-dangle': ['error', 'always-multiline'],
       'object-curly-spacing': ['error', 'always'],
       'array-bracket-spacing': ['error', 'never'],
-      'indent': ['error', 2],
+      indent: ['error', 2],
       'max-len': ['warn', { code: 120, ignoreStrings: true, ignoreComments: true }],
     },
-  },  {
+  },
+  {
     files: ['*.config.js', '*.config.ts', 'eslint.config.js'],
     languageOptions: {
       globals: {
@@ -72,7 +103,8 @@ module.exports = [
     },
   },
   {
-    files: ['tests/**/*.ts'],    rules: {
+    files: ['tests/**/*.ts'],
+    rules: {
       // Allow any types in test files for flexibility
       '@typescript-eslint/no-explicit-any': 'off',
       // Allow console.log in tests for debugging

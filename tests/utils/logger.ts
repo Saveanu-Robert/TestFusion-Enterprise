@@ -1,16 +1,16 @@
 /**
  * Professional Logger for TestFusion-Enterprise
- * 
+ *
  * Provides structured logging with multiple severity levels, request correlation,
  * and memory-safe log management for test automation scenarios.
- * 
+ *
  * Features:
  * - Singleton pattern for consistent logging across the framework
  * - Request correlation IDs for API testing traceability
  * - Memory-safe log storage with automatic rotation
  * - Structured log entries with timestamps and metadata
  * - Test case association for better debugging
- * 
+ *
  * @file logger.ts
  * @author TestFusion-Enterprise Team
  * @version 1.0.0
@@ -157,7 +157,7 @@ export class Logger {
   public logResponse(statusCode: number, responseData?: any, requestId?: string, duration?: number): void {
     const statusEmoji = this.getStatusEmoji(statusCode);
     const durationText = duration ? ` (${duration}ms)` : '';
-    
+
     this.info(`${statusEmoji} API Response received: ${statusCode}${durationText}`, {
       statusCode,
       responseData,
@@ -184,7 +184,7 @@ export class Logger {
       isValid,
       timestamp: new Date().toISOString(),
     };
-    
+
     if (isValid) {
       this.info(message, data);
     } else {
@@ -214,7 +214,7 @@ export class Logger {
   public logTestEnd(testName: string, status: 'PASSED' | 'FAILED' | 'SKIPPED', duration?: number): void {
     const statusEmoji = status === 'PASSED' ? '✅' : status === 'FAILED' ? '❌' : '⏭️';
     const durationText = duration ? ` (${duration}ms)` : '';
-    
+
     this.info(`${statusEmoji} Test execution completed: ${testName} - ${status}${durationText}`, {
       testName,
       status,
@@ -243,12 +243,12 @@ export class Logger {
     };
 
     this.logs.push(logEntry);
-    
+
     // Rotate logs to prevent memory leaks
     if (this.logs.length > this.MAX_LOGS) {
       this.logs.shift();
     }
-    
+
     this.outputLog(logEntry);
   }
 

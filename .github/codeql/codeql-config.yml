@@ -1,0 +1,75 @@
+# CodeQL Configuration for TestFusion-Enterprise
+# Security analysis configuration
+
+name: "TestFusion-Enterprise CodeQL Analysis"
+
+# Languages to analyze
+languages:
+  - javascript
+  - typescript
+
+# Source directories to analyze
+paths:
+  - tests/
+  - scripts/
+
+# Directories to ignore
+paths-ignore:
+  - node_modules/
+  - test-results/
+  - playwright-report/
+  - coverage/
+  - dist/
+  - enterprise-reports/
+
+# Queries to run
+queries:
+  - uses: security-and-quality
+  - uses: security-experimental
+
+# Query filters
+query-filters:
+  - include:
+      kind: problem
+      severity: error
+  - include:
+      kind: problem
+      severity: warning
+  - exclude:
+      id: js/unused-local-variable
+
+# Build configuration
+build:
+  # Skip build for JavaScript/TypeScript analysis
+  skip-autobuild: true
+
+# Analysis configuration
+analyze:
+  # Number of threads to use
+  threads: 2
+  
+  # Memory limit
+  ram: 4096
+  
+  # Timeout for analysis
+  timeout: 30m
+
+# Advanced configuration
+advanced:
+  # Enable experimental features
+  experimental: true
+  
+  # Custom extraction
+  extraction:
+    javascript:
+      # Include additional file types
+      extensions:
+        - ".ts"
+        - ".js"
+        - ".mjs"
+      
+      # Custom extraction patterns
+      patterns:
+        - "**/*.spec.ts"
+        - "**/*.test.ts"
+        - "**/fixtures/**/*.ts"

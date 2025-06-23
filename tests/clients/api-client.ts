@@ -1,10 +1,10 @@
 /**
  * API Client for TestFusion-Enterprise
- * 
+ *
  * Provides a unified HTTP client interface following the Adapter Pattern.
  * Handles all API communication with comprehensive logging, error handling,
  * and response correlation for test automation scenarios.
- * 
+ *
  * Features:
  * - Standardized HTTP method support (GET, POST, PUT, DELETE, PATCH)
  * - Request/response correlation with unique IDs
@@ -12,7 +12,7 @@
  * - Automatic JSON serialization/deserialization
  * - Duration tracking for performance monitoring
  * - Configurable timeout and retry mechanisms
- * 
+ *
  * @file api-client.ts
  * @author TestFusion-Enterprise Team
  * @version 1.0.0
@@ -89,7 +89,7 @@ export class ApiClient {
     const startTime = Date.now();
     const requestId = this.generateRequestId();
     const url = this.buildUrl(endpoint, options?.params);
-    
+
     // Create request details for reporting
     const requestDetails: RequestDetails = {
       method: 'GET',
@@ -99,7 +99,7 @@ export class ApiClient {
       timestamp: new Date().toISOString(),
       requestId,
     };
-    
+
     this.logger.logRequest('GET', endpoint, options?.params, requestId);
 
     try {
@@ -125,7 +125,7 @@ export class ApiClient {
     const startTime = Date.now();
     const requestId = this.generateRequestId();
     const url = this.buildUrl(endpoint, options?.params);
-    
+
     // Create request details for reporting
     const requestDetails: RequestDetails = {
       method: 'POST',
@@ -139,7 +139,7 @@ export class ApiClient {
       timestamp: new Date().toISOString(),
       requestId,
     };
-    
+
     this.logger.logRequest('POST', endpoint, data, requestId);
 
     try {
@@ -169,7 +169,7 @@ export class ApiClient {
     const startTime = Date.now();
     const requestId = this.generateRequestId();
     const url = this.buildUrl(endpoint, options?.params);
-    
+
     // Create request details for reporting
     const requestDetails: RequestDetails = {
       method: 'PUT',
@@ -183,7 +183,7 @@ export class ApiClient {
       timestamp: new Date().toISOString(),
       requestId,
     };
-    
+
     this.logger.logRequest('PUT', endpoint, data, requestId);
 
     try {
@@ -212,7 +212,7 @@ export class ApiClient {
     const startTime = Date.now();
     const requestId = this.generateRequestId();
     const url = this.buildUrl(endpoint, options?.params);
-    
+
     // Create request details for reporting
     const requestDetails: RequestDetails = {
       method: 'DELETE',
@@ -222,7 +222,7 @@ export class ApiClient {
       timestamp: new Date().toISOString(),
       requestId,
     };
-    
+
     this.logger.logRequest('DELETE', endpoint, undefined, requestId);
 
     try {
@@ -248,7 +248,7 @@ export class ApiClient {
     const startTime = Date.now();
     const requestId = this.generateRequestId();
     const url = this.buildUrl(endpoint, options?.params);
-    
+
     // Create request details for reporting
     const requestDetails: RequestDetails = {
       method: 'PATCH',
@@ -262,7 +262,7 @@ export class ApiClient {
       timestamp: new Date().toISOString(),
       requestId,
     };
-    
+
     this.logger.logRequest('PATCH', endpoint, data, requestId);
 
     try {
@@ -300,7 +300,7 @@ export class ApiClient {
     requestDetails: RequestDetails,
   ): Promise<ApiResponse<T>> {
     const duration = Date.now() - startTime;
-    
+
     // Parse response data safely
     let responseData: T | null = null;
     try {
@@ -308,7 +308,7 @@ export class ApiClient {
     } catch {
       // Some responses (like DELETE) might not return JSON
       responseData = null;
-    }    // Convert headers array to object
+    } // Convert headers array to object
     const headers = await response.headersArray();
     const headersObject = Object.fromEntries(
       headers.map((header: { name: string; value: string }) => [header.name, header.value]),
@@ -360,12 +360,12 @@ export class ApiClient {
     requestDetails: RequestDetails,
   ): Promise<void> {
     const duration = Date.now() - startTime;
-    
+
     // Attach error details to test report if reporter is available
     if (this.apiReporter) {
       await this.apiReporter.attachError(error, requestDetails, `${method} ${endpoint} failed`);
     }
-    
+
     this.logger.error(`❌ ${method} request to ${endpoint} failed after ${duration}ms`, {
       error: error.message || error,
       requestId,
@@ -391,7 +391,7 @@ export class ApiClient {
    */
   private buildUrl(endpoint: string, params?: Record<string, string>): string {
     const url = new URL(endpoint, this.baseUrl);
-    
+
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         url.searchParams.append(key, value);
