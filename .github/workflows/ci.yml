@@ -256,7 +256,7 @@ jobs:
       run: npm ci --prefer-offline --no-audit
       
     - name: Install Playwright Browsers
-      run: npx playwright install ${{ matrix.browser }} --with-deps
+      run: npx playwright install --with-deps
       
     - name: Decrypt and load environment variables
       run: |
