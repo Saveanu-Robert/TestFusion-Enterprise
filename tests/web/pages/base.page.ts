@@ -68,14 +68,21 @@ export abstract class BasePage {
 
   /**
    * Element Interaction Methods
-   */
-  protected async waitForElement(selector: string, options: ElementOptions = {}): Promise<Locator> {
+   */  protected async waitForElement(selector: string, options: ElementOptions = {}): Promise<Locator> {
     const element = this.page.locator(selector);
-    await element.waitFor({
-      timeout: options.timeout || this.config.timeout.element,
-      state: 'visible',
-    });
-    return element;
+    try {
+      await element.waitFor({
+        timeout: options.timeout || this.config.timeout.element,
+        state: 'visible',
+      });
+      return element;
+    } catch (error) {
+      const currentUrl = this.page.url();
+      const pageTitle = await this.page.title().catch(() => 'Unknown');
+      const errorMessage = `Failed to find element with selector "${selector}" on page "${pageTitle}" (${currentUrl}). Original error: ${error instanceof Error ? error.message : error}`;
+      this.logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
   }
 
   protected async clickElement(selector: string, options: ElementOptions = {}): Promise<void> {

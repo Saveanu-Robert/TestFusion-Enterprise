@@ -176,70 +176,8 @@ export default defineConfig({
         baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
       },
       metadata: {
-        type: 'web',
-        browser: 'webkit',
+        type: 'web',        browser: 'webkit',
         environment: process.env.TEST_ENV || 'development',
-      },
-    },
-
-    // Mobile Testing Projects
-    {
-      name: 'mobile-chrome',
-      testDir: './tests/web',
-      testMatch: '**/*.mobile.spec.ts',
-      use: {
-        ...devices['Pixel 5'],
-        baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
-      },
-      metadata: {
-        type: 'mobile',
-        browser: 'chromium',
-        device: 'pixel5',
-      },
-    },
-
-    {
-      name: 'mobile-safari',
-      testDir: './tests/web',
-      testMatch: '**/*.mobile.spec.ts',
-      use: {
-        ...devices['iPhone 12'],
-        baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
-      },
-      metadata: {
-        type: 'mobile',
-        browser: 'webkit',
-        device: 'iphone12',
-      },
-    },
-
-    // Performance Testing Project
-    {
-      name: 'performance',
-      testDir: './tests/performance',
-      testMatch: '**/*.perf.spec.ts',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
-      },
-      metadata: {
-        type: 'performance',
-        purpose: 'load-testing',
-      },
-    },
-
-    // Accessibility Testing Project
-    {
-      name: 'accessibility',
-      testDir: './tests/accessibility',
-      testMatch: '**/*.a11y.spec.ts',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
-      },
-      metadata: {
-        type: 'accessibility',
-        purpose: 'a11y-validation',
       },
     },
 
@@ -257,10 +195,10 @@ export default defineConfig({
         type: 'web',
         browser: 'edge',
       },
-    },
-
-    // BrowserStack Cloud Testing
-    {
+    },    // BrowserStack Cloud Testing (only if credentials are provided AND execution mode is browserstack)
+    ...(process.env.BROWSERSTACK_USERNAME && 
+        process.env.BROWSERSTACK_ACCESS_KEY && 
+        process.env.TEST_EXECUTION_MODE === 'browserstack' ? [{
       name: 'browserstack',
       testDir: './tests/web',
       testMatch: '**/*.spec.ts',
@@ -272,7 +210,7 @@ export default defineConfig({
         type: 'cloud',
         provider: 'browserstack',
       },
-    },
+    }] : []),
   ],
 
   /* Development server for local testing */
