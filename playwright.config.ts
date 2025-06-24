@@ -176,7 +176,8 @@ export default defineConfig({
         baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
       },
       metadata: {
-        type: 'web',        browser: 'webkit',
+        type: 'web',
+        browser: 'webkit',
         environment: process.env.TEST_ENV || 'development',
       },
     },
@@ -195,22 +196,26 @@ export default defineConfig({
         type: 'web',
         browser: 'edge',
       },
-    },    // BrowserStack Cloud Testing (only if credentials are provided AND execution mode is browserstack)
-    ...(process.env.BROWSERSTACK_USERNAME && 
-        process.env.BROWSERSTACK_ACCESS_KEY && 
-        process.env.TEST_EXECUTION_MODE === 'browserstack' ? [{
-      name: 'browserstack',
-      testDir: './tests/web',
-      testMatch: '**/*.spec.ts',
-      use: {
-        baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
-        // BrowserStack configuration will be handled by browser provider factory
-      },
-      metadata: {
-        type: 'cloud',
-        provider: 'browserstack',
-      },
-    }] : []),
+    }, // BrowserStack Cloud Testing (only if credentials are provided AND execution mode is browserstack)
+    ...(process.env.BROWSERSTACK_USERNAME &&
+    process.env.BROWSERSTACK_ACCESS_KEY &&
+    process.env.TEST_EXECUTION_MODE === 'browserstack'
+      ? [
+          {
+            name: 'browserstack',
+            testDir: './tests/web',
+            testMatch: '**/*.spec.ts',
+            use: {
+              baseURL: process.env.WEB_BASE_URL || 'https://playwright.dev',
+              // BrowserStack configuration will be handled by browser provider factory
+            },
+            metadata: {
+              type: 'cloud',
+              provider: 'browserstack',
+            },
+          },
+        ]
+      : []),
   ],
 
   /* Development server for local testing */

@@ -65,10 +65,10 @@ export class DocsPage extends BasePage {
     // Get browser type for browser-specific handling
     const browserName = this.page.context().browser()?.browserType().name();
     this.logger.debug(`Browser type: ${browserName}`);
-    
+
     // First wait for the basic page load state
     await this.page.waitForLoadState('domcontentloaded');
-    
+
     // Try multiple possible selectors for the docs page content
     const possibleContentSelectors = [
       '.theme-doc-markdown',
@@ -77,17 +77,17 @@ export class DocsPage extends BasePage {
       '[role="main"]',
       '.docusaurus-page',
       '.main-wrapper',
-      '#__docusaurus'
+      '#__docusaurus',
     ];
 
     let contentFound = false;
-    
+
     for (const selector of possibleContentSelectors) {
       try {
         const element = this.page.locator(selector);
-        await element.waitFor({ 
-          timeout: 3000, 
-          state: 'visible' 
+        await element.waitFor({
+          timeout: 3000,
+          state: 'visible',
         });
         contentFound = true;
         this.logger.debug(`✅ Page content found with selector: ${selector}`);
@@ -100,7 +100,7 @@ export class DocsPage extends BasePage {
 
     if (!contentFound) {
       this.logger.warn('⚠️ No specific content selectors found, checking basic page elements');
-      
+
       // Fallback: Just ensure we have basic page structure
       try {
         await this.page.waitForSelector('body', { timeout: 5000 });
@@ -121,12 +121,14 @@ export class DocsPage extends BasePage {
 
     // Optional: Try networkidle but don't fail if it times out
     // Use browser-specific timeouts as different browsers handle networkidle differently
-    const networkIdleTimeout = browserName === 'webkit' ? 1000 : (browserName === 'chromium' ? 2000 : 1500);
+    const networkIdleTimeout = browserName === 'webkit' ? 1000 : browserName === 'chromium' ? 2000 : 1500;
     try {
       await this.page.waitForLoadState('networkidle', { timeout: networkIdleTimeout });
       this.logger.debug('✅ Network idle achieved');
     } catch (error) {
-      this.logger.debug(`⚠️ Network idle timeout (${networkIdleTimeout}ms) - continuing as this is often expected in ${browserName}`);
+      this.logger.debug(
+        `⚠️ Network idle timeout (${networkIdleTimeout}ms) - continuing as this is often expected in ${browserName}`
+      );
     }
   }
 
@@ -135,7 +137,7 @@ export class DocsPage extends BasePage {
    */
   async searchDocs(query: string): Promise<void> {
     this.logger.info(`Attempting to search docs for: ${query}`);
-    
+
     // Check if search box exists with multiple possible selectors
     const possibleSearchSelectors = [
       WEB_CONSTANTS.SELECTORS.searchBox,
@@ -144,11 +146,11 @@ export class DocsPage extends BasePage {
       'input[type="search"]',
       '.DocSearch-Input',
       '.search-box input',
-      '#search-input'
+      '#search-input',
     ];
 
     let searchInput = null;
-    
+
     for (const selector of possibleSearchSelectors) {
       try {
         const element = this.page.locator(selector);
@@ -235,7 +237,7 @@ export class DocsPage extends BasePage {
       'input[type="search"]',
       '.DocSearch-Input',
       '.search-box input',
-      '#search-input'
+      '#search-input',
     ];
 
     let searchFound = false;
@@ -249,7 +251,7 @@ export class DocsPage extends BasePage {
           searchFound = true;
           searchSelector = selector;
           this.logger.debug(`✅ Search functionality found with selector: ${selector}`);
-          
+
           // Validate the search element is functional
           await this.assertElementVisible(selector, 'Search box should be visible');
           await this.assertElementEnabled(selector, 'Search box should be enabled');

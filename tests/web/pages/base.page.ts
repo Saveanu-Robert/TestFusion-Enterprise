@@ -68,7 +68,7 @@ export abstract class BasePage {
 
   /**
    * Element Interaction Methods
-   */  protected async waitForElement(selector: string, options: ElementOptions = {}): Promise<Locator> {
+   */ protected async waitForElement(selector: string, options: ElementOptions = {}): Promise<Locator> {
     const element = this.page.locator(selector);
     try {
       await element.waitFor({
