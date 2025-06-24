@@ -60,33 +60,123 @@ export class DocsPage extends BasePage {
 
   /**
    * Page Loading Methods
-   */  async waitForPageLoad(): Promise<void> {
-    // Check viewport size to determine which element to wait for
-    const viewport = this.page.viewportSize();
-    const isDesktop = viewport && viewport.width >= 1024;
-    
-    if (isDesktop) {
-      // On desktop, sidebar should be visible, so wait for it
-      const uniqueElement = this.getUniquePageElement();
-      if (uniqueElement) {
-        await this.waitForElement(uniqueElement);
-      }
-    } else {
-      // On mobile and tablet, sidebar is hidden, so wait for content area instead
-      await this.waitForElement('.theme-doc-markdown');
-    }
-    
-    // Always wait for DOM to be ready
+   */
+  async waitForPageLoad(): Promise<void> {
+    // Get browser type for browser-specific handling
+    const browserName = this.page.context().browser()?.browserType().name();
+    this.logger.debug(`Browser type: ${browserName}`);
+
+    // First wait for the basic page load state
     await this.page.waitForLoadState('domcontentloaded');
+
+    // Try multiple possible selectors for the docs page content
+    const possibleContentSelectors = [
+      '.theme-doc-markdown',
+      'main',
+      'article',
+      '[role="main"]',
+      '.docusaurus-page',
+      '.main-wrapper',
+      '#__docusaurus',
+    ];
+
+    let contentFound = false;
+
+    for (const selector of possibleContentSelectors) {
+      try {
+        const element = this.page.locator(selector);
+        await element.waitFor({
+          timeout: 3000,
+          state: 'visible',
+        });
+        contentFound = true;
+        this.logger.debug(`✅ Page content found with selector: ${selector}`);
+        break;
+      } catch (error) {
+        this.logger.debug(`⚠️ Content selector ${selector} not found, trying next...`);
+        continue;
+      }
+    }
+
+    if (!contentFound) {
+      this.logger.warn('⚠️ No specific content selectors found, checking basic page elements');
+
+      // Fallback: Just ensure we have basic page structure
+      try {
+        await this.page.waitForSelector('body', { timeout: 5000 });
+        this.logger.debug('✅ Basic page structure confirmed');
+      } catch (error) {
+        this.logger.error('❌ Failed to load even basic page structure');
+        throw new Error(`Page failed to load properly. Current URL: ${this.page.url()}`);
+      }
+    }
+
+    // Wait for load state but with shorter timeout and fallback
+    try {
+      await this.page.waitForLoadState('load', { timeout: 5000 });
+      this.logger.debug('✅ Page load state achieved');
+    } catch (error) {
+      this.logger.warn('⚠️ Load state timeout - continuing anyway as content is available');
+    }
+
+    // Optional: Try networkidle but don't fail if it times out
+    // Use browser-specific timeouts as different browsers handle networkidle differently
+    const networkIdleTimeout = browserName === 'webkit' ? 1000 : browserName === 'chromium' ? 2000 : 1500;
+    try {
+      await this.page.waitForLoadState('networkidle', { timeout: networkIdleTimeout });
+      this.logger.debug('✅ Network idle achieved');
+    } catch (error) {
+      this.logger.debug(
+        `⚠️ Network idle timeout (${networkIdleTimeout}ms) - continuing as this is often expected in ${browserName}`
+      );
+    }
   }
 
   /**
    * Page Actions
    */
   async searchDocs(query: string): Promise<void> {
-    this.logger.info(`Searching docs for: ${query}`);
-    await this.fillInput(WEB_CONSTANTS.SELECTORS.searchBox, query);
-    await this.pressKey('Enter');
+    this.logger.info(`Attempting to search docs for: ${query}`);
+
+    // Check if search box exists with multiple possible selectors
+    const possibleSearchSelectors = [
+      WEB_CONSTANTS.SELECTORS.searchBox,
+      '[placeholder*="Search"]',
+      '[placeholder*="search"]',
+      'input[type="search"]',
+      '.DocSearch-Input',
+      '.search-box input',
+      '#search-input',
+    ];
+
+    let searchInput = null;
+
+    for (const selector of possibleSearchSelectors) {
+      try {
+        const element = this.page.locator(selector);
+        if (await element.isVisible({ timeout: 1000 })) {
+          searchInput = element;
+          this.logger.debug(`✅ Search input found with selector: ${selector}`);
+          break;
+        }
+      } catch (error) {
+        this.logger.debug(`⚠️ Search selector ${selector} not found or not visible`);
+      }
+    }
+
+    if (!searchInput) {
+      this.logger.warn('⚠️ No search input found on this page');
+      throw new Error('Search functionality not available on this page');
+    }
+
+    try {
+      await searchInput.fill(query);
+      await this.pressKey('Enter');
+      this.logger.info(`✅ Search completed for: ${query}`);
+    } catch (error) {
+      this.logger.error(`❌ Failed to perform search: ${error}`);
+      throw error;
+    }
   }
 
   async navigateToNextPage(): Promise<void> {
@@ -114,13 +204,13 @@ export class DocsPage extends BasePage {
 
   /**
    * Page Validations
-   */  async validatePageLoaded(): Promise<void> {
+   */ async validatePageLoaded(): Promise<void> {
     this.logger.info('Validating docs page loaded');
-    
+
     // Check viewport size to determine expected layout
     const viewport = this.page.viewportSize();
     const isDesktop = viewport && viewport.width >= 1024;
-    
+
     if (isDesktop) {
       // On desktop, expect sidebar to be visible
       await this.assertElementVisible('.theme-doc-sidebar-container', 'Sidebar should be visible');
@@ -130,31 +220,62 @@ export class DocsPage extends BasePage {
       // On mobile and tablet, sidebar might be hidden/collapsed
       await this.assertElementVisible('.theme-doc-markdown', 'Content area should be visible');
       await this.assertPageUrl(/\/docs/, 'URL should contain /docs');
-      
+
       // Check if sidebar exists but might be hidden
-      const sidebarExists = await this.page.locator('.theme-doc-sidebar-container').count() > 0;
+      const sidebarExists = (await this.page.locator('.theme-doc-sidebar-container').count()) > 0;
       this.logger.info(`Mobile/tablet viewport detected. Sidebar exists: ${sidebarExists}`);
     }
   }
   async validateSearchFunctionality(): Promise<void> {
     this.logger.info('Validating search functionality');
-    
-    // Wait for search box to be available, but don't fail if it doesn't exist
-    try {
-      await this.page.waitForSelector(WEB_CONSTANTS.SELECTORS.searchBox, { timeout: 5000 });
-      await this.assertElementVisible(WEB_CONSTANTS.SELECTORS.searchBox, 'Search box should be visible');
-      await this.assertElementEnabled(WEB_CONSTANTS.SELECTORS.searchBox, 'Search box should be enabled');
-    } catch (error) {
-      this.logger.warn('Search box not found - this may be expected on some doc pages');
-      // Don't throw error, just log the warning
+
+    // Try multiple possible search selectors
+    const possibleSearchSelectors = [
+      WEB_CONSTANTS.SELECTORS.searchBox,
+      '[placeholder*="Search"]',
+      '[placeholder*="search"]',
+      'input[type="search"]',
+      '.DocSearch-Input',
+      '.search-box input',
+      '#search-input',
+    ];
+
+    let searchFound = false;
+    let searchSelector = '';
+
+    for (const selector of possibleSearchSelectors) {
+      try {
+        const element = this.page.locator(selector);
+        const isVisible = await element.isVisible({ timeout: 2000 });
+        if (isVisible) {
+          searchFound = true;
+          searchSelector = selector;
+          this.logger.debug(`✅ Search functionality found with selector: ${selector}`);
+
+          // Validate the search element is functional
+          await this.assertElementVisible(selector, 'Search box should be visible');
+          await this.assertElementEnabled(selector, 'Search box should be enabled');
+          break;
+        }
+      } catch (error) {
+        this.logger.debug(`⚠️ Search selector ${selector} not found or not functional`);
+      }
     }
-  }  async validateSidebarNavigation(): Promise<void> {
+
+    if (!searchFound) {
+      this.logger.warn('⚠️ Search functionality not found - this may be expected on some doc pages');
+      // Don't throw error for missing search, just log it
+    } else {
+      this.logger.info(`✅ Search functionality validated with selector: ${searchSelector}`);
+    }
+  }
+  async validateSidebarNavigation(): Promise<void> {
     this.logger.info('Validating sidebar navigation');
-    
+
     // Check viewport size to determine expected layout
     const viewport = this.page.viewportSize();
     const isDesktop = viewport && viewport.width >= 1024;
-    
+
     if (isDesktop) {
       // On desktop, expect sidebar to be visible
       await this.assertElementVisible('.theme-doc-sidebar-container', 'Sidebar should be visible');
@@ -166,9 +287,9 @@ export class DocsPage extends BasePage {
       this.logger.info(`Found ${sidebarItems} sidebar navigation items`);
     } else {
       // On mobile and tablet, sidebar might be hidden or require interaction to show
-      const sidebarExists = await this.page.locator('.theme-doc-sidebar-container').count() > 0;
+      const sidebarExists = (await this.page.locator('.theme-doc-sidebar-container').count()) > 0;
       this.logger.info(`Mobile/tablet viewport: Sidebar container exists: ${sidebarExists}`);
-      
+
       if (sidebarExists) {
         // Try to check for sidebar items without requiring visibility
         const sidebarItems = await this.page.locator('.theme-doc-sidebar-item-link').count();

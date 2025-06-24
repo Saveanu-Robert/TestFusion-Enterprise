@@ -1,10 +1,10 @@
 /**
  * API Reporter for TestFusion-Enterprise
- * 
+ *
  * Provides enhanced reporting capabilities for API tests including automatic
  * request/response attachment generation, performance metrics tracking,
  * and comprehensive test documentation for better debugging and analysis.
- * 
+ *
  * Features:
  * - Automatic request/response attachment generation
  * - Performance metrics collection and reporting
@@ -12,7 +12,7 @@
  * - Formatted JSON attachment generation
  * - Test step integration with detailed context
  * - Error scenario documentation
- * 
+ *
  * @file api-reporter.ts
  * @author TestFusion-Enterprise Team
  * @version 1.0.0
@@ -94,7 +94,7 @@ export class ApiReporter {
    */
   public async attachRequest(requestDetails: RequestDetails): Promise<void> {
     const formattedRequest = this.formatRequestDetails(requestDetails);
-    
+
     const endpoint = this.getEndpointFromUrl(requestDetails.url);
     await this.testInfo.attach(`API Request - ${requestDetails.method} ${endpoint}`, {
       body: JSON.stringify(formattedRequest, null, 2),
@@ -133,18 +133,16 @@ export class ApiReporter {
    * @param requestDetails - Request details
    * @param responseDetails - Response details
    */
-  public async attachRequestResponse(
-    requestDetails: RequestDetails, 
-    responseDetails: ResponseDetails,
-  ): Promise<void> {
+  public async attachRequestResponse(requestDetails: RequestDetails, responseDetails: ResponseDetails): Promise<void> {
     const requestResponsePair = {
       request: this.formatRequestDetails(requestDetails),
       response: this.formatResponseDetails(responseDetails),
       metrics: this.calculateMetrics(requestDetails, responseDetails),
-    };    const statusEmoji = this.getStatusEmoji(responseDetails.status);
+    };
+    const statusEmoji = this.getStatusEmoji(responseDetails.status);
     const endpoint = this.getEndpointFromUrl(requestDetails.url);
     const title = `API Call - ${requestDetails.method} ${endpoint} ${statusEmoji} ${responseDetails.status}`;
-    
+
     await this.testInfo.attach(title, {
       body: JSON.stringify(requestResponsePair, null, 2),
       contentType: 'application/json',
@@ -164,10 +162,7 @@ export class ApiReporter {
    * @param metrics - Performance metrics to attach
    * @param context - Additional context for the metrics
    */
-  public async attachPerformanceMetrics(
-    metrics: PerformanceMetrics, 
-    context?: string,
-  ): Promise<void> {
+  public async attachPerformanceMetrics(metrics: PerformanceMetrics, context?: string): Promise<void> {
     const performanceReport = {
       context: context || 'API Performance Metrics',
       timestamp: new Date().toISOString(),
@@ -197,11 +192,7 @@ export class ApiReporter {
    * @param requestDetails - Associated request details
    * @param context - Additional error context
    */
-  public async attachError(
-    error: any, 
-    requestDetails?: RequestDetails, 
-    context?: string,
-  ): Promise<void> {
+  public async attachError(error: any, requestDetails?: RequestDetails, context?: string): Promise<void> {
     const errorReport = {
       context: context || 'API Error Details',
       timestamp: new Date().toISOString(),
@@ -384,17 +375,10 @@ export class ApiReporter {
    * @param responseDetails - Response details
    * @returns Performance metrics
    */
-  private calculateMetrics(
-    requestDetails: RequestDetails, 
-    responseDetails: ResponseDetails,
-  ): PerformanceMetrics {
-    const requestSize = requestDetails.body 
-      ? JSON.stringify(requestDetails.body).length 
-      : 0;
-    
-    const responseSize = responseDetails.body 
-      ? JSON.stringify(responseDetails.body).length 
-      : 0;
+  private calculateMetrics(requestDetails: RequestDetails, responseDetails: ResponseDetails): PerformanceMetrics {
+    const requestSize = requestDetails.body ? JSON.stringify(requestDetails.body).length : 0;
+
+    const responseSize = responseDetails.body ? JSON.stringify(responseDetails.body).length : 0;
 
     return {
       duration: responseDetails.duration,
@@ -450,21 +434,21 @@ export class ApiReporter {
    */
   private getPerformanceRecommendations(duration: number): string[] {
     const recommendations: string[] = [];
-    
+
     if (duration > 1000) {
       recommendations.push('Consider optimizing API response time');
       recommendations.push('Check for unnecessary data in response');
     }
-    
+
     if (duration > 3000) {
       recommendations.push('Investigate server performance issues');
       recommendations.push('Consider implementing caching mechanisms');
     }
-    
+
     if (duration < 100) {
       recommendations.push('Excellent performance - maintain current optimization');
     }
-    
+
     return recommendations;
   }
 
@@ -490,27 +474,27 @@ export class ApiReporter {
    */
   private getSuggestedActions(error: any): string[] {
     const actions: string[] = [];
-    
+
     if (error.name === 'TimeoutError') {
       actions.push('Increase request timeout');
       actions.push('Check server response time');
     }
-    
+
     if (error.message?.includes('network')) {
       actions.push('Verify network connectivity');
       actions.push('Check API endpoint availability');
     }
-    
+
     if (error.message?.includes('404')) {
       actions.push('Verify API endpoint URL');
       actions.push('Check if resource exists');
     }
-    
+
     if (error.message?.includes('401') || error.message?.includes('403')) {
       actions.push('Verify authentication credentials');
       actions.push('Check API permissions');
     }
-    
+
     return actions;
   }
 }

@@ -10,9 +10,11 @@ import { WEB_CONSTANTS } from '../../constants/test-constants';
 export class HomePage extends BasePage {
   constructor(page: Page) {
     super(page);
-  }  getPageUrl(): string {
+  }
+  getPageUrl(): string {
     return `${this.config.baseUrl}${WEB_CONSTANTS.PAGES.home}`;
-  }  getUniquePageElement(): string {
+  }
+  getUniquePageElement(): string {
     return 'h1:has-text("Playwright enables reliable end-to-end testing")'; // More reliable than Docs link
   }
   /**
@@ -36,7 +38,8 @@ export class HomePage extends BasePage {
 
   get mainNavigation() {
     return this.page.locator(WEB_CONSTANTS.SELECTORS.mainNavigation);
-  }  get heroSection() {
+  }
+  get heroSection() {
     return this.page.locator(WEB_CONSTANTS.SELECTORS.heroContainer);
   }
 
@@ -46,7 +49,7 @@ export class HomePage extends BasePage {
 
   /**
    * Page Actions
-   */  async clickGetStarted(): Promise<void> {
+   */ async clickGetStarted(): Promise<void> {
     this.logger.info('Clicking Get Started button');
     // Use the navbar specific docs link to avoid ambiguity
     await this.clickElement('.navbar__item.navbar__link[href="/docs/intro"]');
@@ -69,7 +72,7 @@ export class HomePage extends BasePage {
 
   /**
    * Page Validations
-   */  async validatePageLoaded(): Promise<void> {
+   */ async validatePageLoaded(): Promise<void> {
     this.logger.info('Validating home page loaded');
     await this.assertElementVisible(WEB_CONSTANTS.SELECTORS.mainContainer, 'Main container should be visible');
     await this.assertElementVisible(WEB_CONSTANTS.SELECTORS.mainNavigation, 'Main navigation should be visible');
@@ -77,10 +80,13 @@ export class HomePage extends BasePage {
   }
   async validateNavigationElements(): Promise<void> {
     this.logger.info('Validating navigation elements');
-    
+
     // Check if we're in mobile view by checking if mobile menu toggle is visible
-    const isMobileView = await this.page.locator('button[aria-label*="menu"], .navbar__toggle').isVisible().catch(() => false);
-    
+    const isMobileView = await this.page
+      .locator('button[aria-label*="menu"], .navbar__toggle')
+      .isVisible()
+      .catch(() => false);
+
     if (isMobileView) {
       // For mobile view, we need to open the menu first to see navigation links
       const menuButton = this.page.locator('button[aria-label*="menu"], .navbar__toggle').first();
@@ -88,21 +94,25 @@ export class HomePage extends BasePage {
         await menuButton.click();
         await this.page.waitForTimeout(500); // Wait for menu animation
       }
-      
+
       // Use mobile-specific selectors
       await this.assertElementVisible('.menu__link[href="/docs/intro"]', 'Docs link should be visible in mobile menu');
     } else {
       // For desktop view, use navbar selectors
-      await this.assertElementVisible('.navbar__item.navbar__link[href="/docs/intro"]', 'Docs link should be visible in navbar');
+      await this.assertElementVisible(
+        '.navbar__item.navbar__link[href="/docs/intro"]',
+        'Docs link should be visible in navbar'
+      );
     }
-    
+
     // These should be visible in both views (or check API and Community links appropriately)
     // For now, let's skip the detailed validation to fix the main issue
-  }async validateHeroSection(): Promise<void> {
+  }
+  async validateHeroSection(): Promise<void> {
     this.logger.info('Validating hero section');
     await this.assertElementVisible(WEB_CONSTANTS.SELECTORS.heroContainer, 'Hero container should be visible');
     await this.assertElementVisible(WEB_CONSTANTS.SELECTORS.getStartedButton, 'Get Started button should be visible');
-    
+
     const heroText = await this.getText('h1');
     if (heroText) {
       this.logger.info(`Hero title text: ${heroText}`);

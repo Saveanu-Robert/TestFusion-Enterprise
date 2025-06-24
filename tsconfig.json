@@ -8,7 +8,8 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "resolveJsonModule": true,
     "outDir": "./dist",
@@ -21,14 +22,6 @@
       "@models/*": ["tests/models/*"]
     }
   },
-  "include": [
-    "tests/**/*",
-    "playwright.config.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "test-results",
-    "enterprise-reports"
-  ]
+  "include": ["tests/**/*", "playwright.config.ts", "vite.config.ts"],
+  "exclude": ["node_modules", "dist", "test-results", "enterprise-reports"]
 }

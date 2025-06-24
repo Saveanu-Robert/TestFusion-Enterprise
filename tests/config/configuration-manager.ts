@@ -1,10 +1,10 @@
 /**
  * Centralized Configuration Manager for TestFusion-Enterprise
- * 
+ *
  * This module provides a unified configuration system that consolidates all testing
  * parameters into a single, manageable source. It follows the Singleton pattern to
  * ensure consistent configuration access across the entire test framework.
- * 
+ *
  * Key Features:
  * - Environment variable-based configuration with fallback defaults
  * - Separate API and Web testing configurations
@@ -12,14 +12,14 @@
  * - Type-safe configuration interfaces
  * - Easy customization through .env files
  * - Supports multiple environments (development, staging, production)
- * 
+ *
  * Usage:
  * ```typescript
  * const config = ConfigurationManager.getInstance();
  * const apiConfig = config.getApiConfig();
  * const webConfig = config.getWebConfig();
  * ```
- * 
+ *
  * @file configuration-manager.ts
  * @author TestFusion-Enterprise Team
  * @version 1.0.0
@@ -205,7 +205,7 @@ export interface TestConfig {
 
 /**
  * Singleton Configuration Manager class
- * 
+ *
  * Provides centralized access to all test configuration parameters.
  * Follows the Singleton pattern to ensure consistent configuration
  * across the entire test framework.
@@ -230,10 +230,11 @@ export class ConfigurationManager {
       ConfigurationManager.instance = new ConfigurationManager();
     }
     return ConfigurationManager.instance;
-  }private loadConfiguration(): TestConfig {
+  }
+  private loadConfiguration(): TestConfig {
     // Validate required environment variables
     this.validateRequiredConfig();
-    
+
     return {
       api: {
         baseUrl: this.getRequiredEnvVar('API_BASE_URL'),
@@ -242,7 +243,7 @@ export class ConfigurationManager {
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': 'TestFusion-Enterprise/1.0.0',
-          ...(process.env.API_KEY && { 'Authorization': `Bearer ${process.env.API_KEY}` }),
+          ...(process.env.API_KEY && { Authorization: `Bearer ${process.env.API_KEY}` }),
         },
         environment: this.getRequiredEnvVar('TEST_ENV'),
         endpoints: {
@@ -251,7 +252,8 @@ export class ConfigurationManager {
           comments: this.getEnvVar('API_COMMENTS_ENDPOINT', '/comments'),
           healthCheck: this.getEnvVar('API_HEALTH_ENDPOINT', '/health'),
         },
-      },      web: {
+      },
+      web: {
         baseUrl: this.getRequiredEnvVar('WEB_BASE_URL'),
         executionMode: this.getEnvVar('WEB_EXECUTION_MODE', 'local') as WebExecutionMode,
         timeout: {
@@ -268,12 +270,16 @@ export class ConfigurationManager {
             width: this.getNumberEnvVar('WEB_VIEWPORT_WIDTH'),
             height: this.getNumberEnvVar('WEB_VIEWPORT_HEIGHT'),
           },
-        },        browserStack: {
+        },
+        browserStack: {
           username: this.getOptionalEnvVar('BROWSERSTACK_USERNAME', ''),
           accessKey: this.getOptionalEnvVar('BROWSERSTACK_ACCESS_KEY', ''),
           hubUrl: this.getOptionalEnvVar('BROWSERSTACK_HUB_URL', 'https://hub-cloud.browserstack.com/wd/hub'),
           projectName: this.getOptionalEnvVar('BROWSERSTACK_PROJECT_NAME', 'TestFusion-Enterprise'),
-          buildName: this.getOptionalEnvVar('BROWSERSTACK_BUILD_NAME', `Build-${new Date().toISOString().split('T')[0]}`),
+          buildName: this.getOptionalEnvVar(
+            'BROWSERSTACK_BUILD_NAME',
+            `Build-${new Date().toISOString().split('T')[0]}`
+          ),
           enableLocal: this.getOptionalBooleanEnvVar('BROWSERSTACK_ENABLE_LOCAL', false),
           capabilities: {
             os: this.getOptionalEnvVar('BROWSERSTACK_OS', 'Windows'),
@@ -282,7 +288,10 @@ export class ConfigurationManager {
             browserVersion: this.getOptionalEnvVar('BROWSERSTACK_BROWSER_VERSION', 'latest'),
             enableVideo: this.getOptionalBooleanEnvVar('BROWSERSTACK_ENABLE_VIDEO', true),
             enableNetworkLogs: this.getOptionalBooleanEnvVar('BROWSERSTACK_ENABLE_NETWORK_LOGS', true),
-            consoleLogLevel: this.getOptionalEnvVar('BROWSERSTACK_CONSOLE_LOG_LEVEL', 'errors') as BrowserStackConfig['capabilities']['consoleLogLevel'],
+            consoleLogLevel: this.getOptionalEnvVar(
+              'BROWSERSTACK_CONSOLE_LOG_LEVEL',
+              'errors'
+            ) as BrowserStackConfig['capabilities']['consoleLogLevel'],
           },
         },
         seleniumGrid: {
@@ -296,13 +305,15 @@ export class ConfigurationManager {
             platformName: this.getOptionalEnvVar('SELENIUM_GRID_PLATFORM_NAME', 'ANY'),
             options: this.parseJsonEnvVar('SELENIUM_GRID_OPTIONS', {}),
           },
-        },pages: {
+        },
+        pages: {
           home: this.getEnvVar('WEB_HOME_PATH', '/'),
           docs: this.getEnvVar('WEB_DOCS_PATH', '/docs/intro'),
           api: this.getEnvVar('WEB_API_PATH', '/docs/api'),
           community: this.getEnvVar('WEB_COMMUNITY_PATH', '/community/welcome'),
           search: this.getEnvVar('WEB_SEARCH_PATH', '/search'),
-        },        selectors: {
+        },
+        selectors: {
           searchBox: this.getEnvVar('WEB_SEARCH_BOX_SELECTOR', '[placeholder*="Search"]'),
           searchButton: this.getEnvVar('WEB_SEARCH_BUTTON_SELECTOR', 'button[type="submit"]'),
           docsLink: this.getEnvVar('WEB_DOCS_LINK_SELECTOR', 'a[href="/docs/intro"]'),
@@ -334,29 +345,29 @@ export class ConfigurationManager {
         maxResponseTime: this.getNumberEnvVar('MAX_RESPONSE_TIME'),
       },
     };
-  }  /**
+  } /**
    * Validates web execution mode configuration
    * @param webConfig - Web configuration to validate
    * @throws Error if configuration is invalid for the selected execution mode
    */
   public validateWebExecutionConfig(webConfig: WebConfig): void {
     const mode = webConfig.executionMode;
-    
+
     switch (mode) {
-    case 'local':
-      // Local execution doesn't require additional validation
-      break;
-        
-    case 'browserstack':
-      this.validateBrowserStackConfig(webConfig.browserStack);
-      break;
-        
-    case 'grid':
-      this.validateSeleniumGridConfig(webConfig.seleniumGrid);
-      break;
-        
-    default:
-      throw new Error(`Invalid web execution mode: ${mode}. Supported modes are: local, grid, browserstack`);
+      case 'local':
+        // Local execution doesn't require additional validation
+        break;
+
+      case 'browserstack':
+        this.validateBrowserStackConfig(webConfig.browserStack);
+        break;
+
+      case 'grid':
+        this.validateSeleniumGridConfig(webConfig.seleniumGrid);
+        break;
+
+      default:
+        throw new Error(`Invalid web execution mode: ${mode}. Supported modes are: local, grid, browserstack`);
     }
   }
 
@@ -372,26 +383,29 @@ export class ConfigurationManager {
       { field: 'hubUrl', value: config.hubUrl },
     ];
 
-    const missingFields = requiredFields
-      .filter(({ value }) => !value || value.trim() === '')
-      .map(({ field }) => field);
+    const missingFields = requiredFields.filter(({ value }) => !value || value.trim() === '').map(({ field }) => field);
 
     if (missingFields.length > 0) {
       throw new Error(
         `BrowserStack configuration missing required fields: ${missingFields.join(', ')}. ` +
-        'Please set the following environment variables: ' +
-        missingFields.map(field => `BROWSERSTACK_${field.toUpperCase()}`).join(', '),
+          'Please set the following environment variables: ' +
+          missingFields.map(field => `BROWSERSTACK_${field.toUpperCase()}`).join(', ')
       );
     }
 
     // Validate console log level
-    const validLogLevels: BrowserStackConfig['capabilities']['consoleLogLevel'][] = 
-      ['disable', 'errors', 'warnings', 'info', 'verbose'];
-    
+    const validLogLevels: BrowserStackConfig['capabilities']['consoleLogLevel'][] = [
+      'disable',
+      'errors',
+      'warnings',
+      'info',
+      'verbose',
+    ];
+
     if (!validLogLevels.includes(config.capabilities.consoleLogLevel)) {
       throw new Error(
         `Invalid BrowserStack console log level: ${config.capabilities.consoleLogLevel}. ` +
-        `Valid options: ${validLogLevels.join(', ')}`,
+          `Valid options: ${validLogLevels.join(', ')}`
       );
     }
   }
@@ -403,9 +417,7 @@ export class ConfigurationManager {
    */
   private validateSeleniumGridConfig(config: SeleniumGridConfig): void {
     if (!config.hubUrl || config.hubUrl.trim() === '') {
-      throw new Error(
-        'Selenium Grid hub URL is required. Please set SELENIUM_GRID_HUB_URL environment variable.',
-      );
+      throw new Error('Selenium Grid hub URL is required. Please set SELENIUM_GRID_HUB_URL environment variable.');
     }
 
     // Validate URL format
@@ -435,22 +447,22 @@ export class ConfigurationManager {
    */
   public getBrowserConfig(): any {
     const webConfig = this.getWebConfig();
-    
+
     // Validate configuration before proceeding
     this.validateWebExecutionConfig(webConfig);
-    
+
     switch (webConfig.executionMode) {
-    case 'local':
-      return this.getLocalBrowserConfig(webConfig);
-        
-    case 'browserstack':
-      return this.getBrowserStackConfig(webConfig);
-        
-    case 'grid':
-      return this.getSeleniumGridConfig(webConfig);
-        
-    default:
-      throw new Error(`Unsupported execution mode: ${webConfig.executionMode}`);
+      case 'local':
+        return this.getLocalBrowserConfig(webConfig);
+
+      case 'browserstack':
+        return this.getBrowserStackConfig(webConfig);
+
+      case 'grid':
+        return this.getSeleniumGridConfig(webConfig);
+
+      default:
+        throw new Error(`Unsupported execution mode: ${webConfig.executionMode}`);
     }
   }
 
@@ -475,7 +487,7 @@ export class ConfigurationManager {
    */
   private getBrowserStackConfig(webConfig: WebConfig): any {
     const { browserStack } = webConfig;
-    
+
     return {
       // BrowserStack WebDriver connection
       connectOptions: {
@@ -508,7 +520,7 @@ export class ConfigurationManager {
    */
   private getSeleniumGridConfig(webConfig: WebConfig): any {
     const { seleniumGrid } = webConfig;
-    
+
     return {
       // Selenium Grid WebDriver connection
       connectOptions: {
@@ -527,7 +539,8 @@ export class ConfigurationManager {
         // Additional options
         ...seleniumGrid.capabilities.options,
       },
-    };  }
+    };
+  }
 
   /**
    * Gets the API configuration settings
@@ -578,12 +591,12 @@ export class ConfigurationManager {
   public getProperty(key: string, defaultValue?: any): any {
     const keys = key.split('.');
     let value: any = this.config;
-    
+
     for (const k of keys) {
       value = value?.[k];
       if (value === undefined) break;
     }
-    
+
     return value !== undefined ? value : defaultValue;
   }
 
@@ -596,19 +609,19 @@ export class ConfigurationManager {
     const keys = key.split('.');
     const lastKey = keys.pop()!;
     let target: any = this.config;
-    
+
     for (const k of keys) {
       if (!(k in target)) target[k] = {};
       target = target[k];
     }
-    
+
     target[lastKey] = value;
   }
   private validateRequiredConfig(): void {
     const requiredVars = [
       // API Configuration
       'API_BASE_URL',
-      'API_TIMEOUT', 
+      'API_TIMEOUT',
       'API_RETRY_ATTEMPTS',
       'TEST_ENV',
       // Web Configuration
@@ -638,11 +651,11 @@ export class ConfigurationManager {
     ];
 
     const missingVars = requiredVars.filter(varName => !process.env[varName]);
-    
+
     if (missingVars.length > 0) {
       throw new Error(
         `Missing required environment variables: ${missingVars.join(', ')}. ` +
-        'Please ensure all required variables are set in your .env file.',
+          'Please ensure all required variables are set in your .env file.'
       );
     }
   }
@@ -693,7 +706,7 @@ export class ConfigurationManager {
   private parseJsonEnvVar(name: string, defaultValue: Record<string, any>): Record<string, any> {
     const value = process.env[name];
     if (!value) return defaultValue;
-    
+
     try {
       return JSON.parse(value);
     } catch (error) {

@@ -1,0 +1,73 @@
+# Code Coverage Configuration for TestFusion-Enterprise
+
+# Output directory for coverage reports
+outputDir = "coverage"
+
+# Coverage thresholds
+[coverage.thresholds]
+global.branches = 80
+global.functions = 80
+global.lines = 80
+global.statements = 80
+
+# Per-file thresholds
+[coverage.perFile]
+branches = 70
+functions = 70
+lines = 70
+statements = 70
+
+# Coverage providers
+[coverage.provider]
+c8 = true
+istanbul = true
+
+# Reporters
+[coverage.reporters]
+text = true
+text-summary = true
+html = true
+lcov = true
+json = true
+json-summary = true
+cobertura = true
+
+# Include patterns
+[coverage.include]
+patterns = [
+  "tests/**/*.ts",
+  "tests/**/*.js"
+]
+
+# Exclude patterns
+[coverage.exclude]
+patterns = [
+  "node_modules/**",
+  "test-results/**",
+  "playwright-report/**",
+  "coverage/**",
+  "dist/**",
+  "**/*.d.ts",
+  "**/*.config.js",
+  "**/*.config.ts",
+  "**/fixtures/**",
+  "**/test-data.ts",
+  "**/constants/**"
+]
+
+# Source maps
+[coverage.sourceMaps]
+enabled = true
+instrument = true
+
+# Cache
+[coverage.cache]
+enabled = true
+directory = "node_modules/.cache/coverage"
+
+# Watermarks for coverage color coding
+[coverage.watermarks]
+statements = [70, 90]
+functions = [70, 90]
+branches = [70, 90]
+lines = [70, 90]

@@ -1,149 +1,219 @@
-# TestFusion Enterprise
+# TestFusion Enterprise 🚀
 
-A comprehensive enterprise-grade test automation framework built with Playwright for end-to-end testing of both API and web applications.
+**Enterprise-Grade Test Automation Framework**
 
-## 🚀 Features
+A comprehensive, production-ready test automation framework built with
+Playwright and TypeScript, designed for both API and web application testing at
+scale.
 
-- **Dual Testing Modes**: Complete support for both API and Web UI testing
-- **Cross-browser Testing**: Support for Chromium, Firefox, and WebKit
-- **Parallel Execution**: Run tests in parallel for faster execution
-- **Rich Reporting**: HTML reports with screenshots, videos, and trace files
-- **Page Object Model**: Organized test structure with reusable components
-- **TypeScript Support**: Full TypeScript support for better development experience
-- **Centralized Configuration**: Single configuration source for easy customization
-- **Professional Logging**: Structured logging with request correlation and debugging support
-- **CI/CD Ready**: Configured for continuous integration pipelines
-- **Data Validation**: Comprehensive validation framework for API responses
-- **Environment Management**: Support for multiple environments (dev, staging, prod)
+[![CI/CD Pipeline](https://github.com/TestFusion-Enterprise/TestFusion-Enterprise/workflows/CI/badge.svg)](https://github.com/TestFusion-Enterprise/TestFusion-Enterprise/actions)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-blue)](https://www.typescriptlang.org/)
+[![Playwright](https://img.shields.io/badge/Playwright-1.53+-green)](https://playwright.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-18.19+-brightgreen)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+---
+
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Architecture](#-architecture)
+- [Prerequisites](#-prerequisites)
+- [Quick Start](#-quick-start)
+- [Configuration](#-configuration)
+- [Running Tests](#-running-tests)
+- [Project Structure](#-project-structure)
+- [Test Development](#-test-development)
+- [Reporting](#-reporting)
+- [CI/CD Integration](#-cicd-integration)
+- [Best Practices](#-best-practices)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+
+---
+
+## ✨ Features
+
+### 🎯 Core Testing Capabilities
+
+| Feature                   | Description                                              |
+| ------------------------- | -------------------------------------------------------- |
+| **Dual Testing Modes**    | Complete support for both API and Web UI testing         |
+| **Cross-browser Testing** | Chromium, Firefox, WebKit, Edge support                  |
+| **Mobile Testing**        | iOS Safari and Android Chrome device emulation           |
+| **Parallel Execution**    | Intelligent parallel execution with configurable workers |
+| **Cloud Testing**         | BrowserStack and Selenium Grid integration ready         |
+| **Performance Testing**   | Built-in performance monitoring and metrics              |
+
+### 🏗️ Professional Architecture
+
+- **🔧 Centralized Fixtures**: Base fixture pattern eliminates code duplication
+- **📄 Page Object Model**: Organized, maintainable test structure
+- **🔷 TypeScript First**: Full TypeScript support with strict mode
+- **🧩 Modular Design**: Clean separation of concerns and reusable components
+- **📊 Professional Logging**: Structured logging with correlation IDs
+
+### 📊 Enterprise Reporting
+
+- **📈 Multi-format Reports**: HTML, JUnit, JSON, and Qase.io integration
+- **🎥 Visual Evidence**: Screenshots, videos, and execution traces
+- **📋 Test Management**: Professional test case management integration
+- **⚡ Performance Metrics**: Response time tracking and performance dashboards
+- **🔍 Health Monitoring**: Comprehensive system health checks
+
+### 🔧 Developer Experience
+
+- **✅ Code Quality**: ESLint, Prettier, TypeScript strict mode
+- **🪝 Git Hooks**: Pre-commit hooks for quality enforcement
+- **📝 Conventional Commits**: Structured commit message format
+- **🔒 Security**: Built-in security scanning and vulnerability detection
+- **🐳 Docker Support**: Containerized testing environment
+
+### 🚀 DevOps & CI/CD
+
+- **🔄 GitHub Actions**: Complete CI/CD pipeline with matrix testing
+- **📦 Dependency Management**: Automated updates with Renovate
+- **🔐 Environment Security**: Encrypted environment variable management
+- **🏷️ Release Automation**: Semantic versioning and automated releases
+
+---
+
+## 🏛️ Architecture
+
+```mermaid
+graph TB
+    A[Test Execution] --> B[Base Fixtures]
+    B --> C[API Client]
+    B --> D[Web Client]
+    C --> E[API Services]
+    D --> F[Page Objects]
+    E --> G[Validators]
+    F --> G
+    G --> H[Reporters]
+    I[Configuration Manager] --> A
+    J[Logger] --> A
+```
+
+### Design Patterns
+
+- **Factory Pattern**: Browser provider factory for different execution
+  environments
+- **Strategy Pattern**: Configurable execution strategies (local, grid, cloud)
+- **Page Object Model**: Encapsulated page interactions and elements
+- **Fixture Pattern**: Centralized test setup and teardown
+- **Builder Pattern**: Configurable test data generation
+
+---
 
 ## 📋 Prerequisites
 
-- Node.js (v16 or higher)
-- npm or yarn package manager
+| Requirement | Version  | Purpose                            |
+| ----------- | -------- | ---------------------------------- |
+| **Node.js** | 18.19.0+ | Runtime environment (see `.nvmrc`) |
+| **npm**     | 9.0.0+   | Package management                 |
+| **Git**     | Latest   | Version control                    |
+| **Docker**  | Latest   | Optional: Containerized testing    |
 
-## 🛠️ Installation
+### System Requirements
 
-1. Clone the repository:
+- **Memory**: 4GB+ RAM (8GB recommended for parallel execution)
+- **Storage**: 2GB+ free space for browser installations and reports
+- **OS**: Windows 10+, macOS 10.15+, Ubuntu 18.04+
+
+---
+
+## 🛠️ Quick Start
+
+### 1. Installation
+
 ```bash
+# Clone the repository
 git clone <repository-url>
 cd TestFusion-Enterprise
-```
 
-2. Install dependencies:
-```bash
+# Install dependencies and setup browsers
 npm install
+npx playwright install
 ```
 
-3. Install Playwright browsers:
-```bash
-npm run install:browsers
-```
+### 2. Environment Setup
 
-4. Configure environment variables:
 ```bash
-# Copy the example .env file and customize for your environment
+# Copy and configure environment variables
 cp .env .env.local
-# Edit .env.local with your specific configuration
+# Edit .env.local with your specific settings
 ```
+
+### 3. Verify Installation
+
+```bash
+# Run basic validation
+npm run validate
+
+# Run sample tests
+npm run test:api
+npm run test:web
+```
+
+---
 
 ## ⚙️ Configuration
 
-The framework uses a centralized configuration system managed through environment variables. All settings are defined in the `.env` file:
+The framework uses a sophisticated configuration system with environment-based
+overrides.
 
-### Key Configuration Areas:
-- **API Testing**: Base URLs, timeouts, endpoints, authentication
-- **Web Testing**: Browser settings, selectors, page paths
-- **Logging**: Log levels, request/response logging
-- **Reporting**: Screenshots, videos, trace collection
-- **Validation**: Data validation rules and thresholds
+### Core Configuration Files
 
-### Environment Variables:
+| File                                    | Purpose                           |
+| --------------------------------------- | --------------------------------- |
+| `.env`                                  | Default environment configuration |
+| `playwright.config.ts`                  | Playwright-specific settings      |
+| `tests/config/configuration-manager.ts` | Centralized configuration logic   |
+
+### Key Environment Variables
+
+#### API Testing Configuration
+
 ```env
-# API Configuration
 API_BASE_URL=https://jsonplaceholder.typicode.com
 API_TIMEOUT=30000
 API_RETRY_ATTEMPTS=3
+API_RATE_LIMIT=100
+```
 
-# Web Configuration  
+#### Web Testing Configuration
+
+```env
 WEB_BASE_URL=https://playwright.dev
+WEB_EXECUTION_MODE=local  # local | grid | browserstack
 WEB_HEADLESS=true
 WEB_VIEWPORT_WIDTH=1920
 WEB_VIEWPORT_HEIGHT=1080
+```
 
-# Logging
+#### Logging & Reporting
+
+```env
 LOG_LEVEL=INFO
 ENABLE_REQUEST_LOGGING=true
-
-# See .env file for complete configuration options
+ENABLE_RESPONSE_LOGGING=true
+ENABLE_SCREENSHOTS=true
+ENABLE_VIDEO_RECORDING=true
 ```
 
-## 🏃‍♂️ Running Tests
+#### Cloud Testing (Optional)
 
-### Basic Commands
+```env
+# BrowserStack Configuration
+BROWSERSTACK_USERNAME=your_username
+BROWSERSTACK_ACCESS_KEY=your_access_key
+BROWSERSTACK_PROJECT=TestFusion-Enterprise
 
-```bash
-# Run all tests
-npm test
-
-# Run API tests only
-npm run test:api
-
-# Run web tests only  
-npm run test:web
-
-# Run tests in headed mode (visible browser)
-npm run test:headed
-
-# Run tests with UI mode
-npm run test:ui
-
-# Debug tests
-npm run test:debug
-
-# Show test report
-npm run test:report
+# Selenium Grid Configuration
+SELENIUM_GRID_URL=http://localhost:4444/wd/hub
 ```
 
-### Specific Test Execution
-
-```bash
-# Run specific API tests
-npm run test:posts
-npm run test:users
-npm run test:comments
-
-# Run tests with custom configuration
-npx playwright test --project=chromium
-npx playwright test tests/web/ --headed
-```
-
-## 📁 Project Structure
-
-```
-TestFusion-Enterprise/
-├── tests/
-│   ├── api/                 # API test specifications
-│   ├── web/                 # Web UI test specifications
-│   │   └── pages/          # Page Object Model files
-│   ├── clients/            # HTTP and browser clients
-│   ├── config/             # Configuration management
-│   ├── constants/          # Test constants and validation rules
-│   ├── fixtures/           # Test fixtures and data models
-│   ├── operations/         # Business logic operations
-│   ├── services/           # API service layers
-│   ├── utils/              # Utility functions and helpers
-│   └── validators/         # Data validation logic
-├── .env                    # Environment configuration
-├── playwright.config.ts    # Playwright configuration
-├── package.json           # Project dependencies
-└── README.md              # This file
-```
-
-## 🔧 Advanced Configuration
-
-### Configuration Manager
-
-The framework provides a centralized configuration manager:
+### Configuration Manager Usage
 
 ```typescript
 import { ConfigurationManager } from './tests/config/configuration-manager';
@@ -153,71 +223,450 @@ const apiConfig = config.getApiConfig();
 const webConfig = config.getWebConfig();
 ```
 
-### Logging System
+---
 
-Professional logging with request correlation:
+## 🏃‍♂️ Running Tests
 
-```typescript
-import { Logger } from './tests/utils/logger';
+### Basic Commands
 
-const logger = Logger.getInstance();
-logger.info('Test execution started');
-logger.logRequest('GET', '/api/users');
-logger.logValidation('email', expected, actual, isValid);
+```bash
+# Complete test suite
+npm test                    # All tests (API + Web)
+npm run validate           # Full validation (typecheck + lint + tests)
+
+# Test by category
+npm run test:api           # API tests only
+npm run test:web           # Web tests only
+
+# Development modes
+npm run test:headed        # Visible browser mode
+npm run test:ui           # Interactive UI mode
+npm run test:debug        # Debug mode with breakpoints
 ```
 
-## 📊 Reporting
+### Advanced Execution
 
-After running tests, you can view detailed reports:
+```bash
+# Specific test files
+npx playwright test tests/api/posts-crud-operations.spec.ts
+npx playwright test tests/web/user-journeys.spec.ts
 
-- HTML Report: `npm run test:report`
-- Test artifacts are stored in `test-results/`
-- Enterprise reports are stored in `enterprise-reports/`
+# Browser-specific testing
+npx playwright test --project=chromium
+npx playwright test --project=firefox
+npx playwright test --project=webkit
 
-## 🧪 Writing Tests
+# Parallel execution control
+npx playwright test --workers=4
+npx playwright test --max-failures=5
 
-### Basic Test Structure
+# Retry failed tests
+npx playwright test --retries=2
+```
+
+### Environment-Specific Testing
+
+```bash
+# Local testing
+WEB_EXECUTION_MODE=local npm run test:web
+
+# Grid testing
+WEB_EXECUTION_MODE=grid SELENIUM_GRID_URL=http://your-grid:4444/wd/hub npm run test:web
+
+# BrowserStack testing
+WEB_EXECUTION_MODE=browserstack npm run test:web
+```
+
+---
+
+## 📁 Project Structure
+
+```
+TestFusion-Enterprise/
+├── 📁 tests/
+│   ├── 🌐 api/                    # API test specifications
+│   │   ├── comments-relationship-validation.spec.ts
+│   │   ├── posts-crud-operations.spec.ts
+│   │   └── users-data-validation.spec.ts
+│   ├── 💻 web/                    # Web UI test specifications
+│   │   ├── docs.spec.ts
+│   │   ├── home.spec.ts
+│   │   ├── user-journeys.spec.ts
+│   │   └── 📁 pages/             # Page Object Model
+│   │       ├── base.page.ts
+│   │       ├── docs.page.ts
+│   │       └── home.page.ts
+│   ├── 🔌 clients/               # Client abstractions
+│   │   ├── api-client.ts
+│   │   └── web-client.ts
+│   ├── ⚙️ config/                # Configuration management
+│   │   ├── browser-provider-factory.ts
+│   │   └── configuration-manager.ts
+│   ├── 📊 constants/             # Application constants
+│   │   ├── api-constants.ts
+│   │   ├── test-constants.ts
+│   │   ├── validation-constants.ts
+│   │   └── web-constants.ts
+│   ├── 🔧 fixtures/              # Test fixtures and data
+│   │   ├── api-fixtures.ts
+│   │   ├── test-data.ts
+│   │   └── web-fixtures.ts
+│   ├── 🏭 operations/            # Business logic operations
+│   │   ├── comments-operations.ts
+│   │   ├── posts-operations.ts
+│   │   └── users-operations.ts
+│   ├── 🌐 services/              # API service layers
+│   │   ├── comments-api.service.ts
+│   │   ├── posts-api.service.ts
+│   │   └── users-api.service.ts
+│   ├── 🛠️ utils/                 # Utilities and helpers
+│   │   ├── api-reporter.ts
+│   │   ├── logger.ts
+│   │   ├── test-utils.ts
+│   │   └── web-reporter.ts
+│   └── ✅ validators/            # Data validation logic
+│       ├── comments-validator.ts
+│       ├── posts-validator.ts
+│       └── users-validator.ts
+├── 📊 test-results/              # Test execution artifacts
+├── 📈 playwright-report/         # HTML test reports
+├── ⚙️ .env                       # Environment configuration
+├── 🎭 playwright.config.ts       # Playwright configuration
+├── 📦 package.json              # Dependencies and scripts
+└── 📖 README.md                 # This documentation
+```
+
+---
+
+## 🧪 Test Development
+
+### Writing API Tests
 
 ```typescript
 import { test, expect } from '@playwright/test';
+import { APIFixtures } from '../fixtures/api-fixtures';
 
-test.describe('Feature Name', () => {
-  test('should perform expected behavior', async ({ page }) => {
-    await page.goto('https://example.com');
-    await expect(page).toHaveTitle(/Expected Title/);
+test.describe('Posts API', () => {
+  test('should create a new post', async ({ request }) => {
+    const fixtures = new APIFixtures();
+    const newPost = fixtures.generateValidPost();
+
+    const response = await request.post('/posts', {
+      data: newPost,
+    });
+
+    expect(response.status()).toBe(201);
+    const responseData = await response.json();
+    expect(responseData).toMatchObject(newPost);
   });
 });
 ```
 
-### Using Page Objects
+### Writing Web Tests
 
 ```typescript
-import { BasePage } from './pages/base.page';
+import { test, expect } from '@playwright/test';
+import { HomePage } from './pages/home.page';
 
-// Extend BasePage for specific pages
-class LoginPage extends BasePage {
-  async login(username: string, password: string) {
-    await this.fillInput('#username', username);
-    await this.fillInput('#password', password);
-    await this.clickElement('#login-button');
-  }
-}
+test.describe('Home Page', () => {
+  test('should display main navigation', async ({ page }) => {
+    const homePage = new HomePage(page);
+
+    await homePage.navigate();
+    await expect(homePage.navigation).toBeVisible();
+    await expect(homePage.getNavigationItems()).toHaveCount(4);
+  });
+});
 ```
+
+### Using Base Fixtures
+
+```typescript
+import { test as base } from '@playwright/test';
+import { ConfigurationManager } from './config/configuration-manager';
+import { Logger } from './utils/logger';
+
+type TestFixtures = {
+  config: ConfigurationManager;
+  logger: Logger;
+};
+
+export const test = base.extend<TestFixtures>({
+  config: async ({}, use) => {
+    const config = ConfigurationManager.getInstance();
+    await use(config);
+  },
+
+  logger: async ({}, use) => {
+    const logger = Logger.getInstance();
+    await use(logger);
+  },
+});
+```
+
+### Data Validation
+
+```typescript
+import { PostsValidator } from '../validators/posts-validator';
+
+const validator = new PostsValidator();
+const validationResult = validator.validatePost(postData);
+
+expect(validationResult.isValid).toBe(true);
+expect(validationResult.errors).toHaveLength(0);
+```
+
+---
+
+## 📊 Reporting
+
+### Available Report Formats
+
+| Format      | Command               | Use Case                     |
+| ----------- | --------------------- | ---------------------------- |
+| **HTML**    | `npm run test:report` | Detailed interactive reports |
+| **JUnit**   | Automatic             | CI/CD integration            |
+| **JSON**    | Automatic             | Programmatic analysis        |
+| **Qase.io** | Configure API token   | Test management platform     |
+
+### Report Locations
+
+```
+test-results/
+├── junit-results.xml      # JUnit XML for CI
+├── test-results.json     # JSON format for analysis
+├── screenshots/          # Failure screenshots
+├── videos/              # Test execution videos
+└── traces/              # Playwright traces
+```
+
+### Viewing Reports
+
+```bash
+# Open HTML report
+npm run test:report
+
+# Generate custom reports
+npx playwright show-report
+
+# View specific test traces
+npx playwright show-trace test-results/trace.zip
+```
+
+---
+
+## 🔄 CI/CD Integration
+
+### GitHub Actions Workflow
+
+The framework includes a complete CI/CD pipeline:
+
+```yaml
+# .github/workflows/ci.yml
+name: CI/CD Pipeline
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+```
+
+### Key CI/CD Features
+
+- **✅ Quality Gates**: TypeScript compilation, ESLint, Prettier
+- **🔄 Matrix Testing**: Multiple browsers and operating systems
+- **🔒 Security Scanning**: CodeQL analysis and dependency scanning
+- **📊 Test Reporting**: Automatic report generation and artifact storage
+- **🚀 Deployment**: Automated deployment on successful builds
+
+### Docker Support
+
+```bash
+# Run tests in Docker
+docker-compose up --build test
+
+# Grid testing with Docker
+docker-compose up selenium-hub chrome firefox
+npm run test:grid
+```
+
+---
+
+## 💡 Best Practices
+
+### Test Design
+
+1. **Follow the AAA Pattern**: Arrange, Act, Assert
+2. **Use Page Objects**: Encapsulate page interactions
+3. **Implement Wait Strategies**: Use Playwright's auto-waiting
+4. **Mock External Dependencies**: Use fixtures for test data
+5. **Test in Isolation**: Each test should be independent
+
+### Code Quality
+
+1. **TypeScript Strict Mode**: Enable strict type checking
+2. **ESLint Rules**: Follow configured linting rules
+3. **Consistent Formatting**: Use Prettier for code formatting
+4. **Documentation**: Document complex test scenarios
+5. **Git Hooks**: Use pre-commit hooks for quality gates
+
+### Performance
+
+1. **Parallel Execution**: Configure optimal worker count
+2. **Test Data Management**: Use lightweight test data
+3. **Resource Cleanup**: Properly dispose of resources
+4. **Smart Retries**: Configure appropriate retry strategies
+5. **Trace Collection**: Only when debugging failures
+
+---
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### Browser Installation Issues
+
+```bash
+# Reinstall browsers
+npx playwright install --force
+
+# Check browser status
+npx playwright install --dry-run
+```
+
+#### Configuration Issues
+
+```bash
+# Validate configuration
+npm run validate:config
+
+# Check environment variables
+npm run env:check
+```
+
+#### Test Failures
+
+```bash
+# Run with debug mode
+npm run test:debug
+
+# Generate trace files
+npm run test:trace
+
+# Run specific failing tests
+npx playwright test path/to/failing/test.spec.ts --headed
+```
+
+### Performance Issues
+
+| Issue               | Solution                                      |
+| ------------------- | --------------------------------------------- |
+| Slow test execution | Reduce parallel workers or optimize selectors |
+| Memory issues       | Increase heap size or reduce worker count     |
+| Timeout errors      | Increase timeout values in configuration      |
+| Flaky tests         | Improve wait strategies and element selection |
+
+### Debugging Tools
+
+```bash
+# Interactive debugging
+npx playwright test --debug
+
+# Playwright Inspector
+npx playwright codegen <url>
+
+# Trace viewer
+npx playwright show-trace trace.zip
+
+# Test generator
+npx playwright codegen
+```
+
+---
 
 ## 🤝 Contributing
 
-1. Create a feature branch from `main`
-2. Make your changes
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
+### Development Setup
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/your-feature`
+3. **Install dependencies**: `npm install`
+4. **Make your changes**
+5. **Run tests**: `npm run validate`
+6. **Commit changes**: `git commit -m "feat: your description"`
+7. **Push to branch**: `git push origin feature/your-feature`
+8. **Submit a pull request**
+
+### Commit Message Format
+
+Follow [Conventional Commits](https://conventionalcommits.org/):
+
+```
+type(scope): description
+
+[optional body]
+
+[optional footer]
+```
+
+Examples:
+
+- `feat(api): add user authentication tests`
+- `fix(web): resolve navigation timeout issue`
+- `docs(readme): update installation instructions`
+
+### Code Review Checklist
+
+- [ ] Tests pass locally
+- [ ] Code follows project conventions
+- [ ] Documentation updated if needed
+- [ ] No security vulnerabilities introduced
+- [ ] Performance impact considered
+
+---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+for details.
 
-## 🔗 Useful Links
+---
+
+## 🔗 Resources
+
+### Documentation
 
 - [Playwright Documentation](https://playwright.dev/)
-- [TypeScript Documentation](https://www.typescriptlang.org/)
-- [Node.js Documentation](https://nodejs.org/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [Node.js Documentation](https://nodejs.org/docs/)
+
+### Testing Best Practices
+
+- [Test Automation Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html)
+- [Page Object Model](https://playwright.dev/docs/pom)
+- [API Testing Guide](https://playwright.dev/docs/test-api-testing)
+
+### Tools & Integrations
+
+- [GitHub Actions](https://docs.github.com/en/actions)
+- [Docker](https://docs.docker.com/)
+- [BrowserStack](https://www.browserstack.com/docs/automate)
+
+---
+
+## 📞 Support
+
+- **Issues**:
+  [GitHub Issues](https://github.com/TestFusion-Enterprise/TestFusion-Enterprise/issues)
+- **Discussions**:
+  [GitHub Discussions](https://github.com/TestFusion-Enterprise/TestFusion-Enterprise/discussions)
+- **Wiki**:
+  [Project Wiki](https://github.com/TestFusion-Enterprise/TestFusion-Enterprise/wiki)
+
+---
+
+**TestFusion Enterprise** - _Professional Test Automation Framework_
+
+_Built with ❤️ using Playwright, TypeScript, and modern testing practices_

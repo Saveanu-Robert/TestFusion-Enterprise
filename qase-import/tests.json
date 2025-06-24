@@ -1,1573 +1,1628 @@
 {
-    "cases": [
+  "cases": [
+    {
+      "title": "API - Retrieve all posts successfully and validate response structure",
+      "description": "Verify that the API can retrieve all posts from the JSONPlaceholder API with complete structure validation and performance metrics",
+      "preconditions": "API endpoint is accessible and returns valid JSON responses",
+      "postconditions": "All posts are retrieved with proper structure and reasonable count validation",
+      "priority": "high",
+      "severity": "critical",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "api",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
         {
-            "title": "API - Retrieve all posts successfully and validate response structure",
-            "description": "Verify that the API can retrieve all posts from the JSONPlaceholder API with complete structure validation and performance metrics",
-            "preconditions": "API endpoint is accessible and returns valid JSON responses",
-            "postconditions": "All posts are retrieved with proper structure and reasonable count validation",
-            "priority": "high",
-            "severity": "critical",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "api",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Send GET request to /posts endpoint",
-                    "expected_result": "Response status is 200 OK",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Validate response structure and post count",
-                    "expected_result": "Response contains array of post objects with reasonable count (0 < count <= 500)",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Verify post object properties and data integrity",
-                    "expected_result": "Each post has id, title, body, and userId fields with valid data",
-                    "data": "",
-                    "steps": []
-                }
-            ],            "tags": ["api", "posts", "crud", "get", "smoke", "validation"],
-            "params": [],
-            "is_muted": "no"
+          "position": 1,
+          "action": "Send GET request to /posts endpoint",
+          "expected_result": "Response status is 200 OK",
+          "data": "",
+          "steps": []
         },
         {
-            "title": "API - Retrieve a specific post by ID and validate post data integrity",
-            "description": "Verify that a specific post can be retrieved using its ID with comprehensive data validation",
-            "preconditions": "Post with specified ID exists in the system",
-            "postconditions": "Post details are returned correctly with all required fields",
-            "priority": "high",
-            "severity": "major",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "api",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Send GET request to /posts/{id} endpoint",
-                    "expected_result": "Response status is 200 OK",
-                    "data": "id: 1",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Validate post structure and ID match",
-                    "expected_result": "Response contains post with correct ID and valid userId",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Verify data integrity of title and body",
-                    "expected_result": "Post has non-empty title and body fields",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["api", "posts", "get", "validation", "data-integrity"],
-            "params": [],
-            "is_muted": "no"
+          "position": 2,
+          "action": "Validate response structure and post count",
+          "expected_result": "Response contains array of post objects with reasonable count (0 < count <= 500)",
+          "data": "",
+          "steps": []
         },
         {
-            "title": "API - Create a new post successfully and validate creation response",
-            "description": "Verify that a new post can be created via POST request with valid data and proper response validation",
-            "preconditions": "API endpoint accepts POST requests with JSON payload",
-            "postconditions": "New post is created and returns with assigned ID",
-            "priority": "critical",
-            "severity": "major",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "api",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Prepare valid post data (title, body, userId)",
-                    "expected_result": "Test data is properly formatted",
-                    "data": "Generated test data with valid fields",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Send POST request to /posts endpoint",
-                    "expected_result": "Response status is 201 Created",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Validate response contains created post with assigned ID",
-                    "expected_result": "Response includes new post with ID and preserved data integrity",
-                    "data": "",
-                    "steps": []
-                }
-            ],            "tags": ["api", "posts", "crud", "post", "create", "critical"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "API - Return 404 error for non-existent post ID and validate error response",
-            "description": "Verify that the API properly handles requests for non-existent post IDs with appropriate error responses",
-            "preconditions": "API endpoint is accessible for GET requests",
-            "postconditions": "API returns proper 404 error response for missing resources",
-            "priority": "medium",
-            "severity": "normal",
-            "type": "functional",
-            "behavior": "negative",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "api",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Send GET request to /posts/{id} with non-existent ID",
-                    "expected_result": "Response status is 404 Not Found",
-                    "data": "id: 9999",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Validate error response handling",
-                    "expected_result": "API handles missing resource gracefully without server errors",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["api", "posts", "error-handling", "404", "negative"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "API - Retrieve all comments successfully and validate response structure",
-            "description": "Verify that the API can retrieve all comments from the JSONPlaceholder API with proper structure validation",
-            "preconditions": "API endpoint is accessible and returns valid JSON responses",
-            "postconditions": "All comments are retrieved with proper structure and reasonable count",
-            "priority": "high",
-            "severity": "critical",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "api",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Send GET request to /comments endpoint",
-                    "expected_result": "Response status is 200 OK",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Validate response structure and comment count",
-                    "expected_result": "Response contains array of comment objects with reasonable count (0 < count <= 1000)",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Verify comment object properties",
-                    "expected_result": "Each comment has id, name, email, body, and postId fields",
-                    "data": "",
-                    "steps": []
-                }
-            ],            "tags": ["api", "comments", "get", "smoke", "validation"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "API - Retrieve a specific comment by ID and validate comment structure",
-            "description": "Verify that a specific comment can be retrieved using its ID with comprehensive structure validation",
-            "preconditions": "Comment with specified ID exists in the system",
-            "postconditions": "Comment details are returned correctly with all required fields",
-            "priority": "high",
-            "severity": "major",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "api",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Send GET request to /comments/{id} endpoint",
-                    "expected_result": "Response status is 200 OK",
-                    "data": "id: 1",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Validate comment structure and ID match",
-                    "expected_result": "Response contains comment with correct ID and valid postId",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Verify data integrity of name, email and body",
-                    "expected_result": "Comment has non-empty name, email, and body fields",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["api", "comments", "get", "validation", "data-integrity"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "API - Retrieve comments by post ID and validate post-comment relationships",
-            "description": "Verify that comments can be retrieved for a specific post and validate relationship integrity",
-            "preconditions": "Post with specified ID exists and has associated comments",
-            "postconditions": "All comments for the post are retrieved with proper relationship validation",
-            "priority": "critical",
-            "severity": "major",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "api",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Send GET request to /posts/{postId}/comments endpoint",
-                    "expected_result": "Response status is 200 OK",
-                    "data": "postId: 1",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Validate all comments belong to the specified post",
-                    "expected_result": "All returned comments have matching postId",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Verify relationship integrity and comment count",
-                    "expected_result": "Comment count is greater than 0 and relationships are valid",
-                    "data": "",
-                    "steps": []
-                }
-            ],            "tags": ["api", "comments", "posts", "relationships", "validation", "critical"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "API - Create a new comment successfully and validate creation response",
-            "description": "Verify that a new comment can be created via POST request with valid data and proper response validation",
-            "preconditions": "API endpoint accepts POST requests with JSON payload for comments",
-            "postconditions": "New comment is created and returns with assigned ID",
-            "priority": "critical",
-            "severity": "major",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "api",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Prepare valid comment data (name, email, body, postId)",
-                    "expected_result": "Test data is properly formatted with valid fields",
-                    "data": "Generated test comment data",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Send POST request to /comments endpoint",
-                    "expected_result": "Response status is 201 Created",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Validate response contains created comment with assigned ID",
-                    "expected_result": "Response includes new comment with ID and preserved data integrity",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["api", "comments", "crud", "post", "create", "critical"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "API - Retrieve all users successfully and validate response structure",
-            "description": "Verify that the API can retrieve all users from the JSONPlaceholder API with comprehensive structure validation",
-            "preconditions": "API endpoint is accessible and returns valid JSON responses",
-            "postconditions": "All users are retrieved with proper structure and reasonable count",
-            "priority": "high",
-            "severity": "critical",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "api",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Send GET request to /users endpoint",
-                    "expected_result": "Response status is 200 OK",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Validate response structure and user count",
-                    "expected_result": "Response contains array of user objects with reasonable count (0 < count <= 100)",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Verify user object properties and data integrity",
-                    "expected_result": "Each user has id, name, username, email, address, phone, website, company fields",
-                    "data": "",
-                    "steps": []
-                }
-            ],            "tags": ["api", "users", "get", "smoke", "validation"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "API - Retrieve a specific user by ID and validate comprehensive user data",
-            "description": "Verify that a specific user can be retrieved using its ID with comprehensive data validation including nested objects",
-            "preconditions": "User with specified ID exists in the system",
-            "postconditions": "User details are returned correctly with comprehensive validation",
-            "priority": "high",
-            "severity": "major",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "api",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Send GET request to /users/{id} endpoint",
-                    "expected_result": "Response status is 200 OK",
-                    "data": "id: 1",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Validate user structure and comprehensive data",
-                    "expected_result": "Response contains user with all required fields and valid data types",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Verify nested objects (address, company) structure",
-                    "expected_result": "Nested objects have proper structure and required fields",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["api", "users", "get", "validation", "data-validation", "comprehensive"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "API - Create a new user successfully and validate creation response",
-            "description": "Verify that a new user can be created via POST request with valid data and comprehensive response validation",
-            "preconditions": "API endpoint accepts POST requests with JSON payload for users",
-            "postconditions": "New user is created and returns with assigned ID",
-            "priority": "critical",
-            "severity": "major",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "api",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Prepare valid user data with all required fields",
-                    "expected_result": "Test data is properly formatted with comprehensive user information",
-                    "data": "Generated test user data",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Send POST request to /users endpoint",
-                    "expected_result": "Response status is 201 Created",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Validate response contains created user with assigned ID",
-                    "expected_result": "Response includes new user with ID and preserved data integrity",
-                    "data": "",
-                    "steps": []
-                }
-            ],            "tags": ["api", "users", "crud", "post", "create", "critical"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "API - Return 404 error for non-existent user ID and validate error response",
-            "description": "Verify that the API properly handles requests for non-existent user IDs with appropriate error responses",
-            "preconditions": "API endpoint is accessible for GET requests",
-            "postconditions": "API returns proper 404 error response for missing user resources",
-            "priority": "medium",
-            "severity": "normal",
-            "type": "functional",
-            "behavior": "negative",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "api",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Send GET request to /users/{id} with non-existent ID",
-                    "expected_result": "Response status is 404 Not Found",
-                    "data": "id: 9999",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Validate error response handling for missing user",
-                    "expected_result": "API handles missing user resource gracefully without server errors",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["api", "users", "error-handling", "404", "negative"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Load home page successfully and validate core elements",
-            "description": "Verify that the home page loads correctly with all essential elements and proper performance",
-            "preconditions": "Application is deployed and accessible via web browser",
-            "postconditions": "Home page displays with proper layout, content, and performance metrics",
-            "priority": "high",
-            "severity": "critical",
-            "type": "smoke",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Navigate to home page URL",
-                    "expected_result": "Page loads without errors and all key elements are present",
-                    "data": "URL: https://playwright.dev",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Verify page title contains Playwright branding",
-                    "expected_result": "Page title matches expected value and contains 'Playwright'",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Validate essential page elements and performance",
-                    "expected_result": "All key elements are loaded with acceptable performance metrics",
-                    "data": "",
-                    "steps": []
-                }
-            ],            "tags": ["web", "homepage", "load", "ui", "smoke", "performance"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Display hero section correctly and validate visual elements",
-            "description": "Verify that the hero section displays correctly with proper content and visual styling",
-            "preconditions": "Home page is loaded successfully",
-            "postconditions": "Hero section is properly displayed with correct styling and accessibility",
-            "priority": "high",
-            "severity": "major",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Locate and validate hero section element",
-                    "expected_result": "Hero section is visible and properly positioned on the page",
-                    "data": "selector: .hero",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Verify hero content text and formatting",
-                    "expected_result": "Hero section contains expected content with proper formatting",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Validate visual styling and accessibility",
-                    "expected_result": "Hero section has proper styling and meets accessibility standards",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["web", "hero", "styling", "visual", "content", "ui-validation"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Display navigation elements and validate accessibility",
-            "description": "Verify that navigation elements are properly rendered and accessible to all users",
-            "preconditions": "Home page is loaded with visible navigation menu",
-            "postconditions": "All navigation elements are accessible and functional",
-            "priority": "high",
-            "severity": "major",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Identify and validate navigation menu elements",
-                    "expected_result": "All navigation elements are properly rendered and visible",
-                    "data": "Navigation links: Docs, API, Community, Blog",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Verify navigation links accessibility",
-                    "expected_result": "Navigation links are visible, enabled, and accessible",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Test navigation functionality",
-                    "expected_result": "All navigation links function correctly and lead to appropriate pages",
-                    "data": "",
-                    "steps": []
-                }
-            ],            "tags": ["web", "navigation", "accessibility", "menu", "links"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Navigate to docs page successfully",
-            "description": "Verify that navigation from home page to documentation page works correctly with proper URL validation",
-            "preconditions": "Home page is loaded with get started button visible",
-            "postconditions": "Successfully navigated to docs page with proper URL",
-            "priority": "high",
-            "severity": "major",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Click get started button on home page",
-                    "expected_result": "Button click is registered and navigation begins",
-                    "data": "Button selector: [data-testid=\"get-started-button\"]",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Verify navigation to docs page",
-                    "expected_result": "Page URL matches docs pattern and page loads successfully",
-                    "data": "Expected URL pattern: /docs",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Validate docs page is fully loaded",
-                    "expected_result": "Docs page displays with proper content and structure",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["web", "navigation", "docs", "user-journey"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Display properly on mobile viewport",
-            "description": "Verify that the application displays correctly on mobile devices with responsive design",
-            "preconditions": "Application supports responsive design for mobile devices",
-            "postconditions": "Mobile layout is properly displayed and functional",
-            "priority": "high",
-            "severity": "major",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Set browser viewport to mobile dimensions",
-                    "expected_result": "Viewport is adjusted to mobile size (375x667)",
-                    "data": "viewport: { width: 375, height: 667 }",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Verify responsive layout adaptation",
-                    "expected_result": "Page elements adapt correctly to mobile screen size",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Validate mobile-specific functionality",
-                    "expected_result": "All elements are properly sized and accessible on mobile",
-                    "data": "",
-                    "steps": []
-                }
-            ],            "tags": ["web", "mobile", "responsive", "viewport"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Load within acceptable time and validate performance",
-            "description": "Verify that the home page loads within acceptable time limits with proper performance metrics",
-            "preconditions": "Application is accessible and network conditions are stable",
-            "postconditions": "Page loads within performance thresholds",
-            "priority": "medium",
-            "severity": "normal",
-            "type": "performance",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Measure page load performance from navigation start",
-                    "expected_result": "Performance metrics are collected accurately",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Validate page load time is within acceptable limits",
-                    "expected_result": "Page loads in less than 15 seconds",
-                    "data": "Maximum load time: 15000ms",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Verify all essential elements are loaded",
-                    "expected_result": "Page is fully functional after load completion",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["web", "performance", "load-time", "timing"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Have proper SEO elements and validate page structure",
-            "description": "Verify that the page has proper SEO elements and semantic HTML structure according to best practices",
-            "preconditions": "Page is built with SEO best practices in mind",
-            "postconditions": "SEO elements are properly implemented and validated",
-            "priority": "medium",
-            "severity": "normal",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Verify page title length and content meets SEO standards",
-                    "expected_result": "Page title is between 5-100 characters and descriptive",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Validate main heading exists and has appropriate content",
-                    "expected_result": "Main heading (h1) is present and contains meaningful content",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Check semantic HTML structure and accessibility",
-                    "expected_result": "Proper semantic elements and structure are implemented",
-                    "data": "",
-                    "steps": []
-                }
-            ],            "tags": ["web", "seo", "content-validation", "semantic", "structure"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Support keyboard navigation and accessibility",
-            "description": "Verify that the application is fully accessible via keyboard navigation according to accessibility standards",
-            "preconditions": "Application implements proper keyboard accessibility features",
-            "postconditions": "All interactive elements are accessible via keyboard",
-            "priority": "medium",
-            "severity": "normal",
-            "type": "accessibility",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Test focus on get started button using keyboard",
-                    "expected_result": "Button receives focus and shows focus indicator",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Navigate through page using Tab key",
-                    "expected_result": "Focus moves through interactive elements in logical order",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Test keyboard activation and navigation",
-                    "expected_result": "Enter and Space keys activate buttons appropriately",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["web", "accessibility", "keyboard", "a11y", "navigation"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Load docs page successfully and validate core documentation elements",
-            "description": "Verify that the documentation page loads correctly with all essential documentation elements",
-            "preconditions": "Documentation section is available and accessible",
-            "postconditions": "Documentation page displays correctly with proper structure",
-            "priority": "high",
-            "severity": "major",
-            "type": "smoke",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Navigate to documentation page",
-                    "expected_result": "Documentation page loads successfully without errors",
-                    "data": "URL: /docs",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Verify page URL and title validation",
-                    "expected_result": "Page URL matches docs pattern and has appropriate title",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Validate core documentation elements are present",
-                    "expected_result": "All essential documentation elements are loaded and visible",
-                    "data": "",
-                    "steps": []
-                }
-            ],            "tags": ["web", "documentation", "load", "smoke", "content"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Display sidebar navigation and validate navigation functionality",
-            "description": "Verify that documentation sidebar navigation displays correctly and provides proper navigation functionality",
-            "preconditions": "Documentation page is loaded with sidebar navigation visible",
-            "postconditions": "Sidebar navigation is functional and accessible",
-            "priority": "high",
-            "severity": "major",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Validate sidebar navigation elements are properly rendered",
-                    "expected_result": "All sidebar navigation elements are visible and accessible",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Verify sidebar functionality and navigation items count",
-                    "expected_result": "Sidebar is functional with multiple navigation items available",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Test sidebar navigation links functionality",
-                    "expected_result": "Sidebar links work correctly and navigate to appropriate content",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["web", "documentation", "sidebar", "navigation", "functionality"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Validate documentation accessibility features and standards",
-            "description": "Verify that documentation pages meet accessibility standards and guidelines according to WCAG",
-            "preconditions": "Documentation pages are designed with accessibility in mind",
-            "postconditions": "Documentation meets WCAG accessibility guidelines",
-            "priority": "medium",
-            "severity": "normal",
-            "type": "accessibility",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Validate heading structure and hierarchy",
-                    "expected_result": "Proper heading hierarchy (h1, h2, h3) is maintained throughout",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Verify link accessibility and meaningful text",
-                    "expected_result": "All links have proper href attributes and meaningful text content",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Test keyboard navigation through documentation",
-                    "expected_result": "All interactive elements are keyboard accessible",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["web", "documentation", "accessibility", "wcag", "a11y"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Complete end-to-end user workflow from home to documentation",
-            "description": "Verify complete user journey from home page to documentation with comprehensive workflow validation",
-            "preconditions": "Application is fully functional with both home and docs pages accessible",
-            "postconditions": "Complete user workflow is validated end-to-end",
-            "priority": "critical",
-            "severity": "critical",
-            "type": "e2e",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Visit home page and validate initial user landing experience",
-                    "expected_result": "Home page loads successfully with all essential elements",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Navigate to documentation using get started button",
-                    "expected_result": "Successful navigation from home to documentation page",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Explore documentation page structure and validate user experience",
-                    "expected_result": "Documentation page provides proper user experience with functional elements",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 4,
-                    "action": "Test documentation search and content discovery",
-                    "expected_result": "Users can discover content through search and navigation",
-                    "data": "",
-                    "steps": []
-                }
-            ],            "tags": ["web", "e2e", "user-journey", "workflow", "critical"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Collect and validate page metrics",
-            "description": "Verify that page metrics can be collected and validated for monitoring and quality assurance",
-            "preconditions": "Home page is loaded and accessible",
-            "postconditions": "Page metrics are successfully collected and validated",
-            "priority": "medium",
-            "severity": "normal",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Get page metrics from home page",
-                    "expected_result": "Metrics collection is successful",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Validate title contains Playwright",
-                    "expected_result": "Title metric contains expected content",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Verify URL and main heading metrics",
-                    "expected_result": "URL and heading metrics are properly captured",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["web", "metrics", "monitoring", "validation"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Display main content structure in documentation",
-            "description": "Verify that documentation pages display proper main content structure and organization",
-            "preconditions": "Documentation page is loaded successfully",
-            "postconditions": "Main content structure is properly displayed and accessible",
-            "priority": "high",
-            "severity": "major",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Validate content structure organization",
-                    "expected_result": "Content structure is properly organized and accessible",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Verify content area is visible",
-                    "expected_result": "Main content area is visible and properly rendered",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Check main heading text content",
-                    "expected_result": "Main heading is present and contains meaningful content",
-                    "data": "",
-                    "steps": []
-                }
-            ],            "tags": ["web", "documentation", "content", "structure"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Have functional search in documentation",
-            "description": "Verify that documentation search functionality works correctly when available",
-            "preconditions": "Documentation page is loaded with search functionality",
-            "postconditions": "Search functionality is tested and works as expected",
-            "priority": "medium",
-            "severity": "normal",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Validate search functionality availability",
-                    "expected_result": "Search functionality is available and accessible",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Test search interaction with query",
-                    "expected_result": "Search accepts input and processes queries appropriately",
-                    "data": "Search query: 'test'",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Verify search response handling",
-                    "expected_result": "Search results are handled gracefully",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["web", "documentation", "search", "functionality"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Support keyboard navigation in documentation",
-            "description": "Verify that documentation supports proper keyboard navigation for accessibility",
-            "preconditions": "Documentation page is loaded with sidebar navigation",
-            "postconditions": "Keyboard navigation works correctly throughout documentation",
-            "priority": "medium",
-            "severity": "normal",
-            "type": "accessibility",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Test sidebar navigation with keyboard",
-                    "expected_result": "Sidebar links are accessible via keyboard navigation",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Verify focus management on sidebar links",
-                    "expected_result": "Focus indicators work properly on interactive elements",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Test arrow key navigation",
-                    "expected_result": "Arrow keys provide proper navigation between elements",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["web", "documentation", "keyboard", "accessibility", "navigation"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Display page metrics correctly in documentation",
-            "description": "Verify that documentation page metrics can be collected and validated properly",
-            "preconditions": "Documentation page is loaded and functional",
-            "postconditions": "Page metrics are accurately collected and validated",
-            "priority": "medium",
-            "severity": "normal",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Collect and validate page metrics from documentation",
-                    "expected_result": "Metrics collection is successful and accurate",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Verify title and URL metrics",
-                    "expected_result": "Title and URL contain expected documentation values",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Validate main heading and sidebar item count",
-                    "expected_result": "Main heading exists and sidebar items are counted correctly",
-                    "data": "",
-                    "steps": []
-                }
-            ],            "tags": ["web", "documentation", "metrics", "validation"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Work on different screen sizes in documentation",
-            "description": "Verify that documentation pages work correctly across different screen sizes and viewports",
-            "preconditions": "Documentation page supports responsive design",
-            "postconditions": "Documentation displays properly on all tested screen sizes",
-            "priority": "high",
-            "severity": "major",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Test on mobile viewport (375x667)",
-                    "expected_result": "Documentation displays properly on mobile with content accessible",
-                    "data": "Mobile viewport: 375x667",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Test on tablet viewport (768x1024)",
-                    "expected_result": "Documentation layout adapts correctly to tablet size",
-                    "data": "Tablet viewport: 768x1024",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Test on desktop viewport (1200x800)",
-                    "expected_result": "Documentation displays optimally on desktop resolution",
-                    "data": "Desktop viewport: 1200x800",
-                    "steps": []
-                }
-            ],
-            "tags": ["web", "documentation", "responsive", "viewport", "mobile"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Handle pagination if available in documentation",
-            "description": "Verify that documentation pagination functionality works correctly when present",
-            "preconditions": "Documentation page may have pagination navigation",
-            "postconditions": "Pagination functionality is tested and works as expected",
-            "priority": "medium",
-            "severity": "normal",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Check for pagination elements availability",
-                    "expected_result": "Pagination elements are detected if present",
-                    "data": "Selectors: .pagination-nav__link--next, .pagination-nav__link--prev",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Navigate to next page if available",
-                    "expected_result": "Next page navigation works correctly",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Validate content structure after navigation",
-                    "expected_result": "Page content is properly loaded after pagination",
-                    "data": "",
-                    "steps": []
-                }
-            ],            "tags": ["web", "documentation", "pagination", "navigation"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Maintain accessibility standards in documentation",
-            "description": "Verify that documentation pages meet accessibility standards and WCAG guidelines",
-            "preconditions": "Documentation pages are designed with accessibility considerations",
-            "postconditions": "Documentation meets accessibility standards and guidelines",
-            "priority": "medium",
-            "severity": "normal",
-            "type": "accessibility",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Validate heading structure and hierarchy",
-                    "expected_result": "Proper heading hierarchy is maintained (h1, h2, h3, etc.)",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Verify link accessibility and meaningful content",
-                    "expected_result": "All links have proper href attributes and meaningful text",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Test overall accessibility compliance",
-                    "expected_result": "Documentation meets WCAG accessibility standards",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["web", "documentation", "accessibility", "wcag", "standards"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Load content efficiently in documentation",
-            "description": "Verify that documentation content loads efficiently within acceptable time limits",
-            "preconditions": "Documentation page is accessible and network conditions are stable",
-            "postconditions": "Documentation content loads within performance thresholds",
-            "priority": "medium",
-            "severity": "normal",
-            "type": "performance",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Measure content load time from navigation start",
-                    "expected_result": "Load time measurement is accurate",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Validate content structure after load",
-                    "expected_result": "Content structure is properly validated after loading",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Verify load time is within acceptable limits",
-                    "expected_result": "Documentation loads in less than 10 seconds",
-                    "data": "Maximum load time: 10000ms",
-                    "steps": []
-                }
-            ],            "tags": ["web", "documentation", "performance", "load-time", "efficiency"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Documentation exploration journey",
-            "description": "Verify complete documentation exploration workflow including sidebar navigation and pagination",
-            "preconditions": "Documentation page is accessible with sidebar navigation available",
-            "postconditions": "Documentation exploration workflow is validated end-to-end",
-            "priority": "high",
-            "severity": "major",
-            "type": "e2e",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Start from docs page and validate initial state",
-                    "expected_result": "Documentation page loads successfully with sidebar available",
-                    "data": "",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Navigate through sidebar items systematically",
-                    "expected_result": "Sidebar navigation works correctly for multiple items",
-                    "data": "Test first 3 sidebar links",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Test pagination functionality if available",
-                    "expected_result": "Pagination navigation works and content loads properly",
-                    "data": "",
-                    "steps": []
-                }
-            ],
-            "tags": ["web", "documentation", "exploration", "e2e", "journey"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Responsive design journey across multiple viewports",
-            "description": "Verify complete responsive design functionality across multiple device viewports",
-            "preconditions": "Application supports responsive design for multiple device types",
-            "postconditions": "Responsive design works correctly across all tested viewports",
-            "priority": "high",
-            "severity": "major",
-            "type": "functional",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Test Mobile viewport (375x667) for both home and docs",
-                    "expected_result": "Both pages display correctly on mobile viewport",
-                    "data": "Mobile: 375x667",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Test Tablet viewport (768x1024) for both pages",
-                    "expected_result": "Both pages adapt correctly to tablet viewport",
-                    "data": "Tablet: 768x1024",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Test Desktop (1200x800) and Large Desktop (1920x1080)",
-                    "expected_result": "Both pages display optimally on desktop resolutions",
-                    "data": "Desktop: 1200x800, Large: 1920x1080",
-                    "steps": []
-                }
-            ],
-            "tags": ["web", "responsive", "viewport", "mobile", "desktop", "journey"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Accessibility and keyboard navigation journey",
-            "description": "Verify comprehensive accessibility and keyboard navigation across the application",
-            "preconditions": "Application implements accessibility features and keyboard navigation",
-            "postconditions": "Accessibility and keyboard navigation work correctly throughout",
-            "priority": "medium",
-            "severity": "normal",
-            "type": "accessibility",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Test keyboard navigation on home page",
-                    "expected_result": "Home page keyboard navigation works correctly",
-                    "data": "Focus on get started button, test Enter key",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Test keyboard navigation on docs page",
-                    "expected_result": "Docs page supports proper keyboard navigation",
-                    "data": "Tab navigation through key elements",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Validate accessibility standards compliance",
-                    "expected_result": "Application meets accessibility standards throughout",
-                    "data": "Heading structure, alt text, proper semantic elements",
-                    "steps": []
-                }
-            ],
-            "tags": ["web", "accessibility", "keyboard", "navigation", "journey", "a11y"],
-            "params": [],
-            "is_muted": "no"
-        },
-        {
-            "title": "Web - Performance and error handling journey",
-            "description": "Verify comprehensive performance metrics and error handling capabilities across the application",
-            "preconditions": "Application is accessible and supports performance monitoring",
-            "postconditions": "Performance and error handling are validated comprehensively",
-            "priority": "medium",
-            "severity": "normal",
-            "type": "performance",
-            "behavior": "positive",
-            "automation": "automated",
-            "status": "actual",
-            "is_flaky": "no",
-            "layer": "e2e",
-            "milestone": null,
-            "custom_fields": [],
-            "steps_type": "classic",
-            "steps": [
-                {
-                    "position": 1,
-                    "action": "Measure page load performance for home and docs pages",
-                    "expected_result": "Performance metrics are within acceptable thresholds",
-                    "data": "Home: <10s, Docs: <8s, Navigation: <5s",
-                    "steps": []
-                },
-                {
-                    "position": 2,
-                    "action": "Test error handling for non-existent pages",
-                    "expected_result": "Application handles 404 errors gracefully",
-                    "data": "Test /non-existent-page-12345",
-                    "steps": []
-                },
-                {
-                    "position": 3,
-                    "action": "Test performance under slow network conditions",
-                    "expected_result": "Application remains functional under network constraints",
-                    "data": "Simulate slow network (100kb/s, 500ms latency)",
-                    "steps": []
-                }
-            ],
-            "tags": ["web", "performance", "error-handling", "journey", "network"],
-            "params": [],
-            "is_muted": "no"
+          "position": 3,
+          "action": "Verify post object properties and data integrity",
+          "expected_result": "Each post has id, title, body, and userId fields with valid data",
+          "data": "",
+          "steps": []
         }
-    ],
-    "suites": []
+      ],
+      "tags": ["api", "posts", "crud", "get", "smoke", "validation"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "API - Retrieve a specific post by ID and validate post data integrity",
+      "description": "Verify that a specific post can be retrieved using its ID with comprehensive data validation",
+      "preconditions": "Post with specified ID exists in the system",
+      "postconditions": "Post details are returned correctly with all required fields",
+      "priority": "high",
+      "severity": "major",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "api",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Send GET request to /posts/{id} endpoint",
+          "expected_result": "Response status is 200 OK",
+          "data": "id: 1",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Validate post structure and ID match",
+          "expected_result": "Response contains post with correct ID and valid userId",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Verify data integrity of title and body",
+          "expected_result": "Post has non-empty title and body fields",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["api", "posts", "get", "validation", "data-integrity"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "API - Create a new post successfully and validate creation response",
+      "description": "Verify that a new post can be created via POST request with valid data and proper response validation",
+      "preconditions": "API endpoint accepts POST requests with JSON payload",
+      "postconditions": "New post is created and returns with assigned ID",
+      "priority": "critical",
+      "severity": "major",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "api",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Prepare valid post data (title, body, userId)",
+          "expected_result": "Test data is properly formatted",
+          "data": "Generated test data with valid fields",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Send POST request to /posts endpoint",
+          "expected_result": "Response status is 201 Created",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Validate response contains created post with assigned ID",
+          "expected_result": "Response includes new post with ID and preserved data integrity",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["api", "posts", "crud", "post", "create", "critical"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "API - Return 404 error for non-existent post ID and validate error response",
+      "description": "Verify that the API properly handles requests for non-existent post IDs with appropriate error responses",
+      "preconditions": "API endpoint is accessible for GET requests",
+      "postconditions": "API returns proper 404 error response for missing resources",
+      "priority": "medium",
+      "severity": "normal",
+      "type": "functional",
+      "behavior": "negative",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "api",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Send GET request to /posts/{id} with non-existent ID",
+          "expected_result": "Response status is 404 Not Found",
+          "data": "id: 9999",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Validate error response handling",
+          "expected_result": "API handles missing resource gracefully without server errors",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["api", "posts", "error-handling", "404", "negative"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "API - Retrieve all comments successfully and validate response structure",
+      "description": "Verify that the API can retrieve all comments from the JSONPlaceholder API with proper structure validation",
+      "preconditions": "API endpoint is accessible and returns valid JSON responses",
+      "postconditions": "All comments are retrieved with proper structure and reasonable count",
+      "priority": "high",
+      "severity": "critical",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "api",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Send GET request to /comments endpoint",
+          "expected_result": "Response status is 200 OK",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Validate response structure and comment count",
+          "expected_result": "Response contains array of comment objects with reasonable count (0 < count <= 1000)",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Verify comment object properties",
+          "expected_result": "Each comment has id, name, email, body, and postId fields",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["api", "comments", "get", "smoke", "validation"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "API - Retrieve a specific comment by ID and validate comment structure",
+      "description": "Verify that a specific comment can be retrieved using its ID with comprehensive structure validation",
+      "preconditions": "Comment with specified ID exists in the system",
+      "postconditions": "Comment details are returned correctly with all required fields",
+      "priority": "high",
+      "severity": "major",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "api",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Send GET request to /comments/{id} endpoint",
+          "expected_result": "Response status is 200 OK",
+          "data": "id: 1",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Validate comment structure and ID match",
+          "expected_result": "Response contains comment with correct ID and valid postId",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Verify data integrity of name, email and body",
+          "expected_result": "Comment has non-empty name, email, and body fields",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["api", "comments", "get", "validation", "data-integrity"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "API - Retrieve comments by post ID and validate post-comment relationships",
+      "description": "Verify that comments can be retrieved for a specific post and validate relationship integrity",
+      "preconditions": "Post with specified ID exists and has associated comments",
+      "postconditions": "All comments for the post are retrieved with proper relationship validation",
+      "priority": "critical",
+      "severity": "major",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "api",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Send GET request to /posts/{postId}/comments endpoint",
+          "expected_result": "Response status is 200 OK",
+          "data": "postId: 1",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Validate all comments belong to the specified post",
+          "expected_result": "All returned comments have matching postId",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Verify relationship integrity and comment count",
+          "expected_result": "Comment count is greater than 0 and relationships are valid",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": [
+        "api",
+        "comments",
+        "posts",
+        "relationships",
+        "validation",
+        "critical"
+      ],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "API - Create a new comment successfully and validate creation response",
+      "description": "Verify that a new comment can be created via POST request with valid data and proper response validation",
+      "preconditions": "API endpoint accepts POST requests with JSON payload for comments",
+      "postconditions": "New comment is created and returns with assigned ID",
+      "priority": "critical",
+      "severity": "major",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "api",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Prepare valid comment data (name, email, body, postId)",
+          "expected_result": "Test data is properly formatted with valid fields",
+          "data": "Generated test comment data",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Send POST request to /comments endpoint",
+          "expected_result": "Response status is 201 Created",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Validate response contains created comment with assigned ID",
+          "expected_result": "Response includes new comment with ID and preserved data integrity",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["api", "comments", "crud", "post", "create", "critical"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "API - Retrieve all users successfully and validate response structure",
+      "description": "Verify that the API can retrieve all users from the JSONPlaceholder API with comprehensive structure validation",
+      "preconditions": "API endpoint is accessible and returns valid JSON responses",
+      "postconditions": "All users are retrieved with proper structure and reasonable count",
+      "priority": "high",
+      "severity": "critical",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "api",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Send GET request to /users endpoint",
+          "expected_result": "Response status is 200 OK",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Validate response structure and user count",
+          "expected_result": "Response contains array of user objects with reasonable count (0 < count <= 100)",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Verify user object properties and data integrity",
+          "expected_result": "Each user has id, name, username, email, address, phone, website, company fields",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["api", "users", "get", "smoke", "validation"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "API - Retrieve a specific user by ID and validate comprehensive user data",
+      "description": "Verify that a specific user can be retrieved using its ID with comprehensive data validation including nested objects",
+      "preconditions": "User with specified ID exists in the system",
+      "postconditions": "User details are returned correctly with comprehensive validation",
+      "priority": "high",
+      "severity": "major",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "api",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Send GET request to /users/{id} endpoint",
+          "expected_result": "Response status is 200 OK",
+          "data": "id: 1",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Validate user structure and comprehensive data",
+          "expected_result": "Response contains user with all required fields and valid data types",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Verify nested objects (address, company) structure",
+          "expected_result": "Nested objects have proper structure and required fields",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": [
+        "api",
+        "users",
+        "get",
+        "validation",
+        "data-validation",
+        "comprehensive"
+      ],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "API - Create a new user successfully and validate creation response",
+      "description": "Verify that a new user can be created via POST request with valid data and comprehensive response validation",
+      "preconditions": "API endpoint accepts POST requests with JSON payload for users",
+      "postconditions": "New user is created and returns with assigned ID",
+      "priority": "critical",
+      "severity": "major",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "api",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Prepare valid user data with all required fields",
+          "expected_result": "Test data is properly formatted with comprehensive user information",
+          "data": "Generated test user data",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Send POST request to /users endpoint",
+          "expected_result": "Response status is 201 Created",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Validate response contains created user with assigned ID",
+          "expected_result": "Response includes new user with ID and preserved data integrity",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["api", "users", "crud", "post", "create", "critical"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "API - Return 404 error for non-existent user ID and validate error response",
+      "description": "Verify that the API properly handles requests for non-existent user IDs with appropriate error responses",
+      "preconditions": "API endpoint is accessible for GET requests",
+      "postconditions": "API returns proper 404 error response for missing user resources",
+      "priority": "medium",
+      "severity": "normal",
+      "type": "functional",
+      "behavior": "negative",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "api",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Send GET request to /users/{id} with non-existent ID",
+          "expected_result": "Response status is 404 Not Found",
+          "data": "id: 9999",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Validate error response handling for missing user",
+          "expected_result": "API handles missing user resource gracefully without server errors",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["api", "users", "error-handling", "404", "negative"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Load home page successfully and validate core elements",
+      "description": "Verify that the home page loads correctly with all essential elements and proper performance",
+      "preconditions": "Application is deployed and accessible via web browser",
+      "postconditions": "Home page displays with proper layout, content, and performance metrics",
+      "priority": "high",
+      "severity": "critical",
+      "type": "smoke",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Navigate to home page URL",
+          "expected_result": "Page loads without errors and all key elements are present",
+          "data": "URL: https://playwright.dev",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Verify page title contains Playwright branding",
+          "expected_result": "Page title matches expected value and contains 'Playwright'",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Validate essential page elements and performance",
+          "expected_result": "All key elements are loaded with acceptable performance metrics",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "homepage", "load", "ui", "smoke", "performance"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Display hero section correctly and validate visual elements",
+      "description": "Verify that the hero section displays correctly with proper content and visual styling",
+      "preconditions": "Home page is loaded successfully",
+      "postconditions": "Hero section is properly displayed with correct styling and accessibility",
+      "priority": "high",
+      "severity": "major",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Locate and validate hero section element",
+          "expected_result": "Hero section is visible and properly positioned on the page",
+          "data": "selector: .hero",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Verify hero content text and formatting",
+          "expected_result": "Hero section contains expected content with proper formatting",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Validate visual styling and accessibility",
+          "expected_result": "Hero section has proper styling and meets accessibility standards",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "hero", "styling", "visual", "content", "ui-validation"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Display navigation elements and validate accessibility",
+      "description": "Verify that navigation elements are properly rendered and accessible to all users",
+      "preconditions": "Home page is loaded with visible navigation menu",
+      "postconditions": "All navigation elements are accessible and functional",
+      "priority": "high",
+      "severity": "major",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Identify and validate navigation menu elements",
+          "expected_result": "All navigation elements are properly rendered and visible",
+          "data": "Navigation links: Docs, API, Community, Blog",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Verify navigation links accessibility",
+          "expected_result": "Navigation links are visible, enabled, and accessible",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Test navigation functionality",
+          "expected_result": "All navigation links function correctly and lead to appropriate pages",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "navigation", "accessibility", "menu", "links"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Navigate to docs page successfully",
+      "description": "Verify that navigation from home page to documentation page works correctly with proper URL validation",
+      "preconditions": "Home page is loaded with get started button visible",
+      "postconditions": "Successfully navigated to docs page with proper URL",
+      "priority": "high",
+      "severity": "major",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Click get started button on home page",
+          "expected_result": "Button click is registered and navigation begins",
+          "data": "Button selector: [data-testid=\"get-started-button\"]",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Verify navigation to docs page",
+          "expected_result": "Page URL matches docs pattern and page loads successfully",
+          "data": "Expected URL pattern: /docs",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Validate docs page is fully loaded",
+          "expected_result": "Docs page displays with proper content and structure",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "navigation", "docs", "user-journey"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Display properly on mobile viewport",
+      "description": "Verify that the application displays correctly on mobile devices with responsive design",
+      "preconditions": "Application supports responsive design for mobile devices",
+      "postconditions": "Mobile layout is properly displayed and functional",
+      "priority": "high",
+      "severity": "major",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Set browser viewport to mobile dimensions",
+          "expected_result": "Viewport is adjusted to mobile size (375x667)",
+          "data": "viewport: { width: 375, height: 667 }",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Verify responsive layout adaptation",
+          "expected_result": "Page elements adapt correctly to mobile screen size",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Validate mobile-specific functionality",
+          "expected_result": "All elements are properly sized and accessible on mobile",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "mobile", "responsive", "viewport"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Load within acceptable time and validate performance",
+      "description": "Verify that the home page loads within acceptable time limits with proper performance metrics",
+      "preconditions": "Application is accessible and network conditions are stable",
+      "postconditions": "Page loads within performance thresholds",
+      "priority": "medium",
+      "severity": "normal",
+      "type": "performance",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Measure page load performance from navigation start",
+          "expected_result": "Performance metrics are collected accurately",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Validate page load time is within acceptable limits",
+          "expected_result": "Page loads in less than 15 seconds",
+          "data": "Maximum load time: 15000ms",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Verify all essential elements are loaded",
+          "expected_result": "Page is fully functional after load completion",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "performance", "load-time", "timing"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Have proper SEO elements and validate page structure",
+      "description": "Verify that the page has proper SEO elements and semantic HTML structure according to best practices",
+      "preconditions": "Page is built with SEO best practices in mind",
+      "postconditions": "SEO elements are properly implemented and validated",
+      "priority": "medium",
+      "severity": "normal",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Verify page title length and content meets SEO standards",
+          "expected_result": "Page title is between 5-100 characters and descriptive",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Validate main heading exists and has appropriate content",
+          "expected_result": "Main heading (h1) is present and contains meaningful content",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Check semantic HTML structure and accessibility",
+          "expected_result": "Proper semantic elements and structure are implemented",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "seo", "content-validation", "semantic", "structure"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Support keyboard navigation and accessibility",
+      "description": "Verify that the application is fully accessible via keyboard navigation according to accessibility standards",
+      "preconditions": "Application implements proper keyboard accessibility features",
+      "postconditions": "All interactive elements are accessible via keyboard",
+      "priority": "medium",
+      "severity": "normal",
+      "type": "accessibility",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Test focus on get started button using keyboard",
+          "expected_result": "Button receives focus and shows focus indicator",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Navigate through page using Tab key",
+          "expected_result": "Focus moves through interactive elements in logical order",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Test keyboard activation and navigation",
+          "expected_result": "Enter and Space keys activate buttons appropriately",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "accessibility", "keyboard", "a11y", "navigation"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Load docs page successfully and validate core documentation elements",
+      "description": "Verify that the documentation page loads correctly with all essential documentation elements",
+      "preconditions": "Documentation section is available and accessible",
+      "postconditions": "Documentation page displays correctly with proper structure",
+      "priority": "high",
+      "severity": "major",
+      "type": "smoke",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Navigate to documentation page",
+          "expected_result": "Documentation page loads successfully without errors",
+          "data": "URL: /docs",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Verify page URL and title validation",
+          "expected_result": "Page URL matches docs pattern and has appropriate title",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Validate core documentation elements are present",
+          "expected_result": "All essential documentation elements are loaded and visible",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "documentation", "load", "smoke", "content"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Display sidebar navigation and validate navigation functionality",
+      "description": "Verify that documentation sidebar navigation displays correctly and provides proper navigation functionality",
+      "preconditions": "Documentation page is loaded with sidebar navigation visible",
+      "postconditions": "Sidebar navigation is functional and accessible",
+      "priority": "high",
+      "severity": "major",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Validate sidebar navigation elements are properly rendered",
+          "expected_result": "All sidebar navigation elements are visible and accessible",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Verify sidebar functionality and navigation items count",
+          "expected_result": "Sidebar is functional with multiple navigation items available",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Test sidebar navigation links functionality",
+          "expected_result": "Sidebar links work correctly and navigate to appropriate content",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": [
+        "web",
+        "documentation",
+        "sidebar",
+        "navigation",
+        "functionality"
+      ],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Validate documentation accessibility features and standards",
+      "description": "Verify that documentation pages meet accessibility standards and guidelines according to WCAG",
+      "preconditions": "Documentation pages are designed with accessibility in mind",
+      "postconditions": "Documentation meets WCAG accessibility guidelines",
+      "priority": "medium",
+      "severity": "normal",
+      "type": "accessibility",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Validate heading structure and hierarchy",
+          "expected_result": "Proper heading hierarchy (h1, h2, h3) is maintained throughout",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Verify link accessibility and meaningful text",
+          "expected_result": "All links have proper href attributes and meaningful text content",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Test keyboard navigation through documentation",
+          "expected_result": "All interactive elements are keyboard accessible",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "documentation", "accessibility", "wcag", "a11y"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Complete end-to-end user workflow from home to documentation",
+      "description": "Verify complete user journey from home page to documentation with comprehensive workflow validation",
+      "preconditions": "Application is fully functional with both home and docs pages accessible",
+      "postconditions": "Complete user workflow is validated end-to-end",
+      "priority": "critical",
+      "severity": "critical",
+      "type": "e2e",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Visit home page and validate initial user landing experience",
+          "expected_result": "Home page loads successfully with all essential elements",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Navigate to documentation using get started button",
+          "expected_result": "Successful navigation from home to documentation page",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Explore documentation page structure and validate user experience",
+          "expected_result": "Documentation page provides proper user experience with functional elements",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 4,
+          "action": "Test documentation search and content discovery",
+          "expected_result": "Users can discover content through search and navigation",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "e2e", "user-journey", "workflow", "critical"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Collect and validate page metrics",
+      "description": "Verify that page metrics can be collected and validated for monitoring and quality assurance",
+      "preconditions": "Home page is loaded and accessible",
+      "postconditions": "Page metrics are successfully collected and validated",
+      "priority": "medium",
+      "severity": "normal",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Get page metrics from home page",
+          "expected_result": "Metrics collection is successful",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Validate title contains Playwright",
+          "expected_result": "Title metric contains expected content",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Verify URL and main heading metrics",
+          "expected_result": "URL and heading metrics are properly captured",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "metrics", "monitoring", "validation"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Display main content structure in documentation",
+      "description": "Verify that documentation pages display proper main content structure and organization",
+      "preconditions": "Documentation page is loaded successfully",
+      "postconditions": "Main content structure is properly displayed and accessible",
+      "priority": "high",
+      "severity": "major",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Validate content structure organization",
+          "expected_result": "Content structure is properly organized and accessible",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Verify content area is visible",
+          "expected_result": "Main content area is visible and properly rendered",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Check main heading text content",
+          "expected_result": "Main heading is present and contains meaningful content",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "documentation", "content", "structure"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Have functional search in documentation",
+      "description": "Verify that documentation search functionality works correctly when available",
+      "preconditions": "Documentation page is loaded with search functionality",
+      "postconditions": "Search functionality is tested and works as expected",
+      "priority": "medium",
+      "severity": "normal",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Validate search functionality availability",
+          "expected_result": "Search functionality is available and accessible",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Test search interaction with query",
+          "expected_result": "Search accepts input and processes queries appropriately",
+          "data": "Search query: 'test'",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Verify search response handling",
+          "expected_result": "Search results are handled gracefully",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "documentation", "search", "functionality"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Support keyboard navigation in documentation",
+      "description": "Verify that documentation supports proper keyboard navigation for accessibility",
+      "preconditions": "Documentation page is loaded with sidebar navigation",
+      "postconditions": "Keyboard navigation works correctly throughout documentation",
+      "priority": "medium",
+      "severity": "normal",
+      "type": "accessibility",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Test sidebar navigation with keyboard",
+          "expected_result": "Sidebar links are accessible via keyboard navigation",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Verify focus management on sidebar links",
+          "expected_result": "Focus indicators work properly on interactive elements",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Test arrow key navigation",
+          "expected_result": "Arrow keys provide proper navigation between elements",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": [
+        "web",
+        "documentation",
+        "keyboard",
+        "accessibility",
+        "navigation"
+      ],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Display page metrics correctly in documentation",
+      "description": "Verify that documentation page metrics can be collected and validated properly",
+      "preconditions": "Documentation page is loaded and functional",
+      "postconditions": "Page metrics are accurately collected and validated",
+      "priority": "medium",
+      "severity": "normal",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Collect and validate page metrics from documentation",
+          "expected_result": "Metrics collection is successful and accurate",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Verify title and URL metrics",
+          "expected_result": "Title and URL contain expected documentation values",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Validate main heading and sidebar item count",
+          "expected_result": "Main heading exists and sidebar items are counted correctly",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "documentation", "metrics", "validation"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Work on different screen sizes in documentation",
+      "description": "Verify that documentation pages work correctly across different screen sizes and viewports",
+      "preconditions": "Documentation page supports responsive design",
+      "postconditions": "Documentation displays properly on all tested screen sizes",
+      "priority": "high",
+      "severity": "major",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Test on mobile viewport (375x667)",
+          "expected_result": "Documentation displays properly on mobile with content accessible",
+          "data": "Mobile viewport: 375x667",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Test on tablet viewport (768x1024)",
+          "expected_result": "Documentation layout adapts correctly to tablet size",
+          "data": "Tablet viewport: 768x1024",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Test on desktop viewport (1200x800)",
+          "expected_result": "Documentation displays optimally on desktop resolution",
+          "data": "Desktop viewport: 1200x800",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "documentation", "responsive", "viewport", "mobile"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Handle pagination if available in documentation",
+      "description": "Verify that documentation pagination functionality works correctly when present",
+      "preconditions": "Documentation page may have pagination navigation",
+      "postconditions": "Pagination functionality is tested and works as expected",
+      "priority": "medium",
+      "severity": "normal",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Check for pagination elements availability",
+          "expected_result": "Pagination elements are detected if present",
+          "data": "Selectors: .pagination-nav__link--next, .pagination-nav__link--prev",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Navigate to next page if available",
+          "expected_result": "Next page navigation works correctly",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Validate content structure after navigation",
+          "expected_result": "Page content is properly loaded after pagination",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "documentation", "pagination", "navigation"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Maintain accessibility standards in documentation",
+      "description": "Verify that documentation pages meet accessibility standards and WCAG guidelines",
+      "preconditions": "Documentation pages are designed with accessibility considerations",
+      "postconditions": "Documentation meets accessibility standards and guidelines",
+      "priority": "medium",
+      "severity": "normal",
+      "type": "accessibility",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Validate heading structure and hierarchy",
+          "expected_result": "Proper heading hierarchy is maintained (h1, h2, h3, etc.)",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Verify link accessibility and meaningful content",
+          "expected_result": "All links have proper href attributes and meaningful text",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Test overall accessibility compliance",
+          "expected_result": "Documentation meets WCAG accessibility standards",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "documentation", "accessibility", "wcag", "standards"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Load content efficiently in documentation",
+      "description": "Verify that documentation content loads efficiently within acceptable time limits",
+      "preconditions": "Documentation page is accessible and network conditions are stable",
+      "postconditions": "Documentation content loads within performance thresholds",
+      "priority": "medium",
+      "severity": "normal",
+      "type": "performance",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Measure content load time from navigation start",
+          "expected_result": "Load time measurement is accurate",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Validate content structure after load",
+          "expected_result": "Content structure is properly validated after loading",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Verify load time is within acceptable limits",
+          "expected_result": "Documentation loads in less than 10 seconds",
+          "data": "Maximum load time: 10000ms",
+          "steps": []
+        }
+      ],
+      "tags": [
+        "web",
+        "documentation",
+        "performance",
+        "load-time",
+        "efficiency"
+      ],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Documentation exploration journey",
+      "description": "Verify complete documentation exploration workflow including sidebar navigation and pagination",
+      "preconditions": "Documentation page is accessible with sidebar navigation available",
+      "postconditions": "Documentation exploration workflow is validated end-to-end",
+      "priority": "high",
+      "severity": "major",
+      "type": "e2e",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Start from docs page and validate initial state",
+          "expected_result": "Documentation page loads successfully with sidebar available",
+          "data": "",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Navigate through sidebar items systematically",
+          "expected_result": "Sidebar navigation works correctly for multiple items",
+          "data": "Test first 3 sidebar links",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Test pagination functionality if available",
+          "expected_result": "Pagination navigation works and content loads properly",
+          "data": "",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "documentation", "exploration", "e2e", "journey"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Responsive design journey across multiple viewports",
+      "description": "Verify complete responsive design functionality across multiple device viewports",
+      "preconditions": "Application supports responsive design for multiple device types",
+      "postconditions": "Responsive design works correctly across all tested viewports",
+      "priority": "high",
+      "severity": "major",
+      "type": "functional",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Test Mobile viewport (375x667) for both home and docs",
+          "expected_result": "Both pages display correctly on mobile viewport",
+          "data": "Mobile: 375x667",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Test Tablet viewport (768x1024) for both pages",
+          "expected_result": "Both pages adapt correctly to tablet viewport",
+          "data": "Tablet: 768x1024",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Test Desktop (1200x800) and Large Desktop (1920x1080)",
+          "expected_result": "Both pages display optimally on desktop resolutions",
+          "data": "Desktop: 1200x800, Large: 1920x1080",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "responsive", "viewport", "mobile", "desktop", "journey"],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Accessibility and keyboard navigation journey",
+      "description": "Verify comprehensive accessibility and keyboard navigation across the application",
+      "preconditions": "Application implements accessibility features and keyboard navigation",
+      "postconditions": "Accessibility and keyboard navigation work correctly throughout",
+      "priority": "medium",
+      "severity": "normal",
+      "type": "accessibility",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Test keyboard navigation on home page",
+          "expected_result": "Home page keyboard navigation works correctly",
+          "data": "Focus on get started button, test Enter key",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Test keyboard navigation on docs page",
+          "expected_result": "Docs page supports proper keyboard navigation",
+          "data": "Tab navigation through key elements",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Validate accessibility standards compliance",
+          "expected_result": "Application meets accessibility standards throughout",
+          "data": "Heading structure, alt text, proper semantic elements",
+          "steps": []
+        }
+      ],
+      "tags": [
+        "web",
+        "accessibility",
+        "keyboard",
+        "navigation",
+        "journey",
+        "a11y"
+      ],
+      "params": [],
+      "is_muted": "no"
+    },
+    {
+      "title": "Web - Performance and error handling journey",
+      "description": "Verify comprehensive performance metrics and error handling capabilities across the application",
+      "preconditions": "Application is accessible and supports performance monitoring",
+      "postconditions": "Performance and error handling are validated comprehensively",
+      "priority": "medium",
+      "severity": "normal",
+      "type": "performance",
+      "behavior": "positive",
+      "automation": "automated",
+      "status": "actual",
+      "is_flaky": "no",
+      "layer": "e2e",
+      "milestone": null,
+      "custom_fields": [],
+      "steps_type": "classic",
+      "steps": [
+        {
+          "position": 1,
+          "action": "Measure page load performance for home and docs pages",
+          "expected_result": "Performance metrics are within acceptable thresholds",
+          "data": "Home: <10s, Docs: <8s, Navigation: <5s",
+          "steps": []
+        },
+        {
+          "position": 2,
+          "action": "Test error handling for non-existent pages",
+          "expected_result": "Application handles 404 errors gracefully",
+          "data": "Test /non-existent-page-12345",
+          "steps": []
+        },
+        {
+          "position": 3,
+          "action": "Test performance under slow network conditions",
+          "expected_result": "Application remains functional under network constraints",
+          "data": "Simulate slow network (100kb/s, 500ms latency)",
+          "steps": []
+        }
+      ],
+      "tags": ["web", "performance", "error-handling", "journey", "network"],
+      "params": [],
+      "is_muted": "no"
+    }
+  ],
+  "suites": []
 }
