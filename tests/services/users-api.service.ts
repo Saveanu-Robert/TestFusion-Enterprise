@@ -5,7 +5,7 @@
 
 import { ApiClient, ApiResponse } from '../clients/api-client';
 import { User, createUserPayload } from '../fixtures/test-data';
-import { API_ENDPOINTS } from '../constants/api-constants';
+import { ApiEndpoints } from '../constants/api-constants';
 
 export class UsersApiService {
   constructor(private apiClient: ApiClient) {}
@@ -13,14 +13,14 @@ export class UsersApiService {
    * Retrieves all users
    */
   async getAllUsers(): Promise<ApiResponse<User[]>> {
-    return this.apiClient.get<User[]>(API_ENDPOINTS.USERS);
+    return this.apiClient.get<User[]>(ApiEndpoints.USERS);
   }
 
   /**
    * Retrieves a specific user by ID
    */
   async getUserById(id: number): Promise<ApiResponse<User>> {
-    return this.apiClient.get<User>(`${API_ENDPOINTS.USERS}/${id}`);
+    return this.apiClient.get<User>(`${ApiEndpoints.USERS}/${id}`);
   }
 
   /**
@@ -28,20 +28,20 @@ export class UsersApiService {
    */
   async createUser(userData?: Partial<Omit<User, 'id'>>): Promise<ApiResponse<User>> {
     const payload = userData || createUserPayload();
-    return this.apiClient.post<User>(API_ENDPOINTS.USERS, payload);
+    return this.apiClient.post<User>(ApiEndpoints.USERS, payload);
   }
 
   /**
    * Updates an existing user
    */
   async updateUser(id: number, userData: Partial<User>): Promise<ApiResponse<User>> {
-    return this.apiClient.put<User>(`${API_ENDPOINTS.USERS}/${id}`, userData);
+    return this.apiClient.put<User>(`${ApiEndpoints.USERS}/${id}`, userData);
   }
 
   /**
    * Deletes a user
    */
   async deleteUser(id: number): Promise<ApiResponse<void>> {
-    return this.apiClient.delete<void>(`${API_ENDPOINTS.USERS}/${id}`);
+    return this.apiClient.delete<void>(`${ApiEndpoints.USERS}/${id}`);
   }
 }

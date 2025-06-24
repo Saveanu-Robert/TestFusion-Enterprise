@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { HTTP_STATUS_CODES } from '../constants/api-constants';
+import { HttpStatusCodes } from '../constants/api-constants';
 import { EMAIL_REGEX } from '../constants/validation-constants';
 
 export class CommentsValidator {
@@ -7,14 +7,14 @@ export class CommentsValidator {
    * Validates the response status for successful operations
    */
   static validateSuccessfulResponse(response: any): void {
-    expect(response.status).toBe(HTTP_STATUS_CODES.OK);
+    expect(response.status).toBe(HttpStatusCodes.OK.code);
   }
 
   /**
    * Validates the response status for creation operations
    */
   static validateCreationResponse(response: any): void {
-    expect(response.status).toBe(HTTP_STATUS_CODES.CREATED);
+    expect(response.status).toBe(HttpStatusCodes.CREATED.code);
   }
 
   /**

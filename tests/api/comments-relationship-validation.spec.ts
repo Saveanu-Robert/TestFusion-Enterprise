@@ -1,23 +1,36 @@
 /**
  * Comments API Relationship Validation Tests
  *
- * Comprehensive test suite for validating comment-related API endpoints,
+ * Enterprise-grade test suite for validating comment-related API endpoints,
  * focusing on relationship validation between comments, posts, and data integrity.
  * Tests include CRUD operations, data validation, and relationship constraints.
  *
+ * @fileoverview Comprehensive comment relationship validation tests for TestFusion-Enterprise
  * @author TestFusion-Enterprise Team
  * @version 1.0.0
+ * @since 2024
  */
 
-import { test, expect } from '../fixtures/api-fixtures';
-import { qase } from 'playwright-qase-reporter';
+import { test } from '../fixtures/api-fixtures';
+import type { ApiTestFixtures } from '../fixtures/api-fixtures';
+
+// Qase integration with fallback for environments without qase configuration
+let qase: (id: number, title: string) => string;
+try {
+  // Use dynamic import to handle optional qase reporter
+  const qaseModule = eval('require')('playwright-qase-reporter');
+  qase = qaseModule.qase;
+} catch (error) {
+  // Fallback for environments without qase reporter
+  qase = (id: number, title: string) => title;
+}
 import { CommentsApiService } from '../services/comments-api.service';
 import { CommentsOperations } from '../operations/comments-operations';
 
 test.describe('Comments API - Relationship Validation', () => {
   let commentsService: CommentsApiService;
   let commentsOperations: CommentsOperations;
-  test.beforeEach(async ({ apiClient, testContext }) => {
+  test.beforeEach(async ({ apiClient, testContext }: ApiTestFixtures) => {
     commentsService = new CommentsApiService(apiClient);
     commentsOperations = new CommentsOperations(commentsService);
 
@@ -34,7 +47,7 @@ test.describe('Comments API - Relationship Validation', () => {
     });
   });
 
-  test.afterEach(async ({ testContext }, testInfo) => {
+  test.afterEach(async ({ testContext }: ApiTestFixtures, testInfo: any) => {
     // Attach test result summary for enhanced reporting
     await testContext.attachTestSummary({
       test_name: testInfo.title,
@@ -47,10 +60,9 @@ test.describe('Comments API - Relationship Validation', () => {
       duration: testInfo.duration,
       retries: testInfo.retry,
     });
-  });
-  test(
+  });  test(
     qase(24, 'Should retrieve all comments successfully and validate response structure'),
-    async ({ testContext }) => {
+    async ({ testContext }: ApiTestFixtures) => {
       await test.step('Send GET request to retrieve all comments from API', async () => {
         const { response, count } = await commentsOperations.getAllCommentsWithCountValidation();
 
@@ -61,7 +73,7 @@ test.describe('Comments API - Relationship Validation', () => {
       });
     }
   );
-  test(qase(25, 'Should retrieve a specific comment by ID and validate comment structure'), async ({ testContext }) => {
+  test(qase(25, 'Should retrieve a specific comment by ID and validate comment structure'), async ({ testContext }: ApiTestFixtures) => {
     const commentId = 1;
 
     await test.step(`Send GET request to retrieve comment with ID ${commentId}`, async () => {
@@ -73,10 +85,9 @@ test.describe('Comments API - Relationship Validation', () => {
         responseTime: response.duration,
       });
     });
-  });
-  test(
+  });  test(
     qase(26, 'Should retrieve comments by post ID and validate post-comment relationships'),
-    async ({ testContext }) => {
+    async ({ testContext }: ApiTestFixtures) => {
       const postId = 1;
 
       await test.step(`Send GET request to retrieve all comments for post ${postId}`, async () => {
@@ -90,7 +101,7 @@ test.describe('Comments API - Relationship Validation', () => {
       });
     }
   );
-  test(qase(27, 'Should create a new comment successfully and validate creation response'), async ({ testContext }) => {
+  test(qase(27, 'Should create a new comment successfully and validate creation response'), async ({ testContext }: ApiTestFixtures) => {
     await test.step('Send POST request to create new comment with valid data', async () => {
       const newCommentData = CommentsOperations.generateTestCommentData();
       const response = await commentsOperations.createCommentWithComprehensiveValidation(newCommentData);

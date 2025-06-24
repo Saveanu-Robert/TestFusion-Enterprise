@@ -11,9 +11,8 @@ export class DocsPage extends BasePage {
   constructor(page: Page) {
     super(page);
   }
-
   getPageUrl(): string {
-    return `${this.config.baseUrl}${WEB_CONSTANTS.PAGES.docs}`;
+    return `${WEB_CONSTANTS.BASE_URL}${WEB_CONSTANTS.PAGES.docs}`;
   }
 
   getUniquePageElement(): string {
@@ -60,8 +59,7 @@ export class DocsPage extends BasePage {
 
   /**
    * Page Loading Methods
-   */
-  async waitForPageLoad(): Promise<void> {
+   */  async waitForPageLoad(): Promise<this> {
     // Get browser type for browser-specific handling
     const browserName = this.page.context().browser()?.browserType().name();
     this.logger.debug(`Browser type: ${browserName}`);
@@ -117,9 +115,7 @@ export class DocsPage extends BasePage {
       this.logger.debug('✅ Page load state achieved');
     } catch (error) {
       this.logger.warn('⚠️ Load state timeout - continuing anyway as content is available');
-    }
-
-    // Optional: Try networkidle but don't fail if it times out
+    }    // Optional: Try networkidle but don't fail if it times out
     // Use browser-specific timeouts as different browsers handle networkidle differently
     const networkIdleTimeout = browserName === 'webkit' ? 1000 : browserName === 'chromium' ? 2000 : 1500;
     try {
@@ -130,6 +126,8 @@ export class DocsPage extends BasePage {
         `⚠️ Network idle timeout (${networkIdleTimeout}ms) - continuing as this is often expected in ${browserName}`
       );
     }
+
+    return this;
   }
 
   /**
@@ -188,15 +186,18 @@ export class DocsPage extends BasePage {
     this.logger.info('Navigating to previous page');
     await this.clickElement('.pagination-nav__link--prev');
   }
-
   async clickSidebarItem(text: string): Promise<void> {
     this.logger.info(`Clicking sidebar item: ${text}`);
-    await this.clickElement(`text="${text}"`);
+    // Use more specific selector to avoid strict mode violations
+    // Target sidebar links specifically, not just any text match
+    const sidebarLink = this.page.locator('.theme-doc-sidebar-item-link').filter({ hasText: text });
+    await sidebarLink.click();
   }
 
   async expandSidebarSection(sectionName: string): Promise<void> {
     this.logger.info(`Expanding sidebar section: ${sectionName}`);
-    const expandButton = this.page.locator(`text="${sectionName}"`).locator('..').locator('button');
+    // Use more specific selector for sidebar category buttons
+    const expandButton = this.page.locator('.theme-doc-sidebar-item-category').filter({ hasText: sectionName }).locator('button');
     if (await expandButton.isVisible()) {
       await expandButton.click();
     }

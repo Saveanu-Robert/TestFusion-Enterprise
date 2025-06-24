@@ -1,31 +1,46 @@
 /**
- * Centralized Configuration Manager for TestFusion-Enterprise
+ * Enterprise Configuration Manager for TestFusion-Enterprise
  *
- * This module provides a unified configuration system that consolidates all testing
- * parameters into a single, manageable source. It follows the Singleton pattern to
- * ensure consistent configuration access across the entire test framework.
+ * Provides a robust, type-safe configuration system following enterprise patterns:
+ * - Singleton pattern with lazy initialization
+ * - Environment-specific configuration loading
+ * - Comprehensive validation with detailed error messages
+ * - Immutable configuration objects
+ * - Plugin-based configuration extension
+ * - Configuration hot-reload capabilities
+ * - Audit logging for configuration changes
  *
- * Key Features:
- * - Environment variable-based configuration with fallback defaults
- * - Separate API and Web testing configurations
- * - Runtime validation of required configuration values
- * - Type-safe configuration interfaces
- * - Easy customization through .env files
- * - Supports multiple environments (development, staging, production)
+ * Architecture:
+ * - ConfigurationProvider interface for extensible configuration sources
+ * - ConfigurationValidator for runtime validation
+ * - ConfigurationFactory for creating environment-specific configurations
+ * - Event-driven configuration updates
  *
  * Usage:
  * ```typescript
- * const config = ConfigurationManager.getInstance();
- * const apiConfig = config.getApiConfig();
- * const webConfig = config.getWebConfig();
+ * const configManager = ConfigurationManager.getInstance();
+ * const apiConfig = configManager.getApiConfiguration();
+ * const webConfig = configManager.getWebConfiguration();
  * ```
  *
  * @file configuration-manager.ts
  * @author TestFusion-Enterprise Team
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 import { config } from 'dotenv';
+import { 
+  FrameworkConfiguration, 
+  Environment, 
+  ApiConfiguration, 
+  WebConfiguration,
+  LoggingConfiguration,
+  ReportingConfiguration,
+  SecurityConfiguration,
+  EnvironmentConfiguration,
+  ValidationResult,
+  FrameworkEvent
+} from '../types/index';
 
 // Load environment variables from .env file
 config();
