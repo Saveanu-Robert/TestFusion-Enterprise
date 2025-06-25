@@ -24,7 +24,7 @@ export * from './validation-constants';
 export { API_CONSTANTS, WEB_CONSTANTS, TEST_DATA, VALIDATION_CONSTANTS, ENVIRONMENT, UTILS } from './test-constants';
 
 // Convenient re-exports with namespace prefixes for clarity
-export { API_ENDPOINTS as API_URLS } from './api-constants';
+export { ApiEndpoints as API_ENDPOINTS } from './api-constants';
 export { WEB_URLS as WEB_PATHS } from './web-constants';
 export { VALIDATION_PATTERNS as VALIDATORS } from './validation-constants';
 

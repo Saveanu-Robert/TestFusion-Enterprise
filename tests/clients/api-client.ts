@@ -393,6 +393,9 @@ export class ApiClient {
       statusText: response.statusText(),
       headers: headersObject,
       duration,
+      requestId,
+      timestamp: new Date().toISOString(),
+      retryAttempt: 0,
     };
 
     // Create response details for reporting
