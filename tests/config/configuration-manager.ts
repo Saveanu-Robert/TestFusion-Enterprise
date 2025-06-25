@@ -29,17 +29,17 @@
  */
 
 import { config } from 'dotenv';
-import { 
-  FrameworkConfiguration, 
-  Environment, 
-  ApiConfiguration, 
+import {
+  FrameworkConfiguration,
+  Environment,
+  ApiConfiguration,
   WebConfiguration,
   LoggingConfiguration,
   ReportingConfiguration,
   SecurityConfiguration,
   EnvironmentConfiguration,
   ValidationResult,
-  FrameworkEvent
+  FrameworkEvent,
 } from '../types/index';
 
 // Load environment variables from .env file

@@ -10,7 +10,7 @@
  * - Performance and timing metrics collection
  * - Enterprise logging and reporting
  * - Test context attachment and metadata tracking
- * 
+ *
  * Test Architecture:
  * - Repository pattern for data access abstraction
  * - Operations layer for business logic validation
@@ -62,43 +62,52 @@ test.describe('Posts API - CRUD Operations', () => {
     testContext.logTestEnd(`Test completed: ${testInfo.title}`);
   });
 
-  test(qase(20, 'Should retrieve all posts successfully and validate response structure'), async ({ testContext }: { testContext: BaseTestContext }) => {
-    await test.step('Send GET request to retrieve all posts from API endpoint', async () => {
-      const { response, count } = await postsOperations.getAllPostsWithCountValidation();
+  test(
+    qase(20, 'Should retrieve all posts successfully and validate response structure'),
+    async ({ testContext }: { testContext: BaseTestContext }) => {
+      await test.step('Send GET request to retrieve all posts from API endpoint', async () => {
+        const { response, count } = await postsOperations.getAllPostsWithCountValidation();
 
-      testContext.logInfo('✅ Successfully retrieved all posts with valid structure', {
-        totalPosts: count,
-        responseTime: response.duration,
+        testContext.logInfo('✅ Successfully retrieved all posts with valid structure', {
+          totalPosts: count,
+          responseTime: response.duration,
+        });
       });
-    });
-  });
+    }
+  );
 
-  test(qase(21, 'Should retrieve a specific post by ID and validate post data integrity'), async ({ testContext }: { testContext: BaseTestContext }) => {
-    const postId = 1;
+  test(
+    qase(21, 'Should retrieve a specific post by ID and validate post data integrity'),
+    async ({ testContext }: { testContext: BaseTestContext }) => {
+      const postId = 1;
 
-    await test.step(`Send GET request to retrieve post with ID ${postId}`, async () => {
-      const response = await postsOperations.getPostByIdWithComprehensiveValidation(postId);
+      await test.step(`Send GET request to retrieve post with ID ${postId}`, async () => {
+        const response = await postsOperations.getPostByIdWithComprehensiveValidation(postId);
 
-      testContext.logInfo('✅ Successfully retrieved specific post with valid data', {
-        postId,
-        userId: response.data.userId,
-        responseTime: response.duration,
+        testContext.logInfo('✅ Successfully retrieved specific post with valid data', {
+          postId,
+          userId: response.data.userId,
+          responseTime: response.duration,
+        });
       });
-    });
-  });
+    }
+  );
 
-  test(qase(22, 'Should create a new post successfully and validate creation response'), async ({ testContext }: { testContext: BaseTestContext }) => {
-    await test.step('Send POST request to create new post with valid data', async () => {
-      const newPostData = PostsOperations.generateTestPostData();
-      const response = await postsOperations.createPostWithComprehensiveValidation(newPostData);
+  test(
+    qase(22, 'Should create a new post successfully and validate creation response'),
+    async ({ testContext }: { testContext: BaseTestContext }) => {
+      await test.step('Send POST request to create new post with valid data', async () => {
+        const newPostData = PostsOperations.generateTestPostData();
+        const response = await postsOperations.createPostWithComprehensiveValidation(newPostData);
 
-      testContext.logInfo('✅ Successfully created new post with valid response data', {
-        postId: response.data.id,
-        userId: response.data.userId,
-        responseTime: response.duration,
+        testContext.logInfo('✅ Successfully created new post with valid response data', {
+          postId: response.data.id,
+          userId: response.data.userId,
+          responseTime: response.duration,
+        });
       });
-    });
-  });
+    }
+  );
 
   test(
     qase(23, 'Should return 404 error for non-existent post ID and validate error response'),

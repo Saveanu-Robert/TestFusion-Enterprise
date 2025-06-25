@@ -59,7 +59,7 @@ export class DocsPage extends BasePage {
 
   /**
    * Page Loading Methods
-   */  async waitForPageLoad(): Promise<this> {
+   */ async waitForPageLoad(): Promise<this> {
     // Get browser type for browser-specific handling
     const browserName = this.page.context().browser()?.browserType().name();
     this.logger.debug(`Browser type: ${browserName}`);
@@ -115,7 +115,7 @@ export class DocsPage extends BasePage {
       this.logger.debug('✅ Page load state achieved');
     } catch (error) {
       this.logger.warn('⚠️ Load state timeout - continuing anyway as content is available');
-    }    // Optional: Try networkidle but don't fail if it times out
+    } // Optional: Try networkidle but don't fail if it times out
     // Use browser-specific timeouts as different browsers handle networkidle differently
     const networkIdleTimeout = browserName === 'webkit' ? 1000 : browserName === 'chromium' ? 2000 : 1500;
     try {
@@ -197,7 +197,10 @@ export class DocsPage extends BasePage {
   async expandSidebarSection(sectionName: string): Promise<void> {
     this.logger.info(`Expanding sidebar section: ${sectionName}`);
     // Use more specific selector for sidebar category buttons
-    const expandButton = this.page.locator('.theme-doc-sidebar-item-category').filter({ hasText: sectionName }).locator('button');
+    const expandButton = this.page
+      .locator('.theme-doc-sidebar-item-category')
+      .filter({ hasText: sectionName })
+      .locator('button');
     if (await expandButton.isVisible()) {
       await expandButton.click();
     }

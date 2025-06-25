@@ -1,14 +1,14 @@
 /**
  * Enterprise API Constants - Centralized configuration for API testing
- * 
+ *
  * Organized using namespace pattern for better structure:
  * - ApiEndpoints: API endpoint definitions
- * - HttpStatusCodes: HTTP status code constants  
+ * - HttpStatusCodes: HTTP status code constants
  * - ApiHeaders: Standard HTTP headers
  * - ContentTypes: MIME type constants
  * - RequestTimeouts: Timeout configurations
  * - ErrorMessages: Standardized error messages
- * 
+ *
  * @file api-constants.ts
  * @author TestFusion-Enterprise Team
  * @version 2.0.0
@@ -41,12 +41,12 @@ export const HttpStatusCodes = {
   CREATED: { code: 201, message: 'Created' },
   ACCEPTED: { code: 202, message: 'Accepted' },
   NO_CONTENT: { code: 204, message: 'No Content' },
-  
+
   // Redirection codes
   MOVED_PERMANENTLY: { code: 301, message: 'Moved Permanently' },
   FOUND: { code: 302, message: 'Found' },
   NOT_MODIFIED: { code: 304, message: 'Not Modified' },
-  
+
   // Client error codes
   BAD_REQUEST: { code: 400, message: 'Bad Request' },
   UNAUTHORIZED: { code: 401, message: 'Unauthorized' },
@@ -56,7 +56,7 @@ export const HttpStatusCodes = {
   CONFLICT: { code: 409, message: 'Conflict' },
   UNPROCESSABLE_ENTITY: { code: 422, message: 'Unprocessable Entity' },
   TOO_MANY_REQUESTS: { code: 429, message: 'Too Many Requests' },
-  
+
   // Server error codes
   INTERNAL_SERVER_ERROR: { code: 500, message: 'Internal Server Error' },
   NOT_IMPLEMENTED: { code: 501, message: 'Not Implemented' },

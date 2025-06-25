@@ -1,6 +1,6 @@
 /**
  * Enterprise Base Page Object for TestFusion-Enterprise
- * 
+ *
  * Implements enterprise-grade Page Object Model (POM) with:
  * - SOLID principles and clean architecture
  * - Fluent interface pattern for method chaining
@@ -10,7 +10,7 @@
  * - Screenshot and video capture
  * - Element interaction strategies
  * - Wait strategies and timeouts
- * 
+ *
  * @file web/pages/base.page.ts
  * @author TestFusion-Enterprise Team
  * @version 2.0.0
@@ -119,7 +119,7 @@ export abstract class BasePage {
 
   /**
    * Navigation methods with enhanced capabilities
-   */  public async navigate(options: NavigationOptions = {}): Promise<this> {
+   */ public async navigate(options: NavigationOptions = {}): Promise<this> {
     const timer = this.logger.startTimer();
     const url = this.getPageUrl();
 
@@ -135,15 +135,9 @@ export abstract class BasePage {
       await this.waitForPageLoad();
       await this.validatePageElements();
 
-      this.logger.logWithTiming(
-        this.logger.info,
-        'Page navigation completed successfully',
-        timer,
-        { url }
-      );
+      this.logger.logWithTiming(this.logger.info, 'Page navigation completed successfully', timer, { url });
 
       return this;
-
     } catch (error) {
       this.logger.error('Page navigation failed', {
         url,
@@ -155,7 +149,7 @@ export abstract class BasePage {
 
   /**
    * Waits for the page to be fully loaded
-   */  public async waitForPageLoad(strategy: LoadStrategy = LoadStrategy.DOM_CONTENT_LOADED): Promise<this> {
+   */ public async waitForPageLoad(strategy: LoadStrategy = LoadStrategy.DOM_CONTENT_LOADED): Promise<this> {
     const timer = this.logger.startTimer();
 
     try {
@@ -171,15 +165,9 @@ export abstract class BasePage {
         });
       }
 
-      this.logger.logWithTiming(
-        this.logger.debug,
-        'Page load wait completed',
-        timer,
-        { strategy, uniqueIdentifier }
-      );
+      this.logger.logWithTiming(this.logger.debug, 'Page load wait completed', timer, { strategy, uniqueIdentifier });
 
       return this;
-
     } catch (error) {
       this.logger.error('Page load wait failed', {
         strategy,
@@ -219,7 +207,6 @@ export abstract class BasePage {
       });
 
       return result;
-
     } catch (error) {
       this.logger.error('Page verification failed', {
         error: error instanceof Error ? error.message : error,
@@ -230,10 +217,7 @@ export abstract class BasePage {
 
   /**
    * Enhanced element interaction methods
-   */  protected async waitForElement(
-    selector: string,
-    options: ElementInteractionOptions = {}
-  ): Promise<Locator> {
+   */ protected async waitForElement(selector: string, options: ElementInteractionOptions = {}): Promise<Locator> {
     const timer = this.logger.startTimer();
     const finalOptions = { ...this.getDefaultElementOptions(), ...options };
 
@@ -257,15 +241,12 @@ export abstract class BasePage {
         await expect(element).toBeEnabled({ timeout: finalOptions.timeout });
       }
 
-      this.logger.logWithTiming(
-        this.logger.debug,
-        'Element wait completed',
-        timer,
-        { selector, options: finalOptions }
-      );
+      this.logger.logWithTiming(this.logger.debug, 'Element wait completed', timer, {
+        selector,
+        options: finalOptions,
+      });
 
       return element;
-
     } catch (error) {
       this.logger.error('Element wait failed', {
         selector,
@@ -277,13 +258,10 @@ export abstract class BasePage {
     }
   }
 
-  protected async clickElement(
-    selector: string,
-    options: ElementInteractionOptions = {}
-  ): Promise<this> {
+  protected async clickElement(selector: string, options: ElementInteractionOptions = {}): Promise<this> {
     return this.performElementInteraction(
       selector,
-      async (element) => {
+      async element => {
         if (options.scrollIntoView) {
           await element.scrollIntoViewIfNeeded();
         }
@@ -297,14 +275,10 @@ export abstract class BasePage {
     );
   }
 
-  protected async fillInput(
-    selector: string,
-    value: string,
-    options: ElementInteractionOptions = {}
-  ): Promise<this> {
+  protected async fillInput(selector: string, value: string, options: ElementInteractionOptions = {}): Promise<this> {
     return this.performElementInteraction(
       selector,
-      async (element) => {
+      async element => {
         await element.clear();
         await element.fill(value);
         // Verify the value was set correctly
@@ -322,7 +296,7 @@ export abstract class BasePage {
   ): Promise<this> {
     return this.performElementInteraction(
       selector,
-      async (element) => {
+      async element => {
         if (typeof option === 'string') {
           await element.selectOption(option);
         } else if (option.value) {
@@ -338,13 +312,10 @@ export abstract class BasePage {
     );
   }
 
-  protected async getText(
-    selector: string,
-    options: ElementInteractionOptions = {}
-  ): Promise<string> {
+  protected async getText(selector: string, options: ElementInteractionOptions = {}): Promise<string> {
     const element = await this.waitForElement(selector, options);
     const text = await element.textContent();
-    
+
     this.logger.debug('Text content retrieved', {
       selector,
       text: text?.substring(0, 100), // Log first 100 chars
@@ -360,7 +331,7 @@ export abstract class BasePage {
   ): Promise<string | null> {
     const element = await this.waitForElement(selector, options);
     const value = await element.getAttribute(attributeName);
-    
+
     this.logger.debug('Attribute value retrieved', {
       selector,
       attributeName,
@@ -372,7 +343,7 @@ export abstract class BasePage {
 
   /**
    * Generic element interaction with retry logic and error handling
-   */  private async performElementInteraction<T>(
+   */ private async performElementInteraction<T>(
     selector: string,
     interaction: (element: Locator) => Promise<T>,
     actionName: string,
@@ -387,18 +358,16 @@ export abstract class BasePage {
         const element = await this.waitForElement(selector, finalOptions);
         await interaction(element);
 
-        this.logger.logWithTiming(
-          this.logger.info,
-          `Element ${actionName} completed successfully`,
-          timer,
-          { selector, attempt, options: finalOptions }
-        );
+        this.logger.logWithTiming(this.logger.info, `Element ${actionName} completed successfully`, timer, {
+          selector,
+          attempt,
+          options: finalOptions,
+        });
 
         return this;
-
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        
+
         this.logger.warn(`Element ${actionName} failed on attempt ${attempt}`, {
           selector,
           attempt,
@@ -454,13 +423,15 @@ export abstract class BasePage {
 
   /**
    * Accessibility testing methods
-   */  public async runAccessibilityCheck(options: AccessibilityCheckOptions = {
-    enabled: true,
-    standards: ['wcag2aa'],
-    includeTags: [],
-    excludeTags: [],
-    runOnlyAfterInteraction: false,
-  }): Promise<void> {
+   */ public async runAccessibilityCheck(
+    options: AccessibilityCheckOptions = {
+      enabled: true,
+      standards: ['wcag2aa'],
+      includeTags: [],
+      excludeTags: [],
+      runOnlyAfterInteraction: false,
+    }
+  ): Promise<void> {
     if (!options.enabled) {
       return;
     }
@@ -472,13 +443,9 @@ export abstract class BasePage {
       // In a real implementation, this would integrate with tools like axe-core
       this.logger.info('Accessibility check would run here', { options });
 
-      this.logger.logWithTiming(
-        this.logger.info,
-        'Accessibility check completed',
-        timer,
-        { standards: options.standards }
-      );
-
+      this.logger.logWithTiming(this.logger.info, 'Accessibility check completed', timer, {
+        standards: options.standards,
+      });
     } catch (error) {
       this.logger.error('Accessibility check failed', {
         error: error instanceof Error ? error.message : error,
@@ -488,7 +455,7 @@ export abstract class BasePage {
 
   /**
    * Performance monitoring methods
-   */  public async measurePagePerformance(): Promise<PagePerformanceMetrics> {
+   */ public async measurePagePerformance(): Promise<PagePerformanceMetrics> {
     const timer = this.logger.startTimer();
 
     try {
@@ -505,15 +472,11 @@ export abstract class BasePage {
         };
       });
 
-      this.logger.logWithTiming(
-        this.logger.info,
-        'Page performance metrics collected',
-        timer,
-        { metrics: performanceMetrics }
-      );
+      this.logger.logWithTiming(this.logger.info, 'Page performance metrics collected', timer, {
+        metrics: performanceMetrics,
+      });
 
       return performanceMetrics as PagePerformanceMetrics;
-
     } catch (error) {
       this.logger.error('Performance measurement failed', {
         error: error instanceof Error ? error.message : error,
@@ -527,7 +490,7 @@ export abstract class BasePage {
    */
   public async takeScreenshot(name?: string): Promise<Uint8Array> {
     const screenshotName = name || `${this.pageName || 'page'}-${Date.now()}`;
-    
+
     try {
       const screenshot = await this.page.screenshot({
         fullPage: true,
@@ -536,7 +499,6 @@ export abstract class BasePage {
 
       this.logger.info('Screenshot captured', { name: screenshotName });
       return screenshot;
-
     } catch (error) {
       this.logger.error('Screenshot capture failed', {
         error: error instanceof Error ? error.message : error,
@@ -572,11 +534,7 @@ export abstract class BasePage {
     return this.clickElement(selector, options);
   }
 
-  public async fill(
-    selector: string,
-    value: string,
-    options?: ElementInteractionOptions
-  ): Promise<this> {
+  public async fill(selector: string, value: string, options?: ElementInteractionOptions): Promise<this> {
     return this.fillInput(selector, value, options);
   }
 
@@ -590,21 +548,16 @@ export abstract class BasePage {
 
   /**
    * Page state management
-   */  public async refresh(): Promise<this> {
+   */ public async refresh(): Promise<this> {
     const timer = this.logger.startTimer();
 
     try {
       await this.page.reload();
       await this.waitForPageLoad();
 
-      this.logger.logWithTiming(
-        this.logger.info,
-        'Page refreshed successfully',
-        timer
-      );
+      this.logger.logWithTiming(this.logger.info, 'Page refreshed successfully', timer);
 
       return this;
-
     } catch (error) {
       this.logger.error('Page refresh failed', {
         error: error instanceof Error ? error.message : error,
@@ -619,14 +572,9 @@ export abstract class BasePage {
       await this.page.goBack();
       await this.waitForPageLoad();
 
-      this.logger.logWithTiming(
-        this.logger.info,
-        'Navigated back successfully',
-        timer
-      );
+      this.logger.logWithTiming(this.logger.info, 'Navigated back successfully', timer);
 
       return this;
-
     } catch (error) {
       this.logger.error('Navigate back failed', {
         error: error instanceof Error ? error.message : error,
@@ -641,14 +589,9 @@ export abstract class BasePage {
       await this.page.goForward();
       await this.waitForPageLoad();
 
-      this.logger.logWithTiming(
-        this.logger.info,
-        'Navigated forward successfully',
-        timer
-      );
+      this.logger.logWithTiming(this.logger.info, 'Navigated forward successfully', timer);
 
       return this;
-
     } catch (error) {
       this.logger.error('Navigate forward failed', {
         error: error instanceof Error ? error.message : error,

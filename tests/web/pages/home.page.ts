@@ -10,7 +10,8 @@ import { WEB_CONSTANTS } from '../../constants/test-constants';
 export class HomePage extends BasePage {
   constructor(page: Page) {
     super(page);
-  }  getPageUrl(): string {
+  }
+  getPageUrl(): string {
     return `${WEB_CONSTANTS.BASE_URL}${WEB_CONSTANTS.PAGES.home}`;
   }
   getUniquePageElement(): string {

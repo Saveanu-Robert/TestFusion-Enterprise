@@ -11,8 +11,7 @@
  * @since 2024
  */
 
-import { test } from '../fixtures/api-fixtures';
-import type { ApiTestFixtures } from '../fixtures/api-fixtures';
+import { test, type ApiTestFixtures } from '../fixtures/api-fixtures';
 
 // Qase integration with fallback for environments without qase configuration
 let qase: (id: number, title: string) => string;
@@ -60,7 +59,8 @@ test.describe('Comments API - Relationship Validation', () => {
       duration: testInfo.duration,
       retries: testInfo.retry,
     });
-  });  test(
+  });
+  test(
     qase(24, 'Should retrieve all comments successfully and validate response structure'),
     async ({ testContext }: ApiTestFixtures) => {
       await test.step('Send GET request to retrieve all comments from API', async () => {
@@ -73,19 +73,23 @@ test.describe('Comments API - Relationship Validation', () => {
       });
     }
   );
-  test(qase(25, 'Should retrieve a specific comment by ID and validate comment structure'), async ({ testContext }: ApiTestFixtures) => {
-    const commentId = 1;
+  test(
+    qase(25, 'Should retrieve a specific comment by ID and validate comment structure'),
+    async ({ testContext }: ApiTestFixtures) => {
+      const commentId = 1;
 
-    await test.step(`Send GET request to retrieve comment with ID ${commentId}`, async () => {
-      const response = await commentsOperations.getCommentByIdWithComprehensiveValidation(commentId);
+      await test.step(`Send GET request to retrieve comment with ID ${commentId}`, async () => {
+        const response = await commentsOperations.getCommentByIdWithComprehensiveValidation(commentId);
 
-      testContext.logInfo('✅ Successfully retrieved specific comment with valid data', {
-        commentId,
-        postId: response.data.postId,
-        responseTime: response.duration,
+        testContext.logInfo('✅ Successfully retrieved specific comment with valid data', {
+          commentId,
+          postId: response.data.postId,
+          responseTime: response.duration,
+        });
       });
-    });
-  });  test(
+    }
+  );
+  test(
     qase(26, 'Should retrieve comments by post ID and validate post-comment relationships'),
     async ({ testContext }: ApiTestFixtures) => {
       const postId = 1;
@@ -101,16 +105,19 @@ test.describe('Comments API - Relationship Validation', () => {
       });
     }
   );
-  test(qase(27, 'Should create a new comment successfully and validate creation response'), async ({ testContext }: ApiTestFixtures) => {
-    await test.step('Send POST request to create new comment with valid data', async () => {
-      const newCommentData = CommentsOperations.generateTestCommentData();
-      const response = await commentsOperations.createCommentWithComprehensiveValidation(newCommentData);
+  test(
+    qase(27, 'Should create a new comment successfully and validate creation response'),
+    async ({ testContext }: ApiTestFixtures) => {
+      await test.step('Send POST request to create new comment with valid data', async () => {
+        const newCommentData = CommentsOperations.generateTestCommentData();
+        const response = await commentsOperations.createCommentWithComprehensiveValidation(newCommentData);
 
-      testContext.logInfo('✅ Successfully created new comment with valid response data', {
-        commentId: response.data.id,
-        postId: response.data.postId,
-        responseTime: response.duration,
+        testContext.logInfo('✅ Successfully created new comment with valid response data', {
+          commentId: response.data.id,
+          postId: response.data.postId,
+          responseTime: response.duration,
+        });
       });
-    });
-  });
+    }
+  );
 });

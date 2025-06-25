@@ -11,8 +11,7 @@
  * @since 2024
  */
 
-import { test, expect } from '../fixtures/web-fixtures';
-import type { WebTestFixtures } from '../fixtures/web-fixtures';
+import { test, expect, type WebTestFixtures } from '../fixtures/web-fixtures';
 
 // Qase integration with fallback for environments without qase configuration
 let qase: (id: number, title: string) => string;

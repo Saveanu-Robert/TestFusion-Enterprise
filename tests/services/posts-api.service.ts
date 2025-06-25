@@ -1,13 +1,13 @@
 /**
  * Enterprise Posts API Service following Repository and Command Patterns
- * 
+ *
  * Implements enterprise patterns for robust API interaction:
  * - Repository pattern for data access abstraction
  * - Command pattern for API operations
  * - Factory pattern for request creation
  * - Strategy pattern for different operation types
  * - Circuit breaker pattern for resilience
- * 
+ *
  * Key Features:
  * - Comprehensive error handling with custom exceptions
  * - Automatic retry mechanisms with exponential backoff
@@ -15,7 +15,7 @@
  * - Performance monitoring and metrics collection
  * - Bulk operations with intelligent batching
  * - Cache-aside pattern for performance optimization
- * 
+ *
  * @file posts-api.service.ts
  * @author TestFusion-Enterprise Team
  * @version 2.0.0
@@ -54,18 +54,14 @@ export class PostsApiService implements PostsRepository {
    * @param options - Query options for filtering and pagination
    * @returns Promise resolving to paginated posts response
    */
-  async findAll(options?: {
-    userId?: number;
-    limit?: number;
-    offset?: number;
-  }): Promise<ApiResponse<Post[]>> {
+  async findAll(options?: { userId?: number; limit?: number; offset?: number }): Promise<ApiResponse<Post[]>> {
     const timer = this.logger.startTimer();
 
     try {
       this.logger.info('Retrieving all posts', { options });
 
       const params: Record<string, string> = {};
-      
+
       if (options?.userId) {
         params.userId = options.userId.toString();
       }
@@ -78,15 +74,12 @@ export class PostsApiService implements PostsRepository {
 
       const response = await this.apiClient.get<Post[]>(ApiEndpoints.POSTS, { params });
 
-      this.logger.logWithTiming(
-        this.logger.info,
-        'Successfully retrieved all posts',
-        timer,
-        { totalPosts: response.data.length, options }
-      );
+      this.logger.logWithTiming(this.logger.info, 'Successfully retrieved all posts', timer, {
+        totalPosts: response.data.length,
+        options,
+      });
 
       return response;
-
     } catch (error) {
       this.logger.error('Failed to retrieve posts', {
         options,
@@ -110,15 +103,12 @@ export class PostsApiService implements PostsRepository {
 
       const response = await this.apiClient.get<Post>(`${ApiEndpoints.POSTS}/${id}`);
 
-      this.logger.logWithTiming(
-        this.logger.info,
-        'Successfully retrieved post by ID',
-        timer,
-        { postId: id, postTitle: response.data.title }
-      );
+      this.logger.logWithTiming(this.logger.info, 'Successfully retrieved post by ID', timer, {
+        postId: id,
+        postTitle: response.data.title,
+      });
 
       return response;
-
     } catch (error) {
       this.logger.error('Failed to retrieve post by ID', {
         postId: id,
@@ -150,23 +140,20 @@ export class PostsApiService implements PostsRepository {
     try {
       const payload = postData || createPostPayload();
       this.validatePostData(payload);
-      
-      this.logger.info('Creating new post', { 
-        userId: payload.userId, 
-        title: payload.title?.substring(0, 50) 
+
+      this.logger.info('Creating new post', {
+        userId: payload.userId,
+        title: payload.title?.substring(0, 50),
       });
 
       const response = await this.apiClient.post<Post>(ApiEndpoints.POSTS, payload);
 
-      this.logger.logWithTiming(
-        this.logger.info,
-        'Successfully created post',
-        timer,
-        { postId: response.data.id, title: response.data.title?.substring(0, 50) }
-      );
+      this.logger.logWithTiming(this.logger.info, 'Successfully created post', timer, {
+        postId: response.data.id,
+        title: response.data.title?.substring(0, 50),
+      });
 
       return response;
-
     } catch (error) {
       this.logger.error('Failed to create post', {
         postData: postData ? { userId: postData.userId, title: postData.title?.substring(0, 50) } : 'default',
@@ -337,7 +324,10 @@ export class PostsApiService implements PostsRepository {
       throw new Error('Post body must be a non-empty string');
     }
 
-    if (postData.userId !== undefined && (!postData.userId || !Number.isInteger(postData.userId) || postData.userId <= 0)) {
+    if (
+      postData.userId !== undefined &&
+      (!postData.userId || !Number.isInteger(postData.userId) || postData.userId <= 0)
+    ) {
       throw new Error('Post userId must be a positive integer');
     }
   }

@@ -11,8 +11,7 @@
  * @since 2024
  */
 
-import { test } from '../fixtures/api-fixtures';
-import type { ApiTestFixtures } from '../fixtures/api-fixtures';
+import { test, type ApiTestFixtures } from '../fixtures/api-fixtures';
 
 // Qase integration with fallback for environments without qase configuration
 let qase: (id: number, title: string) => string;
@@ -63,16 +62,20 @@ test.describe('Users API - Data Validation', () => {
       retries: testInfo.retry,
     });
   });
-  test(qase(28, 'Should retrieve all users successfully and validate response structure'), async ({ testContext }: ApiTestFixtures) => {
-    await test.step('Send GET request to retrieve all users from API endpoint', async () => {
-      const { response, count } = await usersOperations.getAllUsersWithCountValidation();
+  test(
+    qase(28, 'Should retrieve all users successfully and validate response structure'),
+    async ({ testContext }: ApiTestFixtures) => {
+      await test.step('Send GET request to retrieve all users from API endpoint', async () => {
+        const { response, count } = await usersOperations.getAllUsersWithCountValidation();
 
-      testContext.logInfo('✅ Successfully retrieved all users with valid structure', {
-        totalUsers: count,
-        responseTime: response.duration,
+        testContext.logInfo('✅ Successfully retrieved all users with valid structure', {
+          totalUsers: count,
+          responseTime: response.duration,
+        });
       });
-    });
-  });  test(
+    }
+  );
+  test(
     qase(29, 'Should retrieve a specific user by ID and validate comprehensive user data'),
     async ({ testContext }: ApiTestFixtures) => {
       const userId = 1;
@@ -89,19 +92,23 @@ test.describe('Users API - Data Validation', () => {
       });
     }
   );
-  test(qase(30, 'Should create a new user successfully and validate creation response'), async ({ testContext }: ApiTestFixtures) => {
-    await test.step('Send POST request to create new user with valid data', async () => {
-      const newUserData = UsersOperations.generateTestUserData();
-      const response = await usersOperations.createUserWithComprehensiveValidation(newUserData);
+  test(
+    qase(30, 'Should create a new user successfully and validate creation response'),
+    async ({ testContext }: ApiTestFixtures) => {
+      await test.step('Send POST request to create new user with valid data', async () => {
+        const newUserData = UsersOperations.generateTestUserData();
+        const response = await usersOperations.createUserWithComprehensiveValidation(newUserData);
 
-      testContext.logInfo('✅ Successfully created new user with valid response data', {
-        userId: response.data.id,
-        username: response.data.username,
-        email: response.data.email,
-        responseTime: response.duration,
+        testContext.logInfo('✅ Successfully created new user with valid response data', {
+          userId: response.data.id,
+          username: response.data.username,
+          email: response.data.email,
+          responseTime: response.duration,
+        });
       });
-    });
-  });  test(
+    }
+  );
+  test(
     qase(31, 'Should return 404 error for non-existent user ID and validate error response'),
     async ({ testContext }: ApiTestFixtures) => {
       const nonExistentId = 9999;

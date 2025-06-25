@@ -517,46 +517,59 @@ npm run test:grid
 #### Avoid Ambiguous Text-Based Selectors
 
 ❌ **Avoid** - These can match multiple elements:
+
 ```typescript
 // These may match multiple elements causing strict mode violations
-page.locator('text="Installation"')
-page.locator('text="Getting Started"')
-page.locator('text="API"')
+page.locator('text="Installation"');
+page.locator('text="Getting Started"');
+page.locator('text="API"');
 ```
 
 ✅ **Prefer** - Use specific, scoped selectors:
+
 ```typescript
 // Scope selectors to specific containers
-page.locator('.sidebar').locator('text="Installation"')
-page.locator('.theme-doc-sidebar-item-link').filter({ hasText: 'Installation' })
-page.locator('.theme-doc-sidebar-item-category').filter({ hasText: 'API' }).locator('button')
+page.locator('.sidebar').locator('text="Installation"');
+page
+  .locator('.theme-doc-sidebar-item-link')
+  .filter({ hasText: 'Installation' });
+page
+  .locator('.theme-doc-sidebar-item-category')
+  .filter({ hasText: 'API' })
+  .locator('button');
 ```
 
 #### Selector Priority Guidelines
 
 1. **Data Test IDs** (Most Preferred)
+
    ```typescript
-   page.locator('[data-testid="submit-button"]')
+   page.locator('[data-testid="submit-button"]');
    ```
 
 2. **CSS Classes with Context**
+
    ```typescript
-   page.locator('.theme-doc-sidebar-item-link').filter({ hasText: 'Installation' })
+   page
+     .locator('.theme-doc-sidebar-item-link')
+     .filter({ hasText: 'Installation' });
    ```
 
 3. **Unique CSS Selectors**
+
    ```typescript
-   page.locator('.navbar .dropdown-menu .nav-link')
+   page.locator('.navbar .dropdown-menu .nav-link');
    ```
 
 4. **ARIA Labels/Roles**
+
    ```typescript
-   page.locator('role=button[name="Submit"]')
+   page.locator('role=button[name="Submit"]');
    ```
 
 5. **Text with Container Scope** (Use Sparingly)
    ```typescript
-   page.locator('.content-area').locator('text="Submit"')
+   page.locator('.content-area').locator('text="Submit"');
    ```
 
 #### Handling Dynamic Content

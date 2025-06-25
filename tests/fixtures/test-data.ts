@@ -1,12 +1,12 @@
 /**
  * Enhanced Test Fixtures and Domain Models for API Testing
- * 
+ *
  * Provides reusable test data with improved validation and type safety:
  * - Domain-driven design principles
  * - Value objects for better validation
  * - Factory methods for test data generation
  * - Builder pattern for complex objects
- * 
+ *
  * @file test-data.ts
  * @author TestFusion-Enterprise Team
  * @version 2.0.0

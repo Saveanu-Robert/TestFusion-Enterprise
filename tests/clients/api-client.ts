@@ -381,7 +381,9 @@ export class ApiClient {
     } catch {
       // Some responses (like DELETE) might not return JSON
       responseData = null;
-    } // Convert headers array to object
+    }
+
+    // Convert headers array to object
     const headers = await response.headersArray();
     const headersObject = Object.fromEntries(
       headers.map((header: { name: string; value: string }) => [header.name, header.value])

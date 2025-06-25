@@ -1,13 +1,13 @@
 /**
  * Domain Models for TestFusion-Enterprise
- * 
+ *
  * Implements Domain-Driven Design (DDD) principles with:
  * - Value Objects for type safety and validation
  * - Entity base classes with identity management
  * - Domain events for loose coupling
  * - Rich domain models with business logic
  * - Immutable data structures
- * 
+ *
  * @file models/domain-models.ts
  * @author TestFusion-Enterprise Team
  * @version 2.0.0
@@ -104,12 +104,12 @@ export class EmailAddress extends ValueObject<string> {
     if (!value || value.trim().length === 0) {
       throw new Error('Email address cannot be empty');
     }
-    
+
     const normalizedValue = value.trim().toLowerCase();
     if (!EmailAddress.EMAIL_REGEX.test(normalizedValue)) {
       throw new Error(`Invalid email address format: ${value}`);
     }
-    
+
     super(normalizedValue);
   }
 
@@ -260,12 +260,14 @@ export class GeoCoordinates extends ValueObject<{ lat: number; lng: number }> {
     const R = 6371; // Earth's radius in kilometers
     const dLat = this.toRadians(other.getLatitude() - this.getLatitude());
     const dLng = this.toRadians(other.getLongitude() - this.getLongitude());
-    
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(this.toRadians(this.getLatitude())) *
-              Math.cos(this.toRadians(other.getLatitude())) *
-              Math.sin(dLng / 2) * Math.sin(dLng / 2);
-              
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(this.getLatitude())) *
+        Math.cos(this.toRadians(other.getLatitude())) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
@@ -285,13 +287,7 @@ export class Address extends ValueObject<{
   zipcode: string;
   geo: GeoCoordinates;
 }> {
-  constructor(
-    street: string,
-    suite: string,
-    city: string,
-    zipcode: string,
-    geo: GeoCoordinates
-  ) {
+  constructor(street: string, suite: string, city: string, zipcode: string, geo: GeoCoordinates) {
     if (!street || street.trim().length === 0) {
       throw new Error('Street address cannot be empty');
     }
@@ -311,13 +307,7 @@ export class Address extends ValueObject<{
     });
   }
 
-  public static create(
-    street: string,
-    suite: string,
-    city: string,
-    zipcode: string,
-    geo: GeoCoordinates
-  ): Address {
+  public static create(street: string, suite: string, city: string, zipcode: string, geo: GeoCoordinates): Address {
     return new Address(street, suite, city, zipcode, geo);
   }
 
@@ -383,7 +373,7 @@ export class User extends Entity<UserId> {
     private readonly _company: Company
   ) {
     super(id);
-    
+
     if (!_name || _name.trim().length === 0) {
       throw new Error('User name cannot be empty');
     }
@@ -483,18 +473,8 @@ export class Post extends Entity<PostId> {
     super(id);
   }
 
-  public static create(
-    id: number,
-    userId: number,
-    title: string,
-    body: string
-  ): Post {
-    return new Post(
-      PostId.create(id),
-      UserId.create(userId),
-      PostTitle.create(title),
-      PostBody.create(body)
-    );
+  public static create(id: number, userId: number, title: string, body: string): Post {
+    return new Post(PostId.create(id), UserId.create(userId), PostTitle.create(title), PostBody.create(body));
   }
 
   public getUserId(): UserId {
@@ -516,9 +496,7 @@ export class Post extends Entity<PostId> {
   public getContentSummary(): string {
     const maxLength = 100;
     const content = `${this._title.value}: ${this._body.value}`;
-    return content.length > maxLength 
-      ? content.substring(0, maxLength) + '...'
-      : content;
+    return content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
   }
 
   public getTotalWordCount(): number {
@@ -538,7 +516,7 @@ export class Comment extends Entity<CommentId> {
     private readonly _body: string
   ) {
     super(id);
-    
+
     if (!_name || _name.trim().length === 0) {
       throw new Error('Comment name cannot be empty');
     }
@@ -547,20 +525,8 @@ export class Comment extends Entity<CommentId> {
     }
   }
 
-  public static create(
-    id: number,
-    postId: number,
-    name: string,
-    email: string,
-    body: string
-  ): Comment {
-    return new Comment(
-      CommentId.create(id),
-      PostId.create(postId),
-      name,
-      EmailAddress.create(email),
-      body
-    );
+  public static create(id: number, postId: number, name: string, email: string, body: string): Comment {
+    return new Comment(CommentId.create(id), PostId.create(postId), name, EmailAddress.create(email), body);
   }
 
   public getPostId(): PostId {
