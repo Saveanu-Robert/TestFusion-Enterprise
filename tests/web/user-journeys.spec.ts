@@ -1,16 +1,28 @@
 /**
  * End-to-End User Journey Tests for TestFusion-Enterprise
  *
- * Comprehensive test suite for validating complete user workflows across multiple pages,
+ * Enterprise-grade test suite for validating complete user workflows across multiple pages,
  * including home-to-docs navigation, documentation exploration, and responsive design validation.
  * Tests simulate real user interactions and validate end-to-end functionality.
  *
+ * @fileoverview Comprehensive end-to-end user journey tests for TestFusion-Enterprise
  * @author TestFusion-Enterprise Team
  * @version 1.0.0
+ * @since 2024
  */
 
-import { test, expect } from '../fixtures/web-fixtures';
-import { qase } from 'playwright-qase-reporter';
+import { test, expect, type WebTestFixtures } from '../fixtures/web-fixtures';
+
+// Qase integration with fallback for environments without qase configuration
+let qase: (id: number, title: string) => string;
+try {
+  // Use dynamic import to handle optional qase reporter
+  const qaseModule = eval('require')('playwright-qase-reporter');
+  qase = qaseModule.qase;
+} catch (error) {
+  // Fallback for environments without qase reporter
+  qase = (id: number, title: string) => title;
+}
 import { HomePage } from './pages/home.page';
 import { DocsPage } from './pages/docs.page';
 import { WEB_CONSTANTS } from '../constants/test-constants';

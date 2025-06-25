@@ -1,23 +1,35 @@
 /**
  * Docs Page Web Tests for TestFusion-Enterprise
  *
- * Comprehensive test suite for validating the documentation page functionality,
+ * Enterprise-grade test suite for validating the documentation page functionality,
  * including navigation, content structure, search functionality, and accessibility.
  * Tests cover multiple viewports and validate user interaction patterns.
  *
+ * @fileoverview Comprehensive documentation page tests for TestFusion-Enterprise
  * @author TestFusion-Enterprise Team
  * @version 1.0.0
+ * @since 2024
  */
 
-import { test, expect } from '../fixtures/web-fixtures';
-import { qase } from 'playwright-qase-reporter';
+import { test, expect, type WebTestFixtures } from '../fixtures/web-fixtures';
+
+// Qase integration with fallback for environments without qase configuration
+let qase: (id: number, title: string) => string;
+try {
+  // Use dynamic import to handle optional qase reporter
+  const qaseModule = eval('require')('playwright-qase-reporter');
+  qase = qaseModule.qase;
+} catch (error) {
+  // Fallback for environments without qase reporter
+  qase = (id: number, title: string) => title;
+}
 import { DocsPage } from './pages/docs.page';
 import { WEB_CONSTANTS } from '../constants/test-constants';
 
 test.describe('Docs Page Tests', () => {
   let docsPage: DocsPage;
 
-  test.beforeEach(async ({ webPage, testContext }) => {
+  test.beforeEach(async ({ webPage, testContext }: WebTestFixtures) => {
     docsPage = new DocsPage(webPage);
     await docsPage.navigate();
 

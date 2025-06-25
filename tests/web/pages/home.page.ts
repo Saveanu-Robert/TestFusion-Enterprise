@@ -12,7 +12,7 @@ export class HomePage extends BasePage {
     super(page);
   }
   getPageUrl(): string {
-    return `${this.config.baseUrl}${WEB_CONSTANTS.PAGES.home}`;
+    return `${WEB_CONSTANTS.BASE_URL}${WEB_CONSTANTS.PAGES.home}`;
   }
   getUniquePageElement(): string {
     return 'h1:has-text("Playwright enables reliable end-to-end testing")'; // More reliable than Docs link

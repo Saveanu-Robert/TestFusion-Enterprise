@@ -3,21 +3,39 @@ import { PostsValidator } from '../validators/posts-validator';
 import { createPostPayload } from '../fixtures/test-data';
 import { TEST_DATA } from '../constants/test-constants';
 import { expect } from '@playwright/test';
+import { Logger, ScopedLogger } from '../utils/logger';
 
 export class PostsOperations {
-  constructor(private postsService: PostsApiService) {}
+  private readonly logger: ScopedLogger;
 
+  constructor(private postsService: PostsApiService) {
+    this.logger = Logger.getInstance().createScopedLogger('PostsOperations');
+  }
   /**
    * Retrieves all posts and validates the response
    */
   async getAllPostsWithValidation(): Promise<{ response: any; count: number }> {
-    const response = await this.postsService.getAllPosts();
+    const timer = this.logger.startTimer();
 
-    PostsValidator.validateSuccessfulResponse(response);
-    PostsValidator.validateResponseDataStructure(response);
-    PostsValidator.validatePostStructure(response.data[0]);
+    try {
+      this.logger.info('Retrieving all posts with validation');
+      const response = await this.postsService.getAllPosts();
 
-    return { response, count: response.data.length };
+      PostsValidator.validateSuccessfulResponse(response);
+      PostsValidator.validateResponseDataStructure(response);
+      PostsValidator.validatePostStructure(response.data[0]);
+
+      this.logger.logWithTiming(this.logger.info, 'Successfully retrieved and validated all posts', timer, {
+        count: response.data.length,
+      });
+
+      return { response, count: response.data.length };
+    } catch (error) {
+      this.logger.error('Failed to retrieve or validate posts', {
+        error: error instanceof Error ? error.message : error,
+      });
+      throw error;
+    }
   }
 
   /**
@@ -49,15 +67,29 @@ export class PostsOperations {
    * Retrieves a specific post by ID with comprehensive data validation
    */
   async getPostByIdWithComprehensiveValidation(postId: number): Promise<any> {
-    const response = await this.getPostByIdWithValidation(postId);
+    const timer = this.logger.startTimer();
 
-    // Validate post structure and data integrity
-    expect(response.data.id).toBe(postId);
-    expect(response.data.userId).toBeGreaterThan(0);
-    expect(response.data.title).toBeTruthy();
-    expect(response.data.body).toBeTruthy();
+    try {
+      this.logger.info('Retrieving post by ID with comprehensive validation', { postId });
+      const response = await this.postsService.findById(postId);
 
-    return response;
+      PostsValidator.validateSuccessfulResponse(response);
+      PostsValidator.validateSpecificPost(response, postId);
+      PostsValidator.validatePostStructure(response.data);
+
+      this.logger.logWithTiming(this.logger.info, 'Successfully retrieved and validated post by ID', timer, {
+        postId,
+        userId: response.data.userId,
+      });
+
+      return response;
+    } catch (error) {
+      this.logger.error('Failed to retrieve or validate post by ID', {
+        postId,
+        error: error instanceof Error ? error.message : error,
+      });
+      throw error;
+    }
   }
 
   /**
@@ -73,18 +105,40 @@ export class PostsOperations {
   }
 
   /**
-   * Creates a new post with comprehensive validation including data preservation checks
+   * Creates a new post with comprehensive validation
    */
   async createPostWithComprehensiveValidation(postData: any): Promise<any> {
-    const response = await this.createPostWithValidation(postData);
+    const timer = this.logger.startTimer();
 
-    // Validate created post contains expected data
-    expect(response.data.id).toBeTruthy();
-    expect(response.data.userId).toBe(postData.userId);
-    expect(response.data.title).toBe(postData.title);
-    expect(response.data.body).toBe(postData.body);
+    try {
+      this.logger.info('Creating post with comprehensive validation', {
+        userId: postData.userId,
+        title: postData.title?.substring(0, 50),
+      });
+      const response = await this.postsService.create(postData);
 
-    return response;
+      PostsValidator.validateCreationResponse(response);
+      PostsValidator.validatePostStructure(response.data);
+
+      // Validate creation response specifics
+      expect(response.data.id).toBeDefined();
+      expect(response.data.userId).toBe(postData.userId);
+      expect(response.data.title).toBe(postData.title);
+      expect(response.data.body).toBe(postData.body);
+
+      this.logger.logWithTiming(this.logger.info, 'Successfully created and validated new post', timer, {
+        postId: response.data.id,
+        userId: response.data.userId,
+      });
+
+      return response;
+    } catch (error) {
+      this.logger.error('Failed to create or validate post', {
+        postData: { userId: postData.userId, title: postData.title?.substring(0, 50) },
+        error: error instanceof Error ? error.message : error,
+      });
+      throw error;
+    }
   }
 
   /**

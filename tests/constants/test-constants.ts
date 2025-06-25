@@ -320,4 +320,4 @@ export const UTILS = {
 
 // Legacy export for backwards compatibility - use API_CONSTANTS.STATUS_CODES instead
 // @deprecated Use API_CONSTANTS.STATUS_CODES instead of HTTP_STATUS_CODES
-export { HTTP_STATUS_CODES } from './api-constants';
+export { HttpStatusCodes as HTTP_STATUS_CODES } from './api-constants';

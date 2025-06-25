@@ -1,33 +1,33 @@
 import { expect } from '@playwright/test';
-import { HTTP_STATUS_CODES } from '../constants/api-constants';
+import { HttpStatusCodes } from '../constants/api-constants';
 
 export class PostsValidator {
   /**
    * Validates the response status for successful operations
    */
   static validateSuccessfulResponse(response: any): void {
-    expect(response.status).toBe(HTTP_STATUS_CODES.OK);
+    expect(response.status).toBe(HttpStatusCodes.OK.code);
   }
 
   /**
    * Validates the response status for creation operations
    */
   static validateCreationResponse(response: any): void {
-    expect(response.status).toBe(HTTP_STATUS_CODES.CREATED);
+    expect(response.status).toBe(HttpStatusCodes.CREATED.code);
   }
 
   /**
    * Validates the response status for update operations
    */
   static validateUpdateResponse(response: any): void {
-    expect(response.status).toBe(HTTP_STATUS_CODES.OK);
+    expect(response.status).toBe(HttpStatusCodes.OK.code);
   }
 
   /**
    * Validates the response status for delete operations
    */
   static validateDeleteResponse(response: any): void {
-    expect(response.status).toBe(HTTP_STATUS_CODES.OK);
+    expect(response.status).toBe(HttpStatusCodes.OK.code);
   }
 
   /**

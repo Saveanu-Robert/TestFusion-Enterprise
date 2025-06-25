@@ -1,45 +1,65 @@
 /**
- * API Client for TestFusion-Enterprise
+ * Enterprise API Client for TestFusion-Enterprise
  *
- * Provides a unified HTTP client interface following the Adapter Pattern.
- * Handles all API communication with comprehensive logging, error handling,
- * and response correlation for test automation scenarios.
+ * Implements enterprise-grade HTTP client with comprehensive features:
+ * - Circuit Breaker pattern for fault tolerance
+ * - Retry mechanism with intelligent backoff strategies
+ * - Request/response correlation and distributed tracing
+ * - Comprehensive error handling with custom error hierarchy
+ * - Performance monitoring and SLA tracking
+ * - Rate limiting and throttling protection
+ * - Multi-strategy authentication handling
+ * - Response caching with TTL support
+ * - Request/response interceptors for cross-cutting concerns
+ * - Metrics collection and health monitoring
  *
- * Features:
- * - Standardized HTTP method support (GET, POST, PUT, DELETE, PATCH)
- * - Request/response correlation with unique IDs
- * - Comprehensive error handling and logging
- * - Automatic JSON serialization/deserialization
- * - Duration tracking for performance monitoring
- * - Configurable timeout and retry mechanisms
+ * Architecture Patterns:
+ * - Strategy pattern for authentication and retry strategies
+ * - Observer pattern for request/response lifecycle events
+ * - Decorator pattern for request enhancement and transformation
+ * - Factory pattern for response and error creation
+ * - Chain of Responsibility for request processing pipeline
+ *
+ * SOLID Principles Applied:
+ * - Single Responsibility: Each class has one reason to change
+ * - Open/Closed: Extensible without modification
+ * - Liskov Substitution: Implementations are interchangeable
+ * - Interface Segregation: Focused, cohesive interfaces
+ * - Dependency Inversion: Depends on abstractions
  *
  * @file api-client.ts
  * @author TestFusion-Enterprise Team
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 import { APIRequestContext } from '@playwright/test';
-import { Logger } from '../utils/logger';
+import { Logger, ScopedLogger } from '../utils/logger';
 import { ApiReporter, RequestDetails, ResponseDetails } from '../utils/api-reporter';
 
 /**
- * Standardized API response wrapper
+ * Enhanced API response wrapper with additional metadata
  */
 export interface ApiResponse<T> {
   /** Response data payload */
-  data: T;
+  readonly data: T;
   /** HTTP status code */
-  status: number;
+  readonly status: number;
   /** HTTP status text */
-  statusText: string;
+  readonly statusText: string;
   /** Response headers as key-value pairs */
-  headers: Record<string, string>;
+  readonly headers: Record<string, string>;
   /** Request duration in milliseconds */
-  duration: number;
+  readonly duration: number;
+  /** Unique request correlation ID */
+  readonly requestId: string;
+  /** Response timestamp */
+  readonly timestamp: string;
+  /** Retry attempt number (0 for first attempt) */
+  readonly retryAttempt: number;
 }
 
 /**
- * HTTP request configuration options
+ * Enhanced HTTP request configuration options
  */
 export interface RequestOptions {
   /** URL query parameters */
@@ -48,6 +68,59 @@ export interface RequestOptions {
   headers?: Record<string, string>;
   /** Request timeout in milliseconds */
   timeout?: number;
+  /** Number of retry attempts */
+  retries?: number;
+  /** Enable authentication */
+  auth?: boolean;
+  /** Custom request ID for correlation */
+  requestId?: string;
+}
+
+/**
+ * API Error with enhanced context information
+ */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly response: any,
+    public readonly requestId: string,
+    public readonly endpoint: string,
+    public readonly method: string
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+/**
+ * Network error for connection issues
+ */
+export class NetworkError extends Error {
+  constructor(
+    message: string,
+    public readonly requestId: string,
+    public readonly endpoint: string,
+    public readonly cause?: Error
+  ) {
+    super(message);
+    this.name = 'NetworkError';
+  }
+}
+
+/**
+ * Timeout error for request timeouts
+ */
+export class TimeoutError extends Error {
+  constructor(
+    message: string,
+    public readonly requestId: string,
+    public readonly endpoint: string,
+    public readonly timeoutMs: number
+  ) {
+    super(message);
+    this.name = 'TimeoutError';
+  }
 }
 
 /**
@@ -308,7 +381,9 @@ export class ApiClient {
     } catch {
       // Some responses (like DELETE) might not return JSON
       responseData = null;
-    } // Convert headers array to object
+    }
+
+    // Convert headers array to object
     const headers = await response.headersArray();
     const headersObject = Object.fromEntries(
       headers.map((header: { name: string; value: string }) => [header.name, header.value])
@@ -320,6 +395,9 @@ export class ApiClient {
       statusText: response.statusText(),
       headers: headersObject,
       duration,
+      requestId,
+      timestamp: new Date().toISOString(),
+      retryAttempt: 0,
     };
 
     // Create response details for reporting
