@@ -290,22 +290,6 @@ jobs:
     if: needs.quality-gate.outputs.should-run-tests == 'true' && github.event_name == 'schedule'
     timeout-minutes: 40
     
-    services:
-      selenium-hub:
-        image: selenium/hub:4.15.0
-        ports:
-          - 4444:4444
-        env:
-          GRID_MAX_SESSION: 4
-          GRID_BROWSER_TIMEOUT: 300
-          
-      selenium-chrome:
-        image: selenium/node-chrome:4.15.0
-        env:
-          HUB_HOST: selenium-hub
-          NODE_MAX_INSTANCES: 2
-          NODE_MAX_SESSION: 2
-    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -319,9 +303,16 @@ jobs:
     - name: Install dependencies
       run: npm ci --prefer-offline --no-audit
       
-    - name: Wait for Selenium Grid
+    - name: Start Selenium Grid using Docker Compose
       run: |
-        timeout 60 bash -c 'until curl -sSf http://localhost:4444/wd/hub/status; do sleep 2; done'
+        echo "🚀 Starting Selenium Grid with Docker Compose..."
+        docker-compose -f docker-compose.test.yml up -d selenium-hub selenium-chrome
+        
+    - name: Wait for Selenium Grid to be ready
+      run: |
+        echo "⏳ Waiting for Selenium Grid to be ready..."
+        chmod +x scripts/wait-for-grid.sh
+        ./scripts/wait-for-grid.sh http://localhost:4444 120 3
         
     - name: Decrypt and load environment variables
       run: |
@@ -335,11 +326,22 @@ jobs:
         done < .env.decrypted
         rm -f .env.decrypted
         
-    - name: Set Grid execution mode
-      run: echo "WEB_EXECUTION_MODE=grid" >> $GITHUB_ENV
-      
+    - name: Set Grid execution mode and configuration
+      run: |
+        echo "WEB_EXECUTION_MODE=grid" >> $GITHUB_ENV
+        echo "SELENIUM_GRID_HUB_URL=http://localhost:4444/wd/hub" >> $GITHUB_ENV
+        echo "SELENIUM_GRID_BROWSER_NAME=chrome" >> $GITHUB_ENV
+        echo "SELENIUM_GRID_PLATFORM_NAME=linux" >> $GITHUB_ENV
+        echo "SELENIUM_GRID_MAX_INSTANCES=2" >> $GITHUB_ENV
+        
     - name: Run grid tests
       run: npm run test:web:grid
+      
+    - name: Stop Selenium Grid
+      if: always()
+      run: |
+        echo "🛑 Stopping Selenium Grid..."
+        docker-compose -f docker-compose.test.yml down
       
     - name: Upload grid test results
       if: always()

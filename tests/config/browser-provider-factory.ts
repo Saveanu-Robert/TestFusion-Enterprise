@@ -329,14 +329,38 @@ export class SeleniumGridProvider implements IBrowserProvider {
       wsEndpoint: wsEndpoint,
     });
 
-    const browser = await chromium.connect(wsEndpoint);
+    try {
+      // Validate grid connectivity before connecting
+      await this.validateGridConnection(seleniumGrid.hubUrl);
+      
+      const browser = await chromium.connect(wsEndpoint, {
+        timeout: 30000, // 30 second timeout
+      });
 
-    this.logger.info('✅ Connected to Selenium Grid successfully', {
-      browserName: seleniumGrid.capabilities.browserName,
-      platformName: seleniumGrid.capabilities.platformName,
-    });
+      this.logger.info('✅ Connected to Selenium Grid successfully', {
+        browserName: seleniumGrid.capabilities.browserName,
+        platformName: seleniumGrid.capabilities.platformName,
+      });
 
-    return browser;
+      return browser;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error('❌ Failed to connect to Selenium Grid', {
+        hubUrl: seleniumGrid.hubUrl,
+        wsEndpoint: wsEndpoint,
+        error: errorMessage,
+      });
+      
+      // Try to get grid status for debugging
+      try {
+        await this.logGridStatus(seleniumGrid.hubUrl);
+      } catch (statusError) {
+        const statusErrorMessage = statusError instanceof Error ? statusError.message : String(statusError);
+        this.logger.error('Could not retrieve grid status', { error: statusErrorMessage });
+      }
+      
+      throw new Error(`Failed to connect to Selenium Grid: ${errorMessage}`);
+    }
   }
 
   async createContext(browser: Browser): Promise<BrowserContext> {
@@ -388,6 +412,65 @@ export class SeleniumGridProvider implements IBrowserProvider {
       return `${protocol}//${url.host}/ws`;
     } catch (error) {
       throw new Error(`Invalid Selenium Grid hub URL: ${httpUrl}`);
+    }
+  }
+
+  /**
+   * Validates that the Selenium Grid is accessible and ready
+   * @param hubUrl - The Selenium Grid hub URL
+   */
+  private async validateGridConnection(hubUrl: string): Promise<void> {
+    try {
+      const statusUrl = `${hubUrl}/status`;
+      
+      // Use a simple HTTP check first
+      const response = await fetch(statusUrl, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Grid status check failed with status ${response.status}`);
+      }
+      
+      const status = await response.json() as any;
+      if (!status.value?.ready) {
+        throw new Error('Grid is not ready');
+      }
+      
+      this.logger.debug('✅ Grid validation successful', { status: status.value });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Grid validation failed: ${errorMessage}`);
+    }
+  }
+
+  /**
+   * Logs the current grid status for debugging
+   * @param hubUrl - The Selenium Grid hub URL
+   */
+  private async logGridStatus(hubUrl: string): Promise<void> {
+    try {
+      const statusUrl = `${hubUrl}/status`;
+      const response = await fetch(statusUrl, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const status = await response.json() as any;
+      
+      const nodes = status.value?.nodes || [];
+      const totalSessions = nodes.reduce((total: number, node: any) => {
+        return total + (node.sessions?.length || 0);
+      }, 0);
+      
+      this.logger.info('📊 Current Grid Status', {
+        ready: status.value?.ready,
+        nodes: nodes.length,
+        sessions: totalSessions,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.warn('Could not retrieve grid status for debugging', { error: errorMessage });
     }
   }
 }

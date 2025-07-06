@@ -18,22 +18,48 @@ services:
       - TEST_ENV=ci
       - HEADLESS=true
     command: npm run test:ci
+    networks:
+      - test-network
     
   # Selenium Grid for parallel testing
   selenium-hub:
     image: selenium/hub:4.15.0
+    container_name: selenium-hub-test
     ports:
       - "4444:4444"
+      - "4443:4443"
+      - "4442:4442"
     environment:
-      - GRID_MAX_SESSION=2
-      - GRID_BROWSER_TIMEOUT=120
+      - GRID_MAX_SESSION=4
+      - GRID_BROWSER_TIMEOUT=300
+      - GRID_TIMEOUT=300
+      - GRID_NEW_SESSION_WAIT_TIMEOUT=30000
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444/wd/hub/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
       
   selenium-chrome:
     image: selenium/node-chrome:4.15.0
-    shm_size: 1gb
+    container_name: selenium-chrome-test
+    shm_size: 2gb
     environment:
       - HUB_HOST=selenium-hub
-      - NODE_MAX_INSTANCES=1
-      - NODE_MAX_SESSION=1
+      - NODE_MAX_INSTANCES=2
+      - NODE_MAX_SESSION=2
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
     depends_on:
-      - selenium-hub
+      selenium-hub:
+        condition: service_healthy
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge
