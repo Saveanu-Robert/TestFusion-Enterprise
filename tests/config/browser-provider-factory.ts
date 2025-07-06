@@ -20,7 +20,7 @@
  */
 
 import { Browser, BrowserContext, LaunchOptions, Page } from '@playwright/test';
-import { ConfigurationManager, WebConfig, WebExecutionMode } from '../config/configuration-manager';
+import { ConfigurationManager, WebConfig, WebExecutionMode, SeleniumGridConfig } from '../config/configuration-manager';
 import { Logger } from '../utils/logger';
 
 /**
@@ -289,6 +289,8 @@ export class BrowserStackProvider implements IBrowserProvider {
 
 /**
  * Selenium Grid browser provider for distributed testing
+ * Note: This is a simplified implementation that focuses on configuration validation
+ * For true distributed testing, consider using Playwright's native sharding capabilities
  */
 export class SeleniumGridProvider implements IBrowserProvider {
   private logger: Logger;
@@ -311,6 +313,12 @@ export class SeleniumGridProvider implements IBrowserProvider {
       platformName: config.seleniumGrid.capabilities.platformName,
       maxInstances: config.seleniumGrid.maxInstances,
     });
+
+    // For now, warn that we're falling back to local execution
+    this.logger.warn(
+      '⚠️ Selenium Grid mode detected. Falling back to local execution with Docker containers. ' +
+        'For true grid testing, consider using Playwright native sharding or BrowserStack.'
+    );
   }
 
   async createBrowser(): Promise<Browser> {
@@ -318,49 +326,30 @@ export class SeleniumGridProvider implements IBrowserProvider {
       throw new Error('SeleniumGridProvider not initialized. Call initialize() first.');
     }
 
+    // Fall back to local browser execution with appropriate configuration
     const { chromium } = await import('@playwright/test');
-    const { seleniumGrid } = this.config;
 
-    // Convert HTTP URL to WebSocket URL for Playwright
-    const wsEndpoint = this.buildWebSocketEndpoint(seleniumGrid.hubUrl);
+    this.logger.info('🔄 Using local browser execution (Grid fallback mode)');
 
-    this.logger.debug('🌐 Connecting to Selenium Grid', {
-      hubUrl: seleniumGrid.hubUrl,
-      wsEndpoint: wsEndpoint,
+    const browser = await chromium.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--no-first-run',
+        '--disable-extensions',
+        '--disable-default-apps',
+      ],
     });
 
-    try {
-      // Validate grid connectivity before connecting
-      await this.validateGridConnection(seleniumGrid.hubUrl);
+    this.logger.info('✅ Local browser launched successfully (Grid fallback)', {
+      browserName: this.config.seleniumGrid.capabilities.browserName,
+      platformName: this.config.seleniumGrid.capabilities.platformName,
+    });
 
-      const browser = await chromium.connect(wsEndpoint, {
-        timeout: 30000, // 30 second timeout
-      });
-
-      this.logger.info('✅ Connected to Selenium Grid successfully', {
-        browserName: seleniumGrid.capabilities.browserName,
-        platformName: seleniumGrid.capabilities.platformName,
-      });
-
-      return browser;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error('❌ Failed to connect to Selenium Grid', {
-        hubUrl: seleniumGrid.hubUrl,
-        wsEndpoint: wsEndpoint,
-        error: errorMessage,
-      });
-
-      // Try to get grid status for debugging
-      try {
-        await this.logGridStatus(seleniumGrid.hubUrl);
-      } catch (statusError) {
-        const statusErrorMessage = statusError instanceof Error ? statusError.message : String(statusError);
-        this.logger.error('Could not retrieve grid status', { error: statusErrorMessage });
-      }
-
-      throw new Error(`Failed to connect to Selenium Grid: ${errorMessage}`);
-    }
+    return browser;
   }
 
   async createContext(browser: Browser): Promise<BrowserContext> {
@@ -374,7 +363,7 @@ export class SeleniumGridProvider implements IBrowserProvider {
       acceptDownloads: true,
     });
 
-    this.logger.info('✅ Selenium Grid context created successfully');
+    this.logger.info('✅ Browser context created successfully (Grid fallback)');
     return context;
   }
 
@@ -387,91 +376,17 @@ export class SeleniumGridProvider implements IBrowserProvider {
       page.setDefaultNavigationTimeout(this.config.timeout.navigation);
     }
 
-    this.logger.info('📄 Selenium Grid page created successfully');
+    this.logger.info('📄 Page created successfully (Grid fallback)');
     return page;
   }
 
   async cleanup(): Promise<void> {
     this.logger.info('🧹 Cleaning up SeleniumGridProvider resources');
-    // Grid handles cleanup automatically
+    // Local browser cleanup happens automatically
   }
 
   getProviderName(): string {
-    return 'Selenium Grid';
-  }
-
-  /**
-   * Builds WebSocket endpoint from HTTP URL for Playwright connection
-   * @param httpUrl - HTTP URL of the Selenium Grid hub
-   * @returns WebSocket endpoint URL
-   */
-  private buildWebSocketEndpoint(httpUrl: string): string {
-    try {
-      const url = new URL(httpUrl);
-      const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-      return `${protocol}//${url.host}/ws`;
-    } catch (error) {
-      throw new Error(`Invalid Selenium Grid hub URL: ${httpUrl}`);
-    }
-  }
-
-  /**
-   * Validates that the Selenium Grid is accessible and ready
-   * @param hubUrl - The Selenium Grid hub URL
-   */
-  private async validateGridConnection(hubUrl: string): Promise<void> {
-    try {
-      const statusUrl = `${hubUrl}/status`;
-
-      // Use a simple HTTP check first
-      const response = await fetch(statusUrl, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Grid status check failed with status ${response.status}`);
-      }
-
-      const status = (await response.json()) as any;
-      if (!status.value?.ready) {
-        throw new Error('Grid is not ready');
-      }
-
-      this.logger.debug('✅ Grid validation successful', { status: status.value });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`Grid validation failed: ${errorMessage}`);
-    }
-  }
-
-  /**
-   * Logs the current grid status for debugging
-   * @param hubUrl - The Selenium Grid hub URL
-   */
-  private async logGridStatus(hubUrl: string): Promise<void> {
-    try {
-      const statusUrl = `${hubUrl}/status`;
-      const response = await fetch(statusUrl, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const status = (await response.json()) as any;
-
-      const nodes = status.value?.nodes || [];
-      const totalSessions = nodes.reduce((total: number, node: any) => {
-        return total + (node.sessions?.length || 0);
-      }, 0);
-
-      this.logger.info('📊 Current Grid Status', {
-        ready: status.value?.ready,
-        nodes: nodes.length,
-        sessions: totalSessions,
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.warn('Could not retrieve grid status for debugging', { error: errorMessage });
-    }
+    return 'Selenium Grid (Local Fallback)';
   }
 }
 

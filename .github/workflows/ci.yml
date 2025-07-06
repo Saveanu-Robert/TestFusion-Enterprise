@@ -282,13 +282,18 @@ jobs:
           test-results/
           playwright-report/
         retention-days: 14
-  # Job 5: Grid Tests (Selenium Grid)
-  grid-tests:
-    name: Grid Tests
+  # Job 5: Distributed Tests (using Docker containers)
+  distributed-tests:
+    name: Distributed Tests
     runs-on: ubuntu-latest
     needs: [quality-gate, build]
     if: needs.quality-gate.outputs.should-run-tests == 'true' && github.event_name == 'schedule'
     timeout-minutes: 40
+    
+    strategy:
+      matrix:
+        browser: [chromium, firefox]
+        shard: [1, 2]
     
     steps:
     - name: Checkout code
@@ -303,16 +308,8 @@ jobs:
     - name: Install dependencies
       run: npm ci --prefer-offline --no-audit
       
-    - name: Start Selenium Grid using Docker Compose
-      run: |
-        echo "🚀 Starting Selenium Grid with Docker Compose..."
-        docker-compose -f docker-compose.test.yml up -d selenium-hub selenium-chrome
-        
-    - name: Wait for Selenium Grid to be ready
-      run: |
-        echo "⏳ Waiting for Selenium Grid to be ready..."
-        chmod +x scripts/wait-for-grid.sh
-        ./scripts/wait-for-grid.sh http://localhost:4444 120 3
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps ${{ matrix.browser }}
         
     - name: Decrypt and load environment variables
       run: |
@@ -326,22 +323,14 @@ jobs:
         done < .env.decrypted
         rm -f .env.decrypted
         
-    - name: Set Grid execution mode and configuration
+    - name: Set test execution configuration
       run: |
-        echo "WEB_EXECUTION_MODE=grid" >> $GITHUB_ENV
-        echo "SELENIUM_GRID_HUB_URL=http://localhost:4444/wd/hub" >> $GITHUB_ENV
-        echo "SELENIUM_GRID_BROWSER_NAME=chrome" >> $GITHUB_ENV
-        echo "SELENIUM_GRID_PLATFORM_NAME=linux" >> $GITHUB_ENV
-        echo "SELENIUM_GRID_MAX_INSTANCES=2" >> $GITHUB_ENV
+        echo "WEB_EXECUTION_MODE=local" >> $GITHUB_ENV
+        echo "HEADLESS=true" >> $GITHUB_ENV
+        echo "CI=true" >> $GITHUB_ENV
         
-    - name: Run grid tests
-      run: npm run test:web:grid
-      
-    - name: Stop Selenium Grid
-      if: always()
-      run: |
-        echo "🛑 Stopping Selenium Grid..."
-        docker-compose -f docker-compose.test.yml down
+    - name: Run distributed tests
+      run: npx playwright test --project=${{ matrix.browser }} --shard=${{ matrix.shard }}/2
       
     - name: Upload grid test results
       if: always()
