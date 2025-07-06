@@ -1,10 +1,13 @@
 # Selenium Grid Setup and Testing
 
-This document explains how to run tests on Selenium Grid both locally and in CI/CD pipelines.
+This document explains how to run tests on Selenium Grid both locally and in
+CI/CD pipelines.
 
 ## Overview
 
-The Selenium Grid setup allows running tests in a distributed environment with multiple browser nodes. This is useful for:
+The Selenium Grid setup allows running tests in a distributed environment with
+multiple browser nodes. This is useful for:
+
 - Parallel test execution
 - Testing on different browser versions
 - Simulating real-world distributed testing scenarios
@@ -21,6 +24,7 @@ The Selenium Grid setup allows running tests in a distributed environment with m
 ### Starting the Grid
 
 **Windows (PowerShell):**
+
 ```powershell
 # Start the grid
 .\scripts\grid.ps1 start
@@ -36,6 +40,7 @@ The Selenium Grid setup allows running tests in a distributed environment with m
 ```
 
 **Linux/Mac (Bash):**
+
 ```bash
 # Start the grid
 ./scripts/grid.sh start
@@ -51,6 +56,7 @@ The Selenium Grid setup allows running tests in a distributed environment with m
 ```
 
 **Using NPM scripts:**
+
 ```bash
 # Start the grid
 npm run grid:start
@@ -103,11 +109,13 @@ The grid is configured in `docker-compose.test.yml`:
 ### Local Development
 
 1. **Start the grid:**
+
    ```bash
    npm run grid:start
    ```
 
 2. **Run tests:**
+
    ```bash
    npm run test:web:grid
    ```
@@ -150,10 +158,11 @@ docker-compose -f docker-compose.test.yml down
 ### Common Issues
 
 1. **WebSocket Connection Failed**
+
    ```
    Error: browserType.connect: WebSocket error: ws://host:port/ws *** Bad Request
    ```
-   
+
    **Solutions:**
    - Ensure grid is fully started: `npm run grid:status`
    - Check if Chrome node is registered
@@ -161,17 +170,18 @@ docker-compose -f docker-compose.test.yml down
    - Check Docker logs: `docker-compose -f docker-compose.test.yml logs`
 
 2. **Grid Not Ready**
+
    ```
    Grid validation failed: Grid is not ready
    ```
-   
+
    **Solutions:**
    - Wait longer for grid startup
    - Check Docker resources (memory, CPU)
    - Restart grid: `npm run grid:restart`
 
 3. **Browser Node Not Registering**
-   
+
    **Solutions:**
    - Check hub logs: `docker logs selenium-hub-test`
    - Check node logs: `docker logs selenium-chrome-test`
@@ -201,12 +211,14 @@ docker inspect testfusion-enterprise_test-network
 For better performance:
 
 1. **Increase shared memory:**
+
    ```yaml
    selenium-chrome:
-     shm_size: 4gb  # Increase from 2gb
+     shm_size: 4gb # Increase from 2gb
    ```
 
 2. **Adjust timeouts:**
+
    ```bash
    SELENIUM_GRID_NODE_TIMEOUT=60
    SELENIUM_GRID_SESSION_TIMEOUT=600
@@ -232,7 +244,8 @@ For better performance:
                     └─────────────────┘
 ```
 
-The hub manages test distribution and node registration, while nodes execute the actual browser automation.
+The hub manages test distribution and node registration, while nodes execute the
+actual browser automation.
 
 ## Best Practices
 

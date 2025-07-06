@@ -332,7 +332,7 @@ export class SeleniumGridProvider implements IBrowserProvider {
     try {
       // Validate grid connectivity before connecting
       await this.validateGridConnection(seleniumGrid.hubUrl);
-      
+
       const browser = await chromium.connect(wsEndpoint, {
         timeout: 30000, // 30 second timeout
       });
@@ -350,7 +350,7 @@ export class SeleniumGridProvider implements IBrowserProvider {
         wsEndpoint: wsEndpoint,
         error: errorMessage,
       });
-      
+
       // Try to get grid status for debugging
       try {
         await this.logGridStatus(seleniumGrid.hubUrl);
@@ -358,7 +358,7 @@ export class SeleniumGridProvider implements IBrowserProvider {
         const statusErrorMessage = statusError instanceof Error ? statusError.message : String(statusError);
         this.logger.error('Could not retrieve grid status', { error: statusErrorMessage });
       }
-      
+
       throw new Error(`Failed to connect to Selenium Grid: ${errorMessage}`);
     }
   }
@@ -422,22 +422,22 @@ export class SeleniumGridProvider implements IBrowserProvider {
   private async validateGridConnection(hubUrl: string): Promise<void> {
     try {
       const statusUrl = `${hubUrl}/status`;
-      
+
       // Use a simple HTTP check first
       const response = await fetch(statusUrl, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
-      
+
       if (!response.ok) {
         throw new Error(`Grid status check failed with status ${response.status}`);
       }
-      
-      const status = await response.json() as any;
+
+      const status = (await response.json()) as any;
       if (!status.value?.ready) {
         throw new Error('Grid is not ready');
       }
-      
+
       this.logger.debug('✅ Grid validation successful', { status: status.value });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -456,13 +456,13 @@ export class SeleniumGridProvider implements IBrowserProvider {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
-      const status = await response.json() as any;
-      
+      const status = (await response.json()) as any;
+
       const nodes = status.value?.nodes || [];
       const totalSessions = nodes.reduce((total: number, node: any) => {
         return total + (node.sessions?.length || 0);
       }, 0);
-      
+
       this.logger.info('📊 Current Grid Status', {
         ready: status.value?.ready,
         nodes: nodes.length,
