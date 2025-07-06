@@ -20,7 +20,7 @@
  */
 
 import { Browser, BrowserContext, LaunchOptions, Page } from '@playwright/test';
-import { ConfigurationManager, WebConfig, WebExecutionMode } from '../config/configuration-manager';
+import { ConfigurationManager, WebConfig, WebExecutionMode, SeleniumGridConfig } from '../config/configuration-manager';
 import { Logger } from '../utils/logger';
 
 /**
@@ -289,6 +289,8 @@ export class BrowserStackProvider implements IBrowserProvider {
 
 /**
  * Selenium Grid browser provider for distributed testing
+ * Note: This is a simplified implementation that focuses on configuration validation
+ * For true distributed testing, consider using Playwright's native sharding capabilities
  */
 export class SeleniumGridProvider implements IBrowserProvider {
   private logger: Logger;
@@ -311,6 +313,12 @@ export class SeleniumGridProvider implements IBrowserProvider {
       platformName: config.seleniumGrid.capabilities.platformName,
       maxInstances: config.seleniumGrid.maxInstances,
     });
+
+    // For now, warn that we're falling back to local execution
+    this.logger.warn(
+      '⚠️ Selenium Grid mode detected. Falling back to local execution with Docker containers. ' +
+        'For true grid testing, consider using Playwright native sharding or BrowserStack.'
+    );
   }
 
   async createBrowser(): Promise<Browser> {
@@ -318,22 +326,27 @@ export class SeleniumGridProvider implements IBrowserProvider {
       throw new Error('SeleniumGridProvider not initialized. Call initialize() first.');
     }
 
+    // Fall back to local browser execution with appropriate configuration
     const { chromium } = await import('@playwright/test');
-    const { seleniumGrid } = this.config;
 
-    // Convert HTTP URL to WebSocket URL for Playwright
-    const wsEndpoint = this.buildWebSocketEndpoint(seleniumGrid.hubUrl);
+    this.logger.info('🔄 Using local browser execution (Grid fallback mode)');
 
-    this.logger.debug('🌐 Connecting to Selenium Grid', {
-      hubUrl: seleniumGrid.hubUrl,
-      wsEndpoint: wsEndpoint,
+    const browser = await chromium.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--no-first-run',
+        '--disable-extensions',
+        '--disable-default-apps',
+      ],
     });
 
-    const browser = await chromium.connect(wsEndpoint);
-
-    this.logger.info('✅ Connected to Selenium Grid successfully', {
-      browserName: seleniumGrid.capabilities.browserName,
-      platformName: seleniumGrid.capabilities.platformName,
+    this.logger.info('✅ Local browser launched successfully (Grid fallback)', {
+      browserName: this.config.seleniumGrid.capabilities.browserName,
+      platformName: this.config.seleniumGrid.capabilities.platformName,
     });
 
     return browser;
@@ -350,7 +363,7 @@ export class SeleniumGridProvider implements IBrowserProvider {
       acceptDownloads: true,
     });
 
-    this.logger.info('✅ Selenium Grid context created successfully');
+    this.logger.info('✅ Browser context created successfully (Grid fallback)');
     return context;
   }
 
@@ -363,32 +376,17 @@ export class SeleniumGridProvider implements IBrowserProvider {
       page.setDefaultNavigationTimeout(this.config.timeout.navigation);
     }
 
-    this.logger.info('📄 Selenium Grid page created successfully');
+    this.logger.info('📄 Page created successfully (Grid fallback)');
     return page;
   }
 
   async cleanup(): Promise<void> {
     this.logger.info('🧹 Cleaning up SeleniumGridProvider resources');
-    // Grid handles cleanup automatically
+    // Local browser cleanup happens automatically
   }
 
   getProviderName(): string {
-    return 'Selenium Grid';
-  }
-
-  /**
-   * Builds WebSocket endpoint from HTTP URL for Playwright connection
-   * @param httpUrl - HTTP URL of the Selenium Grid hub
-   * @returns WebSocket endpoint URL
-   */
-  private buildWebSocketEndpoint(httpUrl: string): string {
-    try {
-      const url = new URL(httpUrl);
-      const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-      return `${protocol}//${url.host}/ws`;
-    } catch (error) {
-      throw new Error(`Invalid Selenium Grid hub URL: ${httpUrl}`);
-    }
+    return 'Selenium Grid (Local Fallback)';
   }
 }
 
