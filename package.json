@@ -31,7 +31,7 @@
     "grid:status": "bash scripts/grid.sh status",
     "grid:test": "bash scripts/grid.sh test",
     "grid:restart": "bash scripts/grid.sh restart",
-    "test:web:browserstack": "dotenv -e .env -- playwright test --project=browserstack",
+    "test:web:browserstack": "node -e \"if(process.env.BROWSERSTACK_USERNAME && process.env.BROWSERSTACK_ACCESS_KEY) { require('child_process').execSync('dotenv -e .env -- playwright test --project=browserstack', {stdio:'inherit'}) } else { console.log('⚠️ BrowserStack credentials not configured - skipping BrowserStack tests') }\"",
     "// CI/CD": "",
     "test:ci": "dotenv -e .env -- playwright test",
     "test:ci:api": "dotenv -e .env -- playwright test --project=api",
